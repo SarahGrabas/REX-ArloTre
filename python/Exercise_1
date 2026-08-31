@@ -1,0 +1,19 @@
+import robot
+from time import sleep
+import serial
+
+arlo = robot.Robot()
+
+
+sleep(1)
+
+
+# send a go_diff command to drive forward 
+leftSpeed = 64
+rightSpeed = 64
+print(arlo.go_diff(leftSpeed, rightSpeed, 1, 1))
+
+# Wait a bit while robot moves forward
+sleep(3)
+
+print(arlo.stop())
