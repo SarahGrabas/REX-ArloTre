@@ -71,7 +71,7 @@ import time
 
 start = time.time()
 
-while start is not 20: #kører i 20 sekunder             
+while start<20: #kører i 20 sekunder             
         arlo.go_diff(leftSpeed, rightSpeed, 1, 1)
         obstacle_avoidance(arlo, leftSpeed, rightSpeed, safe_distance)
         
