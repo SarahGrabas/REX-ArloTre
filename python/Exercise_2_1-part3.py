@@ -18,6 +18,7 @@ while True:
     right = arlo.read_right_ping_sensor() > safe_distance
     
     vals = (left, front, right)
+    print(vals)
     
     if vals == (0,0,0):
         arlo.go_diff(left_speed,right_speed,1,1)
