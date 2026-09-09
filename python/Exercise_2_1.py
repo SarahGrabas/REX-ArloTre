@@ -3,7 +3,7 @@ import robot
 
 arlo = robot.Robot()
 
-safe_distance = 400
+safe_distance = 150
 forward_speed = 64
 turn_speed = 60
 
