@@ -19,7 +19,7 @@ def random_direction(arlo, leftSpeed, rightSpeed):
 
 arlo = robot.Robot()
 
-safe_distance = 100
+safe_distance = 300
 leftSpeed = 64
 rightSpeed = 64
 
