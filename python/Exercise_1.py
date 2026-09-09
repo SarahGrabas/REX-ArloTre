@@ -37,10 +37,17 @@ def square(arlo:Robot, side_length=1.0, turn_left=True, angle=90.0, old=False):
 
 ### Part 2 ###
 
-def continuous(arlo:Robot, n=1):
+def continuous(arlo:Robot, n=1, swap=False, times=(7,7)):
+    l,r = times
     for _ in range(n):
-        print(arlo.go_diff(55, 100, 1, 1))
-        sleep(7)
-        print(arlo.go_diff(100,55, 1, 1))
-        sleep(7)
+        if swap:
+            print(arlo.go_diff(100, 55, 1, 1))
+            sleep(r)
+            print(arlo.go_diff(55, 100, 1, 1))
+            sleep(l)
+        else:
+            print(arlo.go_diff(55, 100, 1, 1))
+            sleep(l)
+            print(arlo.go_diff(100, 55, 1, 1))
+            sleep(r)
     print(arlo.stop())

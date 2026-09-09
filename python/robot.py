@@ -205,4 +205,4 @@ class Robot(object):
         cmd='y' + str(turntime) + '\n'
         return self.send_command(cmd)
         
-
+arlo = Robot()
