@@ -47,6 +47,6 @@ while True:
 
     else:
         print("Driving forward")
-        arlo.go_diff(forward_speed, forward_speed, 1, 1)
+        arlo.go_diff(forward_speed-3, forward_speed, 1, 1)
 
     sleep(0.1)

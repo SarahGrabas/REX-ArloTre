@@ -1,6 +1,5 @@
 import robot
 from time import sleep
-import serial
 import random
     
 def random_direction(arlo, leftSpeed, rightSpeed):
