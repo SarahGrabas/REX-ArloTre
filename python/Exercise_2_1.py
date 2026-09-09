@@ -3,7 +3,7 @@ import robot
 
 arlo = robot.Robot()
 
-safe_distance = 150
+safe_distance = 300
 forward_speed = 64
 turn_speed = 60
 
@@ -47,6 +47,6 @@ while True:
 
     else:
         print("Driving forward")
-        arlo.go_diff(forward_speed-3, forward_speed, 1, 1)
+        arlo.go_diff(forward_speed-4, forward_speed, 1, 1)
 
     sleep(0.1)
