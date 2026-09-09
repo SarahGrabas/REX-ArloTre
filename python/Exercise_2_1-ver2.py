@@ -24,10 +24,9 @@ leftSpeed = 64
 rightSpeed = 64
 
 
-def obstacle_avoidance(arlo, leftSpeed, rightSpeed, safe_distance):
-    arlo_run=True    
-    while arlo_run:
-        arlo.go_diff(leftSpeed, rightSpeed, 1, 1)
+
+arlo_run=True    
+while arlo_run:
 
         left = arlo.read_left_ping_sensor()
         sleep(0.05)
@@ -40,40 +39,35 @@ def obstacle_avoidance(arlo, leftSpeed, rightSpeed, safe_distance):
         
         if left==-1 or right==-1 or front==-1:
                 arlo_run=False
+                print("fejl ved sensor")
                 
 
         if front < safe_distance:
                 sleep(0.1)
                 random_direction(arlo, leftSpeed, rightSpeed)
                 
-        if left > right and left> safe_distance:
+        if left < safe_distance:
             arlo.go_diff(leftSpeed, rightSpeed, 0, 1) #turn left
             sleep(81*0.01) #81*0.01 er en kvart omgang
             
-        if left > right and right> safe_distance:
+        if right< safe_distance:
             arlo.go_diff(leftSpeed, rightSpeed, 1, 0) #turn right
             sleep(81*0.01) #81*0.01 er en kvart omgang
 
-        else:
-                back = arlo.read_back_ping_sensor()
-                sleep(0.05)
+        # elif left < safe_distance and right < safe_distance and front < safe_distance:
+        #         back = arlo.read_back_ping_sensor()
+        #         sleep(0.05)
                 
-                if back <safe_distance:
-                        arlo.go_diff(leftSpeed, rightSpeed, 0, 0) #bak
-                        sleep(3) #lidt over en meter
-                        random_direction(arlo, leftSpeed, rightSpeed) #Og vælg ny random retning
+        #         if back <safe_distance:
+        #                 arlo.go_diff(leftSpeed, rightSpeed, 0, 0) #bak
+        #                 sleep(3) #lidt over en meter
+        #                 random_direction(arlo, leftSpeed, rightSpeed) #Og vælg ny random retning
 
-                else:
-                        random_direction(arlo, leftSpeed, rightSpeed) #Vælg random direction indtil den kan
+        #         else:
+        #                 random_direction(arlo, leftSpeed, rightSpeed) #Vælg random direction indtil den kan
+        else: 
+                arlo.go_diff(leftSpeed, rightSpeed, 1, 1) 
                         
-import time
-
-start = time.time()
-
-while True: #kører i 20 sekunder             
-        obstacle_avoidance(arlo, leftSpeed, rightSpeed, safe_distance)
-
-
     
 #arlo.go_diff(leftSpeed=61, rightSpeed=64, 1, 1), 5 sekunder = 2 meter
 #arlo.go_diff(leftSpeed=61, rightSpeed=64, 0, 1), 9.8 sekunder = 3 omgange (venstre rotation)
