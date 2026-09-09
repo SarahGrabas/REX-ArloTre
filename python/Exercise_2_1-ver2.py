@@ -4,7 +4,7 @@ import serial
 import random
     
 def random_direction(arlo, leftSpeed, rightSpeed):
-    Left_or_Right = print(random.randrange(0, 1))
+    Left_or_Right = print(random.randrange(0, 2))
     Angle_rand = print(random.randrange(81, 243)) 
     #81 svarer til en kvart omgang, altså 9.8 s/3/4
     #326 svarer til en 3/4 omgang, altså 81*(3/4)
