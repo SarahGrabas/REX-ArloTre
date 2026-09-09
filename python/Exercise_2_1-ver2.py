@@ -43,7 +43,6 @@ def obstacle_avoidance(arlo, leftSpeed, rightSpeed, safe_distance):
                 
 
         if front < safe_distance:
-                arlo.stop()
                 sleep(0.1)
                 random_direction(arlo, leftSpeed, rightSpeed)
                 
