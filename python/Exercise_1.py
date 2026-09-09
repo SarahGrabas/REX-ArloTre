@@ -37,7 +37,7 @@ def square(arlo:Robot, side_length=1.0, turn_left=True, angle=90.0, old=False):
 
 ### Part 2 ###
 
-def continuous(arlo:Robot, n=1, swap=False, times=(7,7)):
+def continuous(arlo:Robot, n=1, swap=False, times=(9,8)):
     l,r = times
     for _ in range(n):
         if swap:
