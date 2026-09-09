@@ -3,61 +3,54 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm, uniform
 
 
-def p_pdf(x):
+def p_pdf(x): #density function med 3 Gaussian 
     return (0.3 * norm.pdf(x, loc=2.0, scale=1.0) +
             0.4 * norm.pdf(x, loc=5.0, scale=2.0) +
             0.3 * norm.pdf(x, loc=9.0, scale=1.0))
 
-def sir_sampling(k, proposal_sampler, proposal_pdf, target_pdf):
-    samples = proposal_sampler(k)
-    weights = target_pdf(samples) / proposal_pdf(samples)
+
+def sir_sampling(k, proposal_samples, proposal_pdf, dist_pdf): #proposal_sampler og proposal_pdf er lambda func 
+    samples = proposal_samples(k) #generer k samples 
+    weights = dist_pdf(samples) / proposal_pdf(samples)
     normalized_weights = weights / np.sum(weights)
-    resampled_samples = np.random.choice(
+    resampled_samples = np.random.choice( #generer random samples fra 1D array
         samples, 
         size=k, 
-        replace=True, 
-        p=normalized_weights
+        replace=True,  #with replacement, et sample kan vælges flere gange
+        p=normalized_weights #weights for samples
     )
     
     return resampled_samples
 
 np.random.seed(42) 
-k_values = [20, 100, 1000]
+k_values = [20, 100, 1000] #antal samples
 x_grid = np.linspace(-2, 15, 1000)
-p_vals = p_pdf(x_grid)
+p_vals = p_pdf(x_grid) 
 
-fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharey=True)
+fig = plt.plot(figsize=(15, 8), sharey=True) #Vi laver 6 plots på 2 rækker
 
 # Question 1
-q1_sampler = lambda k: np.random.uniform(0, 15, size=k)
-q1_pdf = lambda x: uniform.pdf(x, loc=0, scale=15)
+q1_samples = lambda k: np.random.uniform(0, 15, size=k) #k samples mellem 0 og 15
+q1_pdf = lambda x: uniform.pdf(x, loc=0, scale=15) #loc der hvor intervallet starter og scale er intervallets længde
 
-for i, k in enumerate(k_values):
-    resampled = sir_sampling(k, q1_sampler, q1_pdf, p_pdf)
-    
-    # Bins tilpasses k for bedre visuel repræsentation
-    bins = max(5, int(np.sqrt(k)))
-    axes[0, i].hist(resampled, bins=bins, density=True, alpha=0.6, 
-                    color='skyblue', edgecolor='black', label=f'Samples (k={k})')
-    axes[0, i].plot(x_grid, p_vals, 'r-', lw=2, label='$p(x)$')
-    axes[0, i].set_title(f'Q1: Uniform q(x), k = {k}')
-    axes[0, i].set_xlabel('$x$')
-    axes[0, i].legend()
+for k in k_values:
+    resampled = sir_sampling(k, q1_samples, q1_pdf, p_pdf)
+    plt.hist(resampled, density=True, alpha=0.6, color='skyblue', edgecolor='black', label=f'Samples (k={k})')
+    plt.plot(x_grid, p_vals, color='red',linestyle='dashed', linewidth=2, label='p(x)')
+    plt.title(f'Q1: uniform q(x), k = {k}')
+    plt.xlabel('x')
+    plt.legend()
+    plt.show()
 
 # Question 2
-q2_sampler = lambda k: np.random.normal(5.0, 4.0, size=k)
+q2_samples = lambda k: np.random.normal(5.0, 4.0, size=k) 
 q2_pdf = lambda x: norm.pdf(x, loc=5.0, scale=4.0)
 
-for i, k in enumerate(k_values):
-    resampled = sir_sampling(k, q2_sampler, q2_pdf, p_pdf)
-    
-    bins = max(5, int(np.sqrt(k)))
-    axes[1, i].hist(resampled, bins=bins, density=True, alpha=0.6, 
-                    color='lightgreen', edgecolor='black', label=f'Samples (k={k})')
-    axes[1, i].plot(x_grid, p_vals, 'r-', lw=2, label='$p(x)$')
-    axes[1, i].set_title(f'Q2: Gaussian q(x), k = {k}')
-    axes[1, i].set_xlabel('$x$')
-    axes[1, i].legend()
-
-plt.tight_layout()
-plt.show()
+for k in k_values:
+    resampled = sir_sampling(k, q2_samples, q2_pdf, p_pdf)
+    plt.hist(resampled, density=True, alpha=0.6, color='lightgreen', edgecolor='black', label=f'Samples (k={k})') #density=True gør histogrammets areal 1, så det kan sammenlignes med pdf
+    plt.plot(x_grid, p_vals, color='red',linestyle='dashed', linewidth=2, label='p(x)')
+    plt.title(f'Q1: Gaussian q(x), k = {k}')
+    plt.xlabel('x')
+    plt.legend()
+    plt.show()
