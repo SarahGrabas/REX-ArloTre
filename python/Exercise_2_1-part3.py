@@ -13,9 +13,9 @@ print("Obstacle avoidance started")
 
 while True:
 
-    left = arlo.read_left_ping_sensor() > safe_distance
-    front = arlo.read_front_ping_sensor() > safe_distance
-    right = arlo.read_right_ping_sensor() > safe_distance
+    left = arlo.read_left_ping_sensor() < safe_distance
+    front = arlo.read_front_ping_sensor() < safe_distance
+    right = arlo.read_right_ping_sensor() < safe_distance
     
     vals = (left, front, right)
     print(vals)
