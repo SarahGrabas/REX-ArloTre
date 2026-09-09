@@ -28,6 +28,7 @@ rightSpeed = 64
 def obstacle_avoidance(arlo, leftSpeed, rightSpeed, safe_distance):
     arlo_run=True    
     while arlo_run:
+        arlo.go_diff(leftSpeed, rightSpeed, 1, 1)
 
         left = arlo.read_left_ping_sensor()
         sleep(0.05)
@@ -71,7 +72,6 @@ import time
 start = time.time()
 
 while True: #kører i 20 sekunder             
-        arlo.go_diff(leftSpeed, rightSpeed, 1, 1)
         obstacle_avoidance(arlo, leftSpeed, rightSpeed, safe_distance)
 
 
