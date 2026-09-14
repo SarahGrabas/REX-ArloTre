@@ -30,11 +30,6 @@ if not cam.isOpened(): # Error
     print("Could not open camera")
     exit(-1)
 
-# Open a window
-WIN_RF = "Example 1"
-cv2.namedWindow(WIN_RF)
-cv2.moveWindow(WIN_RF, 100, 100)
-
 
 while cv2.waitKey(4) == -1: # Wait for a key pressed event
     retval, frameReference = cam.read() # Read frame
@@ -43,8 +38,8 @@ while cv2.waitKey(4) == -1: # Wait for a key pressed event
         print(" < < <  Game over!  > > > ")
         exit(-1)
     
-    # Show frames
-    cv2.imshow(WIN_RF, frameReference)
+    cv2.imwrite("Images/Image0.png", frameReference)
+
     
 
 # Finished successfully
