@@ -38,7 +38,7 @@ while cv2.waitKey(4) == -1: # Wait for a key pressed event
         print(" < < <  Game over!  > > > ")
         exit(-1)
     
-    cv2.imwrite("Images/Image0.png", frameReference)
+cv2.imwrite("Images/Image0.png", frameReference)
 
     
 
