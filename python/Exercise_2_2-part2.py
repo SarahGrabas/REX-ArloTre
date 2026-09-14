@@ -32,16 +32,33 @@ true_distance = np.array([100, 200, 500, 1000, 2000])
 # [788, 786, 786, 786, 785],
 
 
-measurements = np.array([
-    [92, 93, 93, 92, 92],
-    [193, 193, 193, 193, 193],
-    [486, 487, 486, 486, 486],
-    [987, 988, 988, 988, 988],
-    [2000, 1995, 2000, 2000, 1996]
-])
+# TRÆVÆG
+# measurements = np.array([
+#     [92, 93, 93, 92, 92],
+#     [193, 193, 193, 193, 193],
+#     [486, 487, 486, 486, 486],
+#     [987, 988, 988, 988, 988],
+#     [2000, 1995, 2000, 2000, 1996]
+# ])
 
-# true_distance_cm = true_distance / 10
-# measurements_cm = measurements / 10
+
+# Papkasser
+# All measurements: [106, 106, 106, 106, 106]
+# All measurements: [208, 208, 208, 207, 207]
+# All measurements: [505, 505, 506, 505, 505]
+# All measurements // Denne er ikke med // : [796, 795, 796, 796, 796]
+# All measurements: [998, 997, 998, 997, 998]
+# All measurements: [1990, 1990, 1988, 1988, 1990]
+
+
+# Papkasser
+measurements = np.array([
+    [106, 106, 106, 106, 106],
+    [208, 208, 208, 207, 207],
+    [505, 505, 506, 505, 505],
+    [998, 997, 998, 997, 998],
+    [1990, 1990, 1988, 1988, 1990]
+])
 
 errors = measurements - true_distance[:, None]
 mean_measurement = np.mean(measurements, axis=1)
