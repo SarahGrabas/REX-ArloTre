@@ -5,7 +5,7 @@ picam2 = Picamera2()
 
 # Konfigurer kameraet til stillbilleder
 config = picam2.create_still_configuration(
-    main={"size": (640, 480)}
+    main={"size": (1640, 1232)}
 )
 picam2.configure(config)
 
@@ -16,13 +16,14 @@ picam2.start()
 time.sleep(2)
 
 # Tag billedet
-picam2.capture_file("billede.jpg")
+i = 0
+while input("Take picture? [y/n]").lower() == "y":
+    picam2.capture_file(f"{i}.jpg")
+    i += 1
 
 # Luk kameraet
 picam2.stop()
 picam2.close()
-
-print("Billedet er gemt som billede.jpg")
 
 # Use the following bash command to transfer image via SSH:
 # scp pi@192.168.98.102:~/REX-ArloTre/python/billede.jpg .
