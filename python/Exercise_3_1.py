@@ -26,4 +26,4 @@ picam2.stop()
 picam2.close()
 
 # Use the following bash command to transfer image via SSH:
-# scp pi@192.168.98.102:~/REX-ArloTre/python/billede.jpg .
+# scp -r pi@192.168.98.102:~/REX-ArloTre/python/Pics .
