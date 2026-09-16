@@ -29,3 +29,4 @@ def take_picture(save=False, filename="image.jpg"):
 i = 0
 while input("Take picture? [y/n]").lower() == "y":
     take_picture(True, f"Pics/{i}.jpg")
+    i += 1
