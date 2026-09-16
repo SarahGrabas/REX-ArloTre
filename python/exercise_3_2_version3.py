@@ -61,9 +61,12 @@ while True:
         # Vælger første detekterede markør (eller filtrer på target_id)
         # Beregner kun positionen for den valgte markør.
         rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(
-            corners, marker_length, camera_matrix, dist_coeffs
-            [corners[target_index]], marker_length, camera_matrix, dist_coeffs
+            corners[target_index:target_index+1],
+            marker_length,
+            camera_matrix,
+            dist_coeffs
         )
+
 
         tvec = tvecs[0][0]  # [Xc, Yc, Zc]
         Xc, Yc, Zc = tvec[0], tvec[1], tvec[2]
@@ -80,14 +83,14 @@ while True:
             state = "ALIGNING"
             # Omregning: theta er i radianer, rotate_inplace bruger grader.
             # Drejer højst 5 grader, og måler derefter igen
-            degrees = min(5.0, float(np.degrees(abs(theta))))
+            degrees = min(15.0, float(np.degrees(abs(theta))))
             turn_left = bool(theta < 0)
             E1.rotate_inplace(arlo, degrees, turn_left)
         else:
             state = "APPROACHING"
             # Omregning: distance er i meter, straight_ahead bruger meter.
             # Kører højst 5 cm frem og måler derefter igen.
-            step = min(0.05, float(distance - 0.3))
+            step = min(0.20, float(distance - 0.3))
             E1.straight_ahead(arlo, meters=step)
     else:
         arlo.stop()
