@@ -8,7 +8,7 @@ cam = picamera2.Picamera2()
 
 image_size = (1640, 1232)
 config = cam.create_video_configuration(
-    {"size": image_size, "format": "RGB888"}
+    {"size": image_size}
 )
 
 cam.configure(config)
