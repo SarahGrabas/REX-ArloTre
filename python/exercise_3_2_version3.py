@@ -83,7 +83,7 @@ while True:
             state = "ALIGNING"
             # Omregning: theta er i radianer, rotate_inplace bruger grader.
             # Drejer højst 5 grader, og måler derefter igen
-            degrees = min(15.0, float(np.degrees(abs(theta))))
+            degrees = min(5.0, float(np.degrees(abs(theta))))
             turn_left = bool(theta < 0)
             E1.rotate_inplace(arlo, degrees, turn_left)
         else:
@@ -98,7 +98,7 @@ while True:
 
         if lost_frames > 5:
             state = "SEARCHING"
-            E1.rotate_inplace(arlo, 5, True)
+            E1.rotate_inplace(arlo, 15, True)
         sleep(0.15)
 
     if state == "REACHED":
