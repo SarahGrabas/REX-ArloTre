@@ -21,7 +21,7 @@ def take_picture(save=False, filename="image.jpg"):
     image = cam.capture_array("main")
 
     if save:
-        cv2.imwrite(filename, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(filename, image)
 
     return image
 
