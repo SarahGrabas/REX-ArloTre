@@ -2,6 +2,7 @@ import cv2
 import time
 import picamera2
 from PIL import Image
+from numpy.typing import NDArray
 
 
 # Open camera
@@ -18,17 +19,7 @@ cam.start(show_preview=False)
 time.sleep(1)
 
 
-def take_picture(save=False, filename="image.jpg"):
-    """
-    Take a picture.
-
-    save=True  -> saves the image in the same directory as this script.
-    save=False -> does not save the image.
-
-    Returns:
-        numpy array containing the image.
-    """
-
+def take_picture(save=False, filename="image.jpg") -> NDArray:
     image = cam.capture_array("main")
 
     if save: 
@@ -36,3 +27,8 @@ def take_picture(save=False, filename="image.jpg"):
         # cv2.imwrite(filename, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
     return image
+
+
+i = 0
+while input("Take picture? [y/n]").lower() == "y":
+    take_picture(True, f"Pics/{i}.jpg")
