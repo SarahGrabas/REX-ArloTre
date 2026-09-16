@@ -18,7 +18,7 @@ time.sleep(2)
 # Tag billedet
 i = 0
 while input("Take picture? [y/n]").lower() == "y":
-    picam2.capture_file(f"{i}.jpg")
+    picam2.capture_file(f"Pics/{i}.jpg")
     i += 1
 
 # Luk kameraet
