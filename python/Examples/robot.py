@@ -1,7 +1,7 @@
 # Arlo Robot Controller
 
 from time import sleep
-import serial # type: ignore
+import serial
 
 
 class Robot(object):
@@ -56,8 +56,7 @@ class Robot(object):
         return str_val
 
 
-    @staticmethod
-    def _power_checker(power):
+    def _power_checker(self, power):
         """Checks if a power value is in the set {0, [40;127]}.
            This is an internal utility function."""
         return  (power == 0) or (power >=40 and power <=127) 
