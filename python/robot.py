@@ -2,6 +2,7 @@
 
 from time import sleep
 import serial # type: ignore
+from math import gcd
 
 
 class Robot(object):
@@ -133,7 +134,123 @@ class Robot(object):
         cmd='c\n'
         return self.send_command(cmd)
     
-    
+    ### CALIBRATION
+
+    def _calibrate_sleep(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, speed:int, _range=(0,1,None), wait=0.5) -> float:
+        
+        lower, middle, upper = _range
+                
+        for _ in range(n * 300//gcd(degrees, 360)):
+            sleep(wait)
+            arlo.go_diff(speed*left_wheel, speed*(not left_wheel), forward_drive, forward_drive)
+            sleep(middle)
+            arlo.stop()
+                
+        while True:
+            userinput = input("""
+Enter adjustment action [?/-/0/+/<Enter>]:
+[?] Again
+[-] Decrease sleep
+[0] Spot on
+[+] Increase sleep
+<Enter> Abort
+> """)
+            match userinput:
+                case '?':
+                    pass
+                case '-':
+                    upper = middle
+                    middle = (lower+upper)/2
+                case '0':
+                    return {
+                        "left_wheel": left_wheel,
+                        "forward_drive": forward_drive,
+                        "wait": wait,
+                        "n": n,
+                        "result": (degrees, speed, middle) # (turning degrees, wheel speed, sleep time)
+                    }
+                case '+':
+                    lower = middle
+                    middle = middle*2 if upper is None else (lower+upper)/2
+                case '':
+                    return
+                case _:
+                    print("Invalid input!")
+                    continue
+                
+            for _ in range(n * 300/gcd(degrees, 360)):
+                sleep(wait)
+                arlo.go_diff(speed*left_wheel, speed*(not left_wheel), forward_drive, forward_drive)
+                sleep(middle)
+                arlo.stop()
+
+    def _calibrate_speed(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, _sleep:float, _range=(40,83,127), wait=0.5) -> float:
+        
+        if (2 * 9.8/(3*360) * degrees) < _sleep:
+            raise Warning("_speed is likely to high to be satisfied by even the lowest speed.")
+
+        lower, middle, upper = _range
+                
+        for _ in range(n * 300//gcd(degrees, 360)):
+            sleep(wait)
+            arlo.go_diff(middle*left_wheel, middle*(not left_wheel), forward_drive, forward_drive)
+            sleep(_sleep)
+            arlo.stop()
+                
+        while True:
+            userinput = input("""
+Enter adjustment action [?/-/0/+/<Enter>]:
+[?] Again
+[-] Decrease speed
+[0] Spot on
+[+] Increase speed
+<Enter> Abort
+> """)
+            match userinput:
+                case '?':
+                    pass
+                case '-':
+                    upper = middle
+                    middle = (lower+upper)/2
+                case '0':
+                    return {
+                        "left_wheel": left_wheel,
+                        "forward_drive": forward_drive,
+                        "wait": wait,
+                        "n": n,
+                        "result": (degrees, middle, _sleep) # (turning degrees, wheel speed, sleep time)
+                    }
+                case '+':
+                    lower = middle
+                    middle = middle*2 if upper is None else (lower+upper)/2
+                case '':
+                    return
+                case _:
+                    print("Invalid input!")
+                    continue
+                
+            for _ in range(n * 300/gcd(degrees, 360)):
+                sleep(wait)
+                arlo.go_diff(middle*left_wheel, middle*(not left_wheel), forward_drive, forward_drive)
+                sleep(_sleep)
+                arlo.stop()
+
+    def calibration_suit(self, degrees=(2*360, 360, 180, 90, 45), speeds=(40, 50, 61, 83, 127), sleeps=(0.5, 1, 2, 4, 8), n=1, wait=0.5):
+        {
+            'left': {
+                'forward': [],
+                'bacward': [],
+            },
+            'right': {
+                'forward': [],
+                'bacward': [],
+            },
+        }
+
+        for left in (True, False):
+            for forward in (True, False):
+                pass
+
     ### OBSOLETE STUFF
         
     def go(self):

@@ -163,13 +163,13 @@ Enter number for desired action [1/2/3/4/<Enter>] :
                 
                 while True:
                     userinput = input("""
-                Enter adjustment action [-/0/+/<Enter>]:
-                [?] Again
-                [-] Decrease
-                [0] Spot on
-                [+] Increase
-                <Enter> Abort
-                > """)
+Enter adjustment action [?/-/0/+/<Enter>]:
+[?] Again
+[-] Decrease
+[0] Spot on
+[+] Increase
+<Enter> Abort
+> """)
                     match userinput:
                         case '?':
                             pass
