@@ -113,3 +113,5 @@ while True:
     if state == "REACHED":
         break
       
+#NÅR VI KOMMER TÆTTERE PÅ RALLY, skal vi være opmærksomme på at den ikke kan se kassen når den kommer helt tæt på. 
+#Så dette skal vi finde en løsning på.

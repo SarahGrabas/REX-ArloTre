@@ -34,6 +34,7 @@ def build_landmark_map(ids, tvecs):
     return landmarks
 
 
+
 def main():
     cam = picamera2.Picamera2()
     try:
