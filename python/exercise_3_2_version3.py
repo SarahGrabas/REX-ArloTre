@@ -68,7 +68,7 @@ while True:
         Xc, Yc, Zc = tvec[0], tvec[1], tvec[2]
 
         theta = np.arctan2(Xc, Zc) #vi beregner vinklen mellem robottens fremadgående retning og markeren
-        distance = Zc #Zc er afstanden frem til markøren
+        distance = np.linalg.norm([Xc, Zc]) # Ændret fra Zc til nu at beregne afstanden. sqrt(Xc^^2+Zc^^2)
 
         if distance <= 0.3: #Hvis robotten er 30 cm tæt på markeren behøver vi ikke kører mod den, vi har REACHED den
             state = "REACHED"
