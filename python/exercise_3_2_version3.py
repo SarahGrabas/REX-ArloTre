@@ -6,97 +6,91 @@ import Exercise_1 as E1
 from robot import arlo
 from time import sleep
 
-# Camera setup
-cam = picamera2.Picamera2() # Open camera
-config = cam.create_video_configuration( # define camera config
-    {"size": (1640, 1232), "format": "RGB888"}
-)
-cam.configure(config) # use config
-cam.start(show_preview=False) # start camera (turn on)
-sleep(1) # wait for camera to start
+#camera setup
+cam = picamera2.Picamera2() #open camera
+config = cam.create_video_configuration( {"size": (1640, 1232), "format": "RGB888"}) #define camera config suitable for recording video
+
+cam.configure(config) #use config
+cam.start(show_preview=False) #start camera (turn on)
+sleep(1) #wait for camera to start
 
 
 def take_picture():
     """Takes image in RBG format and return array of shape (hight, width, rbg)"""
-    return cam.capture_array("main")
+    return cam.capture_array("main") #the capture array function captures next image from the stream
 
-# 1. Kamerakalibrering (fra opgave 1)
+#kamerakalibrering (fra opgave 1)
 focal_length = 1288.9
-cx, cy = 1640/2, 1232/2 # camera center in pixels
-camera_matrix = np.array(
-    [[focal_length, 0, cx], [0, focal_length, cy], [0, 0, 1]], dtype=np.float32
-)
-dist_coeffs = np.zeros((5, 1), dtype=np.float32)
+cx, cy = 1640/2, 1232/2 #camera center in pixels
+camera_matrix = np.array([[focal_length, 0, cx], [0, focal_length, cy], [0, 0, 1]], dtype=np.float32) #3x3 matrix 
 
-marker_length = 0.146  # Markørstørrelse i meter
-target_id = 4  # Specifikt ID eller None for enhver markør
+dist_coeffs = np.zeros((5, 1), dtype=np.float32) #zero-vector with 5 rows 
 
-# ArUco-opsætning til OpenCV 4.6.0
+marker_length = 0.146  #markørstørrelse i meter på landmarkbox
+target_id = 4  #specifikt ID eller None for enhver markør
+
+#ArUco-opsætning til OpenCV 4.6.0
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
 
-
-# Tilstande: "SEARCHING", "ALIGNING", "APPROACHING", "REACHED"
+#states: "SEARCHING", "ALIGNING", "APPROACHING", "REACHED"
 state = "SEARCHING"
 lost_frames = 0
 
 while True:
-    frame = take_picture()  # Hent frame fra PiCamera2
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = take_picture()  #hent frame fra PiCamera2, dette er array med shape: (height, width,rbg)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #laver billed om til gråbilled
 
-    corners, ids, _  = aruco.detectMarkers(
-        gray, dictionary)
+    corners, ids, _  = aruco.detectMarkers(gray, dictionary) #tjekker om vi kan finde nogle Aruco markers fra vores dictionary i billedet
+                                                            #corners er hvor markeren er
 
-    # Vælg målmarkøren - andre ID'er tæller ikke som et fund
-    target_index = None
-    if ids is not None and len(ids) > 0:
-        if target_id is None:
-            target_index = 0
-        else:
-            matches = np.flatnonzero(ids.flatten() == target_id)
-            if matches.size > 0:
+    #vælg målmarkøren når vi kan se flere markers
+    target_index = None #None når der ikke er markers
+    if ids is not None and len(ids) > 0: #vi ser mindst 1 marker
+        if target_id is None: #vi har ikke én bestemt marker vi leder efter, så vi bruger den første vi ser
+            target_index = 0 
+        else:                   #hvis vi har en target marker
+            matches = np.flatnonzero(ids.flatten() == target_id) #vi tjekker om nogle af de markers vi ser i billedet matcher med vores target marker
+            if matches.size > 0: #Hvis vi har mindst ét match, så tager vi første match og gemmer
                 target_index = int(matches[0])
 
-    if target_index is not None:
+    if target_index is not None: #vi har en marker i billedet som vi gerne vil hen til.
         lost_frames = 0
-        # Vælger første detekterede markør (eller filtrer på target_id)
-        # Beregner kun positionen for den valgte markør.
-        rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(
-            corners[target_index:target_index+1],
-            marker_length,
-            camera_matrix,
+    
+        rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(  #vi beregner translation og rotation
+            corners[target_index:target_index+1], #vi tager position fra den marker vi ønsker at kører til
+            marker_length,  #size of marker
+            camera_matrix, #camera calibration parametre
             dist_coeffs
         )
 
 
-        tvec = tvecs[0][0]  # [Xc, Yc, Zc]
+        tvec = tvecs[0][0]  #kameraets koordinatsystem
         Xc, Yc, Zc = tvec[0], tvec[1], tvec[2]
 
-        theta = np.arctan2(Xc, Zc)
-        distance = Zc
+        theta = np.arctan2(Xc, Zc) #vi beregner vinklen mellem robottens fremadgående retning og markeren
+        distance = Zc #Zc er afstanden frem til markøren
 
-        # Tilstandsovergange & Styring
-        if distance <= 0.3:
+        if distance <= 0.3: #Hvis robotten er 30 cm tæt på markeren behøver vi ikke kører mod den, vi har REACHED den
             state = "REACHED"
             arlo.stop()
 
-        elif abs(theta) > np.radians(5):
+        elif abs(theta) > np.radians(5):    #hvis markeren er mere end 5 grader væk, drejer vi højst 5 grader og måler igen
             state = "ALIGNING"
-            # Omregning: theta er i radianer, rotate_inplace bruger grader.
-            # Drejer højst 5 grader, og måler derefter igen
-            degrees = min(5.0, float(np.degrees(abs(theta))))
-            turn_left = bool(theta < 0)
+            degrees = min(5.0, float(np.degrees(abs(theta)))) #Hvis vi er mindre end 5 grader fra, så drejere vi det antal grader vi mangler
+            turn_left = bool(theta < 0) #hvis theta er negativ så drejer vi til højre, fordi markøren så er til højre for robottens x-aksen
+                                        #hvis theta er positiv så drejer vi til venstre.
             E1.rotate_inplace(arlo, degrees, turn_left)
-        else:
+            
+        else:                               #Hvis robottens retning og markøren er mindre eller lig 5 grader, begynder vi at approache den
             state = "APPROACHING"
-            # Omregning: distance er i meter, straight_ahead bruger meter.
-            # Kører højst 5 cm frem og måler derefter igen.
-            step = min(0.20, float(distance - 0.3))
-            E1.straight_ahead(arlo, meters=step)
-    else:
+            step = min(0.20, float(distance - 0.3)) #distance er i meter, straight_ahead bruger meter.
+            E1.straight_ahead(arlo, meters=step) #Vi kører højst 20 cm frem, indtil vi er 30 cm fra markeren.
+            
+    else:       #Hvis markeren ikke kan ses, lægger vi én til lost frames
         arlo.stop()
         lost_frames += 1
 
-        if lost_frames > 5:
+        if lost_frames > 5:     #Hvis vi har haft mere end 5 frames uden en marker i sigte, så roterer vi.
             state = "SEARCHING"
             E1.rotate_inplace(arlo, 15, True)
         sleep(0.15)
