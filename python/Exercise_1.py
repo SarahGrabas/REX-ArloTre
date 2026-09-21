@@ -78,10 +78,10 @@ Enter number for desired action [1/2/3/4/<Enter>] :
 
                 c0_left_wheel = True
                 c0_forward_drive = True
-                c0_speed = 40
-                c0_divisor = 4
-                c0_wait = 0.5
                 c0_n = 1
+                c0_degrees = 90
+                c0_speed = 40
+                c0_wait = 0.5
 
                 print("Configure parameters (press <Enter> for default):")
                 while True:
@@ -101,10 +101,10 @@ Enter number for desired action [1/2/3/4/<Enter>] :
                         print("Invalid input!")
                         continue
                 while True:
-                    userinput = input("> speed (int | range {0, [40;127]} "+f"| default {c0_speed}) = ")
+                    userinput = input(f"> n (int | default {c0_n}) = ")
                     try:
-                        c0_speed = int(userinput)
-                        if Robot._power_checker(c0_speed): 
+                        c0_n = int(userinput)
+                        if c0_n > 0: 
                             break
                         else:
                             print("Invalid input!")
@@ -113,10 +113,22 @@ Enter number for desired action [1/2/3/4/<Enter>] :
                         print("Invalid input!")
                         continue
                 while True:
-                    userinput = input(f"> divisor (int | degrees = 360/divisor | default {c0_divisor}) = ")
+                    userinput = input(f"> degrees (int | default {c0_degrees}) = ")
                     try:
-                        c0_divisor = int(userinput)
-                        if c0_divisor > 0: 
+                        c0_degrees = int(userinput)
+                        if c0_degrees > 0: 
+                            break
+                        else:
+                            print("Invalid input!")
+                            continue
+                    except:
+                        print("Invalid input!")
+                        continue
+                while True:
+                    userinput = input("> speed (int | range {0, [40;127]} "+f"| default {c0_speed}) = ")
+                    try:
+                        c0_speed = int(userinput)
+                        if Robot._power_checker(c0_speed): 
                             break
                         else:
                             print("Invalid input!")
@@ -136,73 +148,8 @@ Enter number for desired action [1/2/3/4/<Enter>] :
                     except:
                         print("Invalid input!")
                         continue
-                while True:
-                    userinput = input(f"> n (int | default {c0_n}) = ")
-                    try:
-                        c0_n = int(userinput)
-                        if c0_n > 0: 
-                            break
-                        else:
-                            print("Invalid input!")
-                            continue
-                    except:
-                        print("Invalid input!")
-                        continue
                 
-                c0_results = []
-                
-                c0_lower = 0.0
-                c0_middle = 1.0
-                c0_upper = None
-                
-                for _ in range(c0_divisor*c0_n):
-                    sleep(c0_wait)
-                    arlo.go_diff(c0_speed*c0_left_wheel, c0_speed*(not c0_left_wheel), c0_forward_drive, c0_forward_drive)
-                    sleep(c0_middle)
-                    arlo.stop()
-                
-                while True:
-                    userinput = input("""
-Enter adjustment action [?/-/0/+/<Enter>]:
-[?] Again
-[-] Decrease
-[0] Spot on
-[+] Increase
-<Enter> Abort
-> """)
-                    match userinput:
-                        case '?':
-                            pass
-                        case '-':
-                            c0_upper = c0_middle
-                            c0_middle = (c0_lower+c0_upper)/2
-                        case '0':
-                            c0_results.insert(0, {
-                                "left_wheel": c0_left_wheel,
-                                "forward_drive": c0_forward_drive,
-                                "speed": c0_speed,
-                                "divisor": c0_divisor,
-                                "degrees": 360/c0_divisor,
-                                "wait": c0_wait,
-                                "n": c0_n,
-                                "result_time": c0_middle
-                            })
-                            print(c0_results)
-                            break
-                        case '+':
-                            c0_lower = c0_middle
-                            c0_middle = c0_middle*2 if c0_upper is None else (c0_lower+c0_upper)/2
-                        case '':
-                            break
-                        case _:
-                            print("Invalid input!")
-                            continue
-                        
-                    for _ in range(c0_divisor*c0_n):
-                        sleep(c0_wait)
-                        arlo.go_diff(c0_speed*c0_left_wheel, c0_speed*(not c0_left_wheel), c0_forward_drive, c0_forward_drive)
-                        sleep(c0_middle)
-                        arlo.stop()
+                print(arlo._calibrate_sleep(c0_left_wheel, c0_forward_drive, c0_n, c0_degrees, c0_speed, wait=c0_wait))
 
             case '1':
                 print("Straigt ahead:")

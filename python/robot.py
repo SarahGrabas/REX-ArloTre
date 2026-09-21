@@ -136,7 +136,7 @@ class Robot(object):
     
     ### CALIBRATION
 
-    def _calibrate_sleep(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, speed:int, _range=(0,1,None), wait=0.5) -> float:
+    def _calibrate_sleep(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, speed:int, _range=(0,1,None), wait=0.5):
         
         lower, middle, upper = _range
                 
@@ -184,7 +184,7 @@ Enter adjustment action [?/-/0/+/<Enter>]:
                 sleep(middle)
                 arlo.stop()
 
-    def _calibrate_speed(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, _sleep:float, _range=(40,83,127), wait=0.5) -> float:
+    def _calibrate_speed(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, _sleep:float, _range=(40,83,127), wait=0.5):
         
         if (2 * 9.8/(3*360) * degrees) < _sleep:
             raise Warning("_speed is likely to high to be satisfied by even the lowest speed.")
