@@ -177,7 +177,7 @@ Enter adjustment action [?/-/0/+/<Enter>]:
                 print("Invalid input!")
                 continue
                 
-            for _ in range(n * 300/gcd(degrees, 360)):
+            for _ in range(n * 300//gcd(degrees, 360)):
                 sleep(wait)
                 arlo.go_diff(speed*left_wheel, speed*(not left_wheel), forward_drive, forward_drive)
                 sleep(middle)
@@ -227,7 +227,7 @@ Enter adjustment action [?/-/0/+/<Enter>]:
                 print("Invalid input!")
                 continue
                 
-            for _ in range(n * 300/gcd(degrees, 360)):
+            for _ in range(n * 300//gcd(degrees, 360)):
                 sleep(wait)
                 arlo.go_diff(middle*left_wheel, middle*(not left_wheel), forward_drive, forward_drive)
                 sleep(_sleep)

@@ -87,6 +87,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> left_wheel (bool | default {c0_left_wheel}) = ")
                 try:
+                    if userinput == '': break
                     c0_left_wheel = bool(userinput)
                     break
                 except:
@@ -95,6 +96,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> forward_drive (bool | default {c0_forward_drive}) = ")
                 try:
+                    if userinput == '': break
                     c0_forward_drive = bool(userinput)
                     break
                 except:
@@ -103,6 +105,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> n (int | default {c0_n}) = ")
                 try:
+                    if userinput == '': break
                     c0_n = int(userinput)
                     if c0_n > 0: 
                         break
@@ -115,6 +118,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> degrees (int | default {c0_degrees}) = ")
                 try:
+                    if userinput == '': break
                     c0_degrees = int(userinput)
                     if c0_degrees > 0: 
                         break
@@ -127,6 +131,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input("> speed (int | range {0, [40;127]} "+f"| default {c0_speed}) = ")
                 try:
+                    if userinput == '': break
                     c0_speed = int(userinput)
                     if Robot._power_checker(c0_speed): 
                         break
@@ -139,6 +144,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> wait (float | default {c0_wait}) = ")
                 try:
+                    if userinput == '': break
                     c0_wait = float(userinput)
                     if c0_wait > 0: 
                         break
@@ -159,6 +165,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> meters (float | default {c1_meters}) = ")
                 try:
+                    if userinput == '': break
                     c1_meters = float(userinput)
                     if c1_meters >= 0: 
                         break
@@ -179,6 +186,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> degrees (float | default {c2_degrees}) = ")
                 try:
+                    if userinput == '': break
                     c2_degrees = float(userinput)
                     if c2_degrees >= 0: 
                         break
@@ -191,6 +199,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> turn_left (bool | default {c2_turn_left}) = ")
                 try:
+                    if userinput == '': break
                     c2_turn_left = bool(userinput)
                     break
                 except:
@@ -208,6 +217,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> side_length (float | default {c3_side_length}) = ")
                 try:
+                    if userinput == '': break
                     c3_side_length = float(userinput)
                     if c3_side_length >= 0: 
                         break
@@ -220,6 +230,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> turn_left (bool | default {c3_turn_left}) = ")
                 try:
+                    if userinput == '': break
                     c3_turn_left = bool(userinput)
                     break
                 except:
@@ -228,6 +239,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> angle (float | default {c3_angle}) = ")
                 try:
+                    if userinput == '': break
                     c3_angle = float(userinput)
                     if c3_angle >= 0: 
                         break
@@ -250,6 +262,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> n (int | default {c4_n}) = ")
                 try:
+                    if userinput == '': break
                     c4_n = int(userinput)
                     if c4_n > 0: 
                         break
@@ -262,6 +275,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> swap (bool | default {c4_swap}) = ")
                 try:
+                    if userinput == '': break
                     c4_swap = bool(userinput)
                     break
                 except:
@@ -270,6 +284,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> left_sleep (float | default {c4_left_sleep}) = ")
                 try:
+                    if userinput == '': break
                     c4_left_sleep = float(userinput)
                     if c4_left_sleep >= 0: 
                         break
@@ -282,6 +297,7 @@ Enter number for desired action [1/2/3/4/<Enter>] :
             while True:
                 userinput = input(f"> right_sleep (float | default {c4_right_sleep}) = ")
                 try:
+                    if userinput == '': break
                     c4_right_sleep = float(userinput)
                     if c4_right_sleep >= 0: 
                         break
