@@ -46,13 +46,28 @@ while True:
     #vælg målmarkøren når vi kan se flere markers
     target_index = None #None når der ikke er markers
     if ids is not None and len(ids) > 0: #vi ser mindst 1 marker
-        if target_id is None: #vi har ikke én bestemt marker vi leder efter, så vi bruger den første vi ser
-            target_index = 0 
-        else:                   #hvis vi har en target marker
+        if target_id is not None: #hvis vi har en target marker
             matches = np.flatnonzero(ids.flatten() == target_id) #vi tjekker om nogle af de markers vi ser i billedet matcher med vores target marker
             if matches.size > 0: #Hvis vi har mindst ét match, så tager vi første match og gemmer
                 target_index = int(matches[0])
-
+        
+        else: #vi har ikke én bestemt marker vi leder efter, så vi bruger den der er tættest
+            rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(
+                corners,
+                marker_length,
+                camera_matrix,
+                dist_coeffs
+                )
+            
+            distances=[]
+            
+            for tvec in tvecs:
+                Xc, Yc, Zc = tvec[0], tvec[1], tvec[2]
+                dist_tvec = np.linalg.norm([Xc, Zc]) #distance til marker
+                distances.append(dist_tvec)
+            
+            target_index = int(np.argmin(distances))
+        
     if target_index is not None: #vi har en marker i billedet som vi gerne vil hen til.
         lost_frames = 0
     
