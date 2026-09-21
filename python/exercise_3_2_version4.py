@@ -62,7 +62,7 @@ while True:
             distances=[]
             
             for tvec in tvecs:
-                Xc, Yc, Zc = tvec[0], tvec[1], tvec[2]
+                Xc, Yc, Zc = tvec.reshape(3)
                 dist_tvec = np.linalg.norm([Xc, Zc]) #distance til marker
                 distances.append(dist_tvec)
             
