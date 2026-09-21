@@ -27,7 +27,7 @@ camera_matrix = np.array([[focal_length, 0, cx], [0, focal_length, cy], [0, 0, 1
 dist_coeffs = np.zeros((5, 1), dtype=np.float32) #zero-vector with 5 rows 
 
 marker_length = 0.146  #markørstørrelse i meter på landmarkbox
-target_id = 4  #specifikt ID eller None for enhver markør
+target_id = 6  #specifikt ID eller None for enhver markør
 
 #ArUco-opsætning til OpenCV 4.6.0
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
