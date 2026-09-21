@@ -6,35 +6,31 @@ import picamera2
 from time import sleep
 
 
-# Kamerakalibrering fra opgave 3.1 ved opløsningen 1640 x 1232.
-# Tilnærmelse: fx = fy, billedcentrum som hovedpunkt og ingen forvrængning.
-focal_length = 1288.9       # I pixels
-cx, cy = 1640 / 2, 1232 / 2 # Midten af billedet i pixels
-camera_matrix = np.array(
-    [[focal_length, 0, cx], [0, focal_length, cy], [0, 0, 1]], dtype=np.float32,
-)
-dist_coeffs = np.zeros((5, 1), dtype=np.float32) # Tilnærmelse: Vi antager ingen forvrængning, da kameraet er kalibreret
-marker_length = 0.146  # Alle markørers sorte kvadrat skal have sidelængden 14,6 cm
+#kamerakalibrering fra opgave 3.1 ved opløsningen 1640 x 1232.
+focal_length = 1288.9       #pixels
+cx, cy = 1640 / 2, 1232 / 2 #center of image in pixels
+camera_matrix = np.array([[focal_length, 0, cx], 
+                          [0, focal_length, cy], 
+                          [0, 0, 1]], 
+                         dtype=np.float32,)
 
-# ArUco-opsætning til OpenCV 4.6.0 (Versionen som ligger på Raspberry Pi'en)
+dist_coeffs = np.zeros((5, 1), dtype=np.float32) 
+marker_length = 0.146  #Markeres sorte ramme, har højde 14,6 cm
+
+#ArUco-opsætning til OpenCV 4.6.0 (versionen som ligger på Raspberry Pi'en)
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
 
-
+#Funktion til at gennem 2D koordinater for landmarkers i et billed
 def build_landmark_map(ids, tvecs):
-    """Returner [(ID, (Xc, Zc)), ...] for det aktuelle billede i enheden meter.
-
-    Xc er positiv mod højre, Zc er positiv fremad. Yc udelades.
-    Dette er et kort set ovenfra, hvis kameraet sidder vandret og peger fremad.
-    """
-    landmarks = []
-    if ids is None or tvecs is None: # Kan der ikke ses nogle markører i billedet returneres en tom liste
+    landmarks = [] #list for landmarks in image
+    if ids is None or tvecs is None: #kan der ikke ses nogle markører i billedet returneres en tom liste
         return landmarks
 
-    for marker_id, tvec in zip(ids.flatten(), tvecs):
+    for marker_id, tvec in zip(ids.flatten(), tvecs): #Hvert markerid og koordinater på markers i billedet
         Xc, Yc, Zc = tvec.reshape(3)
-        if np.all(np.isfinite([Xc, Yc, Zc])) and Zc > 0:
-            landmarks.append((int(marker_id), (float(Xc), float(Zc))))
-
+        if np.all(np.isfinite([Xc, Yc, Zc])) and Zc > 0: #Vi tjekker at alle koordinater er tal og at markeren er foran kameraet
+            landmarks.append((int(marker_id), (float(Xc), float(Zc))))  #Vi gemmer id og x,z koordinater i listen. 
+            
     return landmarks
 
 
@@ -43,7 +39,7 @@ def main():
     try:
         config = cam.create_video_configuration(
             {"size": (1640, 1232), "format": "RGB888"},
-            queue=False,  # Hent et nyt billede efter brugerens Enter.
+            queue=False,  #Hent et nyt billede efter brugerens Enter.
         )
         cam.configure(config)
         cam.start(show_preview=False)
