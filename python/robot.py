@@ -13,7 +13,7 @@ class Robot(object):
        Arduino too frequently (give it time to process the command by adding a short sleep wait
        statement). Failure to do some may lead to strange robot behaviour.
        
-       In case you experience trouble - consider using only commands that do not use the wheel 
+       In elif userinput == you experience trouble - consider using only commands that do not use the wheel 
        encoders.
     
        This class is not thread-safe and you should only use it from one thread. However, this does not have
@@ -155,28 +155,27 @@ Enter adjustment action [?/-/0/+/<Enter>]:
 [+] Increase sleep
 <Enter> Abort
 > """)
-            match userinput:
-                case '?':
-                    pass
-                case '-':
-                    upper = middle
-                    middle = (lower+upper)/2
-                case '0':
-                    return {
-                        "left_wheel": left_wheel,
-                        "forward_drive": forward_drive,
-                        "wait": wait,
-                        "n": n,
-                        "result": (degrees, speed, middle) # (turning degrees, wheel speed, sleep time)
-                    }
-                case '+':
-                    lower = middle
-                    middle = middle*2 if upper is None else (lower+upper)/2
-                case '':
-                    return
-                case _:
-                    print("Invalid input!")
-                    continue
+            if userinput == '?':
+                pass
+            elif userinput == '-':
+                upper = middle
+                middle = (lower+upper)/2
+            elif userinput == '0':
+                return {
+                    "left_wheel": left_wheel,
+                    "forward_drive": forward_drive,
+                    "wait": wait,
+                    "n": n,
+                    "result": (degrees, speed, middle) # (turning degrees, wheel speed, sleep time)
+                }
+            elif userinput == '+':
+                lower = middle
+                middle = middle*2 if upper is None else (lower+upper)/2
+            elif userinput == '':
+                return
+            else:
+                print("Invalid input!")
+                continue
                 
             for _ in range(n * 300/gcd(degrees, 360)):
                 sleep(wait)
@@ -206,28 +205,27 @@ Enter adjustment action [?/-/0/+/<Enter>]:
 [+] Increase speed
 <Enter> Abort
 > """)
-            match userinput:
-                case '?':
-                    pass
-                case '-':
-                    upper = middle
-                    middle = (lower+upper)/2
-                case '0':
-                    return {
-                        "left_wheel": left_wheel,
-                        "forward_drive": forward_drive,
-                        "wait": wait,
-                        "n": n,
-                        "result": (degrees, middle, _sleep) # (turning degrees, wheel speed, sleep time)
-                    }
-                case '+':
-                    lower = middle
-                    middle = middle*2 if upper is None else (lower+upper)/2
-                case '':
-                    return
-                case _:
-                    print("Invalid input!")
-                    continue
+            if userinput == '?':
+                pass
+            elif userinput == '-':
+                upper = middle
+                middle = (lower+upper)/2
+            elif userinput == '0':
+                return {
+                    "left_wheel": left_wheel,
+                    "forward_drive": forward_drive,
+                    "wait": wait,
+                    "n": n,
+                    "result": (degrees, middle, _sleep) # (turning degrees, wheel speed, sleep time)
+                }
+            elif userinput == '+':
+                lower = middle
+                middle = middle*2 if upper is None else (lower+upper)/2
+            elif userinput == '':
+                return
+            else:
+                print("Invalid input!")
+                continue
                 
             for _ in range(n * 300/gcd(degrees, 360)):
                 sleep(wait)
