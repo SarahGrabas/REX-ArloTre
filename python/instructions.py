@@ -17,6 +17,6 @@ while True:
     usr = input("speed = ")
     for _ in range(3):
         sleep(0.5)
-        arlo.go_diff(0, int(usr), 1, 1)
+        arlo.go_diff(0, int(usr), 0, 0)
         sleep(8)
         arlo.stop()
