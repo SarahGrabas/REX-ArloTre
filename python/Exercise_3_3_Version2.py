@@ -59,7 +59,7 @@ def main():
                 )
 
             landmarks = build_landmark_map(ids, tvecs)
-            print("\nKoordinater i meter fra kameraet: Xc mod højre, Yc opad, Zc fremad")
+            print("\nKoordinater i meter fra kameraet: Xc mod højre, Yc nedad, Zc fremad")
             for marker_id, (Xc, Yc, Zc) in landmarks:
                 print(f"ID {marker_id}: Xc = {Xc:.3f} m, Yc = {Yc:.3f} m, Zc = {Zc:.3f} m")
             if not landmarks:
