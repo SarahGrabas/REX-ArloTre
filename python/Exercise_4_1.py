@@ -24,7 +24,7 @@ ids, rvecs, tvecs = arlo.picDetectMarkersPose()
 # +Y : Down
 # +Z : Front
 
-print(tvecs)
+print(ids, rvecs, tvecs)
 
 # print([CAMERA_TO_ROBOT @ np.array([x,y,z,1]) for x,y,z in tvecs])
 
