@@ -32,6 +32,8 @@ map_array = [(
     BOX_CIRKEL_RADIUS) 
     for id,(x,y,z) in zip(ids,tvecs)]
 
+print(rvecs, tvecs)
+
 # Note:
 # ids, rvecs, tvecs
 # [[1]] [[[ 3.06523904 -0.05187814  0.12851865]]] [[[-0.08507675  0.04995853  1.02999685]]] 
