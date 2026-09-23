@@ -3,6 +3,23 @@
 from time import sleep
 import serial # type: ignore
 from math import gcd
+import cv2 # type: ignore
+import picamera2 # type: ignore
+import numpy as np
+
+
+### CONSTANTS
+FOCAL_LENGTH = 1288.9 # Camera focal length from Exercise 3.1
+CX, CY = 1640/2, 1232/2 # Camera center in pixels
+CAMERA_MATRIX = np.array([
+    [FOCAL_LENGTH, 0, CX], 
+    [0, FOCAL_LENGTH, CY], 
+    [0, 0, 1]
+], dtype=np.float32) # 3x3 matrix 
+DISTORTION_MATRIX = np.zeros((5, 1), dtype=np.float32) # Zero vector ; assumes no camera (lens) distortion
+
+MARKER_SIZE = 0.146 # markørstørrelse i meter på landmarkbox
+
 
 
 class Robot(object):
@@ -134,6 +151,44 @@ class Robot(object):
         cmd='c\n'
         return self.send_command(cmd)
     
+
+
+    ### CAMERA
+
+    def start_camera(self):
+        self.cam = picamera2.Picamera2() #open camera
+        config = self.cam.create_video_configuration({ # define camera config suitable for recording video
+            "size": (1640, 1232), 
+            "format": "RGB888"
+        }) 
+
+        self.cam.configure(config) #use config
+        self.cam.start(show_preview=False) #start camera (turn on)
+        sleep(1) #wait for camera to start
+
+    def take_picture(self):
+        """Takes image in RBG format and return array of shape (hight, width, rbg)"""
+        return self.cam.capture_array("main") #the capture array function captures next image from the stream
+    
+    def picDetectMarkersPose(self):
+        """Takes picture, detects markers in image and estimates poses for detected markers."""
+        dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+
+        frame = self.take_picture()  #hent frame fra PiCamera2, dette er array med shape: (height, width,rbg)
+        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) #laver billed om til gråbilled
+
+        corners, ids, _  = cv2.aruco.detectMarkers(gray, dictionary) #tjekker om vi kan finde nogle Aruco markers fra vores dictionary i billedet corners er hvor markeren er
+
+        rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(  #vi beregner translation og rotation
+            corners, #vi tager position fra den marker vi ønsker at kører til
+            MARKER_SIZE,  #size of marker
+            CAMERA_MATRIX, #camera calibration parametre
+            DISTORTION_MATRIX
+        )
+        return ids, rvecs, tvecs
+
+
+
     ### CALIBRATION
 
     def _calibrate_sleep(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, speed:int, _range=(0,1,None), wait=0.5):
