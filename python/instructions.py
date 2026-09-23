@@ -13,5 +13,5 @@ while True:
     for _ in range(3):
         sleep(0.5)
         arlo.go_diff(int(usr), 0, 1, 1)
-        sleep(5)
+        sleep(8)
         arlo.stop()
