@@ -10,11 +10,12 @@ from robot import arlo
 
 # left, forward, deg 360, 8 sec, 51
 # left, backward, deg 360, 8 sec, 51
+# right, forward, deg 360, 8 sec, 
 
 while True:
     usr = input("speed = ")
     for _ in range(3):
         sleep(0.5)
-        arlo.go_diff(int(usr), 0, 0, 0)
+        arlo.go_diff(0, int(usr), 1, 1)
         sleep(8)
         arlo.stop()
