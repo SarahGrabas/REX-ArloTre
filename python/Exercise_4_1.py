@@ -32,9 +32,8 @@ map_array = [(
     BOX_CIRKEL_RADIUS) 
     for id,(x,y,z) in zip(ids,tvecs)]
 
-print(rvecs, tvecs)
-
 # Note:
-# ids, rvecs, tvecs
-# [[1]] [[[ 3.06523904 -0.05187814  0.12851865]]] [[[-0.08507675  0.04995853  1.02999685]]] 
+# rvecs, tvecs
+# [[ 3.11429633 -0.0338186   0.01586285]] [[0.01003483 0.04807003 0.37233776]]   ; looking right on 
+# [[ 2.93820187 -0.02655488 -1.08660292]] [[-0.08554608  0.05370342  0.50980161]]   ; 45 degrees (2 faces visible)
 
