@@ -20,6 +20,7 @@ DISTORTION_MATRIX = np.zeros((5, 1), dtype=np.float32) # Zero vector ; assumes n
 
 MARKER_SIZE = 0.146 # markørstørrelse i meter på landmarkbox
 
+ARLO_RADIUS = 0.225 # in meters
 
 
 class Robot(object):
@@ -167,7 +168,8 @@ class Robot(object):
         sleep(1) #wait for camera to start
 
     def take_picture(self):
-        """Takes image in RBG format and return array of shape (hight, width, rbg)"""
+        """Takes image in RBG format and return array of shape (hight, width, rbg)
+        Returns (ids, rvecs, tvecs)"""
         return self.cam.capture_array("main") #the capture array function captures next image from the stream
     
     def picDetectMarkersPose(self):
