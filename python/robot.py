@@ -187,7 +187,7 @@ class Robot(object):
             CAMERA_MATRIX, #camera calibration parametre
             DISTORTION_MATRIX
         )
-        return ids, rvecs, tvecs
+        return ids[0], rvecs[0], tvecs[0]
 
 
 
