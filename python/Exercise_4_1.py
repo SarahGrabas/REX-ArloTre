@@ -10,34 +10,7 @@ ROBOT_TO_CAMERA = np.array([
 
 CAMERA_TO_ROBOT = np.linalg.inv(ROBOT_TO_CAMERA)
 
-BOX_SIZE = 0.27
-
-def rotate(r, v):
-    """Returns v rotated with r (r is the axis-angle rotation representation)"""
-    v = np.asarray(v, dtype=float)
-    r = np.asarray(r, dtype=float)
-
-    theta = np.linalg.norm(r)
-
-    if theta < 1e-12:
-        return v.copy()
-
-    axis = r / theta
-    xyz = v[:3]
-
-    rotated = (
-        xyz * np.cos(theta)
-        + np.cross(axis, xyz) * np.sin(theta)
-        + axis * np.dot(axis, xyz) * (1 - np.cos(theta))
-    )
-
-    if len(v) == 4:
-        return np.append(rotated, v[3])
-    elif len(v) == 3:
-        return rotated
-    else:
-        raise ValueError("v skal have 3 eller 4 komponenter")
-
+BOX_CIRKEL_RADIUS = 0.25
 
 arlo.start_camera()
 
@@ -53,6 +26,7 @@ ids, rvecs, tvecs = arlo.picDetectMarkersPose()
 # +Y : Down
 # +Z : Front
 
-print([CAMERA_TO_ROBOT @ np.array([x,y,z,1]) for r,(x,y,z) in zip(rvecs,tvecs)])
-# print([CAMERA_TO_ROBOT @ (rotate(r, BOX_SIZE*np.array([x,y,z,0])/(2*np.linalg.norm([x,y,z,0]))) + np.array([x,y,z,1])) for r,(x,y,z) in zip(rvecs,tvecs)])
+print(zip(ids, [CAMERA_TO_ROBOT @ np.array([x,y,z,1]) for id,(x,y,z) in tvecs], (BOX_CIRKEL_RADIUS for _ in ids)))
+
+
 
