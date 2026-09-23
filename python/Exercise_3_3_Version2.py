@@ -29,7 +29,7 @@ def build_landmark_map(ids, tvecs):
     for marker_id, tvec in zip(ids.flatten(), tvecs): #Hvert markerid og koordinater på markers i billedet
         Xc, Yc, Zc = tvec.reshape(3)
         if np.all(np.isfinite([Xc, Yc, Zc])) and Zc > 0: #Vi tjekker at alle koordinater er tal og at markeren er foran kameraet
-            landmarks.append((int(marker_id), (float(Xc), float(Zc))))  #Vi gemmer id og x,z koordinater i listen. 
+            landmarks.append((int(marker_id), (float(Xc), (float(Yc)), float(Zc))))  #Vi gemmer id og x,z koordinater i listen. 
             
     return landmarks
 
@@ -59,9 +59,9 @@ def main():
                 )
 
             landmarks = build_landmark_map(ids, tvecs)
-            print("\nKoordinater i meter fra kameraet: Xc mod højre, Zc fremad")
-            for marker_id, (Xc, Zc) in landmarks:
-                print(f"ID {marker_id}: Xc = {Xc:.3f} m, Zc = {Zc:.3f} m")
+            print("\nKoordinater i meter fra kameraet: Xc mod højre, Yc opad, Zc fremad")
+            for marker_id, (Xc, Yc, Zc) in landmarks:
+                print(f"ID {marker_id}: Xc = {Xc:.3f} m, Yc = {Yc:.3f} m, Zc = {Zc:.3f} m")
             if not landmarks:
                 print("Ingen markører med gyldig position fundet i billedet.")
 
