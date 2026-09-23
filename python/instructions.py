@@ -10,7 +10,8 @@ from robot import arlo
 
 # left, forward, deg 360, 8 sec, 51
 # left, backward, deg 360, 8 sec, 51
-# right, forward, deg 360, 8 sec, 
+# right, forward, deg 360, 8 sec, 57
+# right, backward, deg 360, 8 sec, 57
 
 while True:
     usr = input("speed = ")
