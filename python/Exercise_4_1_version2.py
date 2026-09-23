@@ -57,7 +57,7 @@ ids, rvecs, tvecs = arlo.picDetectMarkersPose()
 
 for r,(x,y,z) in zip(rvecs,tvecs):
     marker_side_center= np.array([x,y,z])
-    side_to_center_of_box = np.array([0,0,BOX_SIZE/2])
+    side_to_center_of_box = np.array([0,0,-BOX_SIZE/2])
     
     side_camera_coords =rotate(r,side_to_center_of_box)
     box_center_camera = marker_side_center + side_camera_coords
