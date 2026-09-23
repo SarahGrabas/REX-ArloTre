@@ -5,8 +5,4 @@
 import Exercise_1 as E1
 from robot import arlo
 
-while input("\nDo action? [y/n] ").lower() == "y":
-
-    E1.square(arlo, turn_left=True, angle=float(input("angle=")))
-
-    E1.continuous(arlo, n=int(input("n=")), swap=bool(int(input("swap="))), sleeps=(float(input("l=")),float(input("r="))))
+arlo._calibrate_speed(1, 1, 3, 360, 8)
