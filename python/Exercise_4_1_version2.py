@@ -66,6 +66,10 @@ for r,(x,y,z) in zip(rvecs,tvecs):
     robot_coords=CAMERA_TO_ROBOT @ np.append(box_center_camera,1)
     print(robot_coords)
     
+    print("Marker:", marker_side_center)
+    print("Offset:", side_camera_coords)
+    print("Box center camera:", box_center_camera)
+    print("Box center robot:", robot_coords)
 
 #print([CAMERA_TO_ROBOT @ (rotate(r, BOX_SIZE*np.array([x,y,z,0])/(2*np.linalg.norm([x,y,z,0]))) + np.array([x,y,z,1])) for r,(x,y,z) in zip(rvecs,tvecs)])
 
