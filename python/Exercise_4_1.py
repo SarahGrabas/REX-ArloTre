@@ -26,7 +26,13 @@ ids, rvecs, tvecs = arlo.picDetectMarkersPose()
 # +Y : Down
 # +Z : Front
 
-print([i for i in zip(ids, [CAMERA_TO_ROBOT @ np.array([x,y,z,1]) for (x,y,z) in tvecs], (BOX_CIRKEL_RADIUS for _ in ids))])
+map_array = [(
+    1,
+    CAMERA_TO_ROBOT @ np.array([x,y,z,1]),
+    BOX_CIRKEL_RADIUS) 
+    for id,(x,y,z) in zip(ids,tvecs)]
 
-
+# Note:
+# ids, rvecs, tvecs
+# [[1]] [[[ 3.06523904 -0.05187814  0.12851865]]] [[[-0.08507675  0.04995853  1.02999685]]] 
 
