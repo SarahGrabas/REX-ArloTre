@@ -3,7 +3,7 @@ import numpy as np
 
 ROBOT_TO_CAMERA = np.array([
     [1, 0, 0, 0],
-    [0, 0, -1, 0*0.225],
+    [0, 0, -1, 0.225],
     [0, 1, 0, 0.208],
     [0, 0, 0, 1]
 ])
@@ -53,5 +53,6 @@ ids, rvecs, tvecs = arlo.picDetectMarkersPose()
 # +Y : Down
 # +Z : Front
 
-print([CAMERA_TO_ROBOT @ (rotate(r, np.array([0,0,BOX_SIZE/2,0])) + np.array([x,y,z,1])) for r,(x,y,z) in zip(rvecs,tvecs)])
+print([CAMERA_TO_ROBOT @ np.array([x,y,z,1]) for r,(x,y,z) in zip(rvecs,tvecs)])
+# print([CAMERA_TO_ROBOT @ (rotate(r, np.array([0,0,BOX_SIZE/2,0])) + np.array([x,y,z,1])) for r,(x,y,z) in zip(rvecs,tvecs)])
 
