@@ -185,8 +185,8 @@ Enter adjustment action [?/-/0/+/<Enter>]:
 
     def _calibrate_speed(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, _sleep:float, _range=(40,83,127), wait=0.5):
         
-        if (2 * 9.8/(3*360) * degrees) < _sleep:
-            raise Warning("_speed is likely to high to be satisfied by even the lowest speed.")
+        # if (2 * 9.8/(3*360) * degrees) < _sleep:
+        #     raise Warning("_sleep is likely to high to be satisfied by even the lowest speed.")
 
         lower, middle, upper = _range
                 
