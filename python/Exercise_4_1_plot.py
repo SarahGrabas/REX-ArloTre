@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import json
-import robot
+#import robot
 
-arlo_radius =  robot.ARLO_RADIUS
+arlo_radius =  0.225 #robot.ARLO_RADIUS
 
 #Hent info fra json
 with open('/Users/sarahgrabas/Desktop/REX/REX-ArloTre/python/coordinates.json') as file:
@@ -47,4 +47,8 @@ def draw_landmarks(ax, landmarks_list, arlo_radius):
     ax.legend()
     ax.autoscale()
 
+
+fig, ax =plt.subplots()
+draw_landmarks(ax, landmarks_list, arlo_radius)
+plt.show()
 
