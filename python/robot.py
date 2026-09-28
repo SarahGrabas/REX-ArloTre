@@ -196,7 +196,12 @@ class Robot(object):
             CAMERA_MATRIX, #camera calibration parametre
             DISTORTION_MATRIX
         )
-        return ids[0], tvecs[0], rvecs[0], [self._face_normal(rvec) for rvec in rvecs[0]]
+        # fixing weird default shapes
+        ids = ids.flatten()
+        rvecs = rvecs.reshape(-1, 3)
+        tvecs = tvecs.reshape(-1, 3)
+
+        return ids, tvecs, rvecs, [self._face_normal(rvec) for rvec in rvecs]
 
 
 
