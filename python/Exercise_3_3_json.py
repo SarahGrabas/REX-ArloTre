@@ -1,9 +1,8 @@
-import cv2
-import cv2.aruco as aruco
+import cv2 # type: ignore
+import cv2.aruco as aruco # type: ignore
 import numpy as np
-import picamera2
+import picamera2 # type: ignore
 import json
-
 from time import sleep
 
 

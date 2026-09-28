@@ -1,5 +1,4 @@
-from robot import Robot
-from time import sleep
+from robot import Robot, sleep
 
 ### Part 1 ###
 

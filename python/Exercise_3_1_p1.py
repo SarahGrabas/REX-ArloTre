@@ -1,4 +1,4 @@
-from picamera2 import Picamera2
+from picamera2 import Picamera2 # type: ignore
 import time
 
 picam2 = Picamera2()

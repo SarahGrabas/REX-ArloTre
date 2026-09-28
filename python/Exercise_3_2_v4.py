@@ -1,10 +1,9 @@
-import cv2
-import cv2.aruco as aruco
+import cv2 # type: ignore
+import cv2.aruco as aruco # type: ignore
 import numpy as np
-import picamera2
+import picamera2 # type: ignore
 import Exercise_1 as E1
-from robot import arlo
-from time import sleep
+from robot import arlo, sleep
 
 #camera setup
 cam = picamera2.Picamera2() #open camera

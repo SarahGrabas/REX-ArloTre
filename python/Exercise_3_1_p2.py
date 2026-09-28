@@ -1,7 +1,7 @@
-import cv2
+import cv2 # type: ignore
 import numpy as np
 import time
-from picamera2 import Picamera2
+from picamera2 import Picamera2 # type: ignore
 
 # Camera
 picam2 = Picamera2()

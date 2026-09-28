@@ -172,8 +172,16 @@ class Robot(object):
         Returns (ids, rvecs, tvecs)"""
         return self.cam.capture_array("main") #the capture array function captures next image from the stream
     
+    @staticmethod
+    def _face_normal(rvec):
+        R, _ = cv2.Rodrigues(np.asarray(rvec, dtype=float))
+        return R[:, 2]
+
     def picDetectMarkersPose(self):
-        """Takes picture, detects markers in image and estimates poses for detected markers."""
+        """
+        Takes picture, detects markers in image and estimates poses for detected markers. \\
+        Returns: ```(list[ids], list[tvecs], list[rvecs], list[corners], list[face_norms])```
+        """
         dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 
         frame = self.take_picture()  #hent frame fra PiCamera2, dette er array med shape: (height, width,rbg)
