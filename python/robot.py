@@ -174,13 +174,14 @@ class Robot(object):
     
     @staticmethod
     def _face_normal(rvec):
+        """Given an rotation vector, returns the unit length normal vector for the marker face."""
         R, _ = cv2.Rodrigues(np.asarray(rvec, dtype=float))
         return R[:, 2]
 
     def picDetectMarkersPose(self):
         """
         Takes picture, detects markers in image and estimates poses for detected markers. \\
-        Returns: ```(list[ids], list[tvecs], list[rvecs], list[corners], list[face_norms])```
+        Returns: ```(list[ids], list[tvecs], list[rvecs], list[face_norms])```
         """
         dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 
@@ -195,7 +196,7 @@ class Robot(object):
             CAMERA_MATRIX, #camera calibration parametre
             DISTORTION_MATRIX
         )
-        return ids[0], rvecs[0], tvecs[0]
+        return ids[0], tvecs[0], rvecs[0], [self._face_normal(rvec) for rvec in rvecs[0]]
 
 
 
