@@ -1,5 +1,19 @@
-from robot import arlo
+from robot import arlo, cv2
 import numpy as np
+from math import sqrt
+import json
+
+# ---------------------------------------------------------------------------
+# Robot coords
+# +X : Right
+# +Y : Front
+# +Z : Up 
+
+# Camera coords
+# +X : Right
+# +Y : Down
+# +Z : Front
+# ---------------------------------------------------------------------------
 
 ROBOT_TO_CAMERA = np.array([
     [1, 0, 0, 0],
@@ -10,34 +24,53 @@ ROBOT_TO_CAMERA = np.array([
 
 CAMERA_TO_ROBOT = np.linalg.inv(ROBOT_TO_CAMERA)
 
-BOX_CIRKEL_RADIUS = 0.25
+MAX_BOX_SIZES = {
+    1  : 0.28,
+    2  : 0.275,
+    3  : 0.28,
+    4  : 0.285,
+    5  : 0.275,
+    6  : 0.31,
+    7  : 0.37,
+    8  : 0.245,
+    9  : 0.245,
+    10 : 0.275,
+    11 : 0.305,
+}
 
 arlo.start_camera()
 
-ids, rvecs, tvecs = arlo.picDetectMarkersPose()
+ids, tvecs, rvecs, normals = arlo.picDetectMarkersPose()
 
-# Robot coords
-# +X : Right
-# +Y : Front
-# +Z : Up 
+max_box_size = max(MAX_BOX_SIZES.values())
 
-# Camera coords
-# +X : Right
-# +Y : Down
-# +Z : Front
+# Box centers in camera coordinates
+centers = [
+    tvec - normal * MAX_BOX_SIZES.get(int(id), max_box_size)
+    for id, tvec, normal in zip(ids, tvecs, normals)
+]
 
-map_array = [(
-    1,
-    CAMERA_TO_ROBOT @ np.array([x,y,z,1]),
-    BOX_CIRKEL_RADIUS) 
-    for id,(x,y,z) in zip(ids,tvecs)]
+# Box centers in robot coordinates
+centers = [
+    (CAMERA_TO_ROBOT @ np.append(center, 1))[:3]
+    for center in centers
+]
 
-print(rvecs, tvecs)
+radiuses = [
+    sqrt(2 * MAX_BOX_SIZES.get(int(id), max_box_size) ** 2) / 2
+    for id in ids
+]
 
-# Note:
-# rvecs, tvecs
-# [[ 3.11429633 -0.0338186   0.01586285]] [[0.01003483 0.04807003 0.37233776]]   ; boksen er lige frem, ikke roteret
-# [[-0.01582608 -3.13767396  0.13222295]] [[-0.00227703  0.05177388  0.52987108]]   ; boksen er lige frem, på hovedet, ikke roteret
-# [[ 2.93820187 -0.02655488 -1.08660292]] [[-0.08554608  0.05370342  0.50980161]]   ; boksen er lige frem, roteret 45 grader (2 sider synlige)
-# [[ 2.1736008  -2.21441669  0.08033051]] [[0.00755181 0.095368   0.47405852]]   ; boksen er lige frem, væltet 90 grader
+
+coordinates_json = [
+    {
+        "id": int(id),
+        "center": [float(i) for i in center],
+        "radius": float(radius),
+    }
+    for id, center, radius in zip(ids, centers, radiuses)
+]
+
+with open("coordinates.json", "w") as f:
+    json.dump(coordinates_json, f, indent=4)
 
