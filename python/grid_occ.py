@@ -32,7 +32,7 @@ class GridOccupancyMap(object):
         
         return self.grid[indices[0], indices[1]] 
 
-    def populate(self, landmarks_list=rrt.landmarks_list, robot_radius=0.225):
+    def populate(self, landmarks_list, robot_radius):
         """
         generate a grid map with landmarks as obstacles
         """
@@ -44,7 +44,7 @@ class GridOccupancyMap(object):
         
                 for id, centrum, radius in landmarks_list:
                     X, Y,_ =centrum
-                    center=np.array(X,Y)
+                    center=np.array([X,Y])
                     effective_radius = radius + robot_radius #Den afstand vi beregner for ikke at køre ind i noget
                     
                     if np.linalg.norm(centroid - center) <= effective_radius:

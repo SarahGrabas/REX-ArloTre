@@ -185,16 +185,15 @@ class RRT:
 
 
 import grid_occ, robot_models
-import Exercise_4_1_plot as plot_landmarks
+import Exercise_4_1_plot as ex4_1
 import json
 #import robot
 
 arlo_radius = 0.225 #robot.ARLO_RADIUS
 
 #Hent info fra json
-with open('/Users/sarahgrabas/Desktop/REX/REX-ArloTre/python/coordinates.json') as file:
+with open('./python/coordinates.json') as file:
     data = json.load(file)
-    print("Type:", type(data))
     landmarks=data
     landmarks_list=[]
     for landmark in landmarks:
@@ -206,59 +205,42 @@ with open('/Users/sarahgrabas/Desktop/REX/REX-ArloTre/python/coordinates.json') 
 
 
 def main():
-
+    goal=[0, 0.2]
     path_res = 0.05
     map = grid_occ.GridOccupancyMap(low=(-1, 0), high=(1, 2), res=path_res)
-    map.populate()
+    map.populate(landmarks_list,
+    robot_radius=arlo_radius) #generer vores landmarks som obstacles
+    print()
 
     robot = robot_models.PointMassModel(ctrl_range=[-path_res, path_res])   #
 
     rrt = RRT(
         start=[0, 0],
-        goal=[0, 1.9],
+        goal=goal,
         robot_model=robot,
         map=map,
         expand_dis=0.2,
         path_resolution=path_res,
         )
     
-    show_animation = True
-    metadata = dict(title="RRT Test")
-    #writer = FFMpegWriter(fps=15, metadata=metadata)
+    show_animation = False
     writer = None
-    fig = plt.figure()
-    if writer is not None:
-        with writer.saving(fig, "rrt_test.mp4", 100):
-            path = rrt.planning(animation=show_animation, writer=writer)
-
-            if path is None:
-                print("Cannot find path")
-            else:
-                print("found path!!")
-
-                # Draw final path
-                if show_animation:
-                    rrt.draw_graph()
-                    plt.plot([x for (x, y) in path], [y for (x, y) in path], '-r')
-                    plt.grid(True)
-                    plt.pause(0.01)  # Need for Mac
-                    plt.show()
-                    writer.grab_frame()
-    else:
-        #do not save videos
-        path = rrt.planning(animation=show_animation, writer=writer)
-
-        if path is None:
+    
+    path = rrt.planning(animation=show_animation, writer=writer)
+    
+    if path is None:
             print("Cannot find path")
-        else:
-            print("found path!!")
-            # Draw final path
-            if show_animation:
-                rrt.draw_graph()
-                plt.plot([x for (x, y) in path], [y for (x, y) in path], '-r')
-                plt.grid(True)
-                plt.pause(0.01)  # Need for Mac
-                plt.show()
+    else:
+        print("found path!!")
+        fig, ax =plt.subplots()
+        ex4_1.draw_landmarks(ax, landmarks_list, arlo_radius)
+        ax.plot([x for (x, y) in path], [y for (x, y) in path], '-r')
+        plt.grid(True)
+        plt.pause(0.01)
+        ax.scatter(goal[0],goal[1], color='green')
+    
+        plt.show()
+
 
 
 if __name__ == '__main__':
