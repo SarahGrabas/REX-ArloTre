@@ -205,9 +205,9 @@ with open('./python/coordinates.json') as file:
 
 
 def main():
-    goal=[0, 0.2]
+    goal=[0, 5]
     path_res = 0.05
-    map = grid_occ.GridOccupancyMap(low=(-1, 0), high=(1, 2), res=path_res)
+    map = grid_occ.GridOccupancyMap(low=(-3, 0), high=(1, 5.5), res=path_res)
     map.populate(landmarks_list,
     robot_radius=arlo_radius) #generer vores landmarks som obstacles
     print()
@@ -237,6 +237,8 @@ def main():
         ax.plot([x for (x, y) in path], [y for (x, y) in path], '-r')
         plt.grid(True)
         plt.pause(0.01)
+        #ax.set_xlim(-10,10)
+        #ax.set_ylim(-10,10)
         ax.scatter(goal[0],goal[1], color='green')
     
         plt.show()
