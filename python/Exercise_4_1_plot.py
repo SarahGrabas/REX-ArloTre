@@ -29,6 +29,12 @@ for marker_id, centrum, radius_box in landmarks_list:
     circle_box = plt.Circle((X, Y), radius_box, edgecolor='red', facecolor='lightblue', linewidth=1, fill=True)
     ax.add_patch(circle_box)
     ax.scatter(X,Y, color="red")
+    ax.annotate(
+    f"ID: {marker_id}",
+    xy=(X, Y),
+    xytext=(5, 5),
+    textcoords="offset points"
+    )
     
 circle_robot= plt.Circle((0, 0), arlo_radius, linewidth=2, edgecolor='black', facecolor='grey', fill=True)
 ax.add_patch(circle_robot)
