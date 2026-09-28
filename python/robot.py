@@ -6,21 +6,28 @@ from math import gcd
 import cv2 # type: ignore
 import picamera2 # type: ignore
 import numpy as np
+from math import pi as PI
 
 
 ### CONSTANTS
+WHEEL_2_WHEEL_DIST = 0.381 # center of wheel to center of wheel, not edge to edge
+
 FOCAL_LENGTH = 1288.9 # Camera focal length from Exercise 3.1
+
 CX, CY = 1640/2, 1232/2 # Camera center in pixels
+
 CAMERA_MATRIX = np.array([
     [FOCAL_LENGTH, 0, CX], 
     [0, FOCAL_LENGTH, CY], 
     [0, 0, 1]
 ], dtype=np.float32) # 3x3 matrix 
+
 DISTORTION_MATRIX = np.zeros((5, 1), dtype=np.float32) # Zero vector ; assumes no camera (lens) distortion
 
-MARKER_SIZE = 0.146 # markørstørrelse i meter på landmarkbox
+MARKER_SIZE = 0.15 # markørstørrelse i meter på landmarkbox
 
 ARLO_RADIUS = 0.225 # in meters
+
 
 
 class Robot(object):
@@ -152,6 +159,56 @@ class Robot(object):
         cmd='c\n'
         return self.send_command(cmd)
     
+
+
+    ### MOVEMENT 
+
+    # measurements where not inplace rotation
+    # left, forward, deg 360, 8 sec, 51
+    # left, backward, deg 360, 8 sec, 51
+    # right, forward, deg 360, 8 sec, 57
+    # right, backward, deg 360, 8 sec, 53
+
+    def go_diff_calibrated(self, dirLeft:int, dirRight:int):
+        """
+        Like ``Robot.go_diff`` but calibrated for speeds in the range [50;60].\\
+        ``dirLeft`` and ``dirRight`` can be ``[-1,0,1]``, where:
+        - ``-1`` is backwards
+        - ``0`` is still/none
+        - ``1`` is forward.
+        """
+        assert dirLeft in (-1,0,1), f"Error: Expected dirLeft to be either -1,0 or 1, but recieved {dirLeft}"
+        assert dirRight in (-1,0,1), f"Error: Expected dirRight to be either -1,0 or 1, but recieved {dirRight}"
+        
+        speedLeft = (0, 51, 51)[dirLeft]
+        speedRight = (0, 57, 53)[dirRight]
+
+        self.go_diff(speedLeft, speedRight, 1 if dirLeft==1 else -1, 1 if dirRight==1 else -1)
+
+    def drive(self, meters:float, forward=True, stop_when_done=True):
+        """
+        Drives straight forward or backward at ~0.3 meters/second.
+        """
+        meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8
+        self.go_diff_calibrated(2 * forward - 1, 2 * forward - 1)
+        sleep(meters / meters_pr_sec)
+        if stop_when_done: arlo.stop()
+
+    def rotate(self, degrees:float, stop_when_done=True):
+        """
+        Rotates ``degrees`` inplace, at 90°/second, and stops.\\
+        Negative rotation is right, positive rotation is left.
+        """
+        degrees_pr_second = 360 / 4 # 4 instead of 8 is intentional
+        if degrees < 0:
+            self.go_diff_calibrated(1, -1)
+        elif degrees > 0:
+            self.go_diff_calibrated(-1, 1)
+        else:
+            return
+        sleep(degrees / degrees_pr_second)
+        if stop_when_done: arlo.stop()
+            
 
 
     ### CAMERA
@@ -304,21 +361,16 @@ Enter adjustment action [?/-/0/+/<Enter>]:
                 sleep(_sleep)
                 arlo.stop()
 
-    def calibration_suit(self, degrees=(2*360, 360, 180, 90, 45), speeds=(40, 50, 61, 83, 127), sleeps=(0.5, 1, 2, 4, 8), n=1, wait=0.5):
-        {
-            'left': {
-                'forward': [],
-                'bacward': [],
-            },
-            'right': {
-                'forward': [],
-                'bacward': [],
-            },
-        }
+    # # actual calibration used
+    # while True:
+    #     usr = input("speed = ")
+    #     for _ in range(3):
+    #         sleep(0.5)
+    #         arlo.go_diff(int(usr), 0, 0, 0)
+    #         sleep(8)
+    #         arlo.stop()
 
-        for left in (True, False):
-            for forward in (True, False):
-                pass
+
 
     ### OBSOLETE STUFF
         
