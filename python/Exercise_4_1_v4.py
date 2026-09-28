@@ -53,9 +53,9 @@ radiuses = [sqrt(2 * MAX_BOX_SIZES.get(id, max(MAX_BOX_SIZES.values())) ** 2) / 
 
 coordinates_json = [
     {
-        "id":id,
-        "center":list(center),
-        "radius":radius,
+        "id": int(id),
+        "center": [float(i) for i in center],
+        "radius": float(radius),
     }
     for id, center, radius in zip(ids, centers, radiuses)
 ]
