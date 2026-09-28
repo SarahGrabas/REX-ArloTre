@@ -185,6 +185,25 @@ class RRT:
 
 
 import grid_occ, robot_models
+import Exercise_4_1_plot as plot_landmarks
+import json
+#import robot
+
+arlo_radius = 0.225 #robot.ARLO_RADIUS
+
+#Hent info fra json
+with open('/Users/sarahgrabas/Desktop/REX/REX-ArloTre/python/coordinates.json') as file:
+    data = json.load(file)
+    print("Type:", type(data))
+    landmarks=data
+    landmarks_list=[]
+    for landmark in landmarks:
+        id=landmark["id"]
+        center=landmark["center"]
+        radius=landmark["radius"]
+        landmarks_list.append((id,center,radius))
+    print(landmarks_list)
+
 
 def main():
 
@@ -244,3 +263,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
