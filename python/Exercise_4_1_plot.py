@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import json
-#import robot
+import robot
 
-arlo_radius =  0.225 #robot.ARLO_RADIUS
+arlo_radius =  robot.ARLO_RADIUS
 
 with open('/Users/sarahgrabas/Desktop/REX/REX-ArloTre/python/coordinates.json') as file:
     data = json.load(file)
