@@ -6,7 +6,7 @@ import json
 arlo_radius =  0.225 #robot.ARLO_RADIUS
 
 #Hent info fra json
-with open('/Users/sarahgrabas/Desktop/REX/REX-ArloTre/python/coordinates.json') as file:
+with open('./python/coordinates.json') as file:
     data = json.load(file)
     print("Type:", type(data))
     landmarks=data

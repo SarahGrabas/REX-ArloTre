@@ -43,7 +43,8 @@ class GridOccupancyMap(object):
     
         
                 for id, centrum, radius in landmarks_list:
-                    center =np.array(centrum)
+                    X, Y,_ =centrum
+                    center=np.array(X,Y)
                     effective_radius = radius + robot_radius #Den afstand vi beregner for ikke at køre ind i noget
                     
                     if np.linalg.norm(centroid - center) <= effective_radius:
