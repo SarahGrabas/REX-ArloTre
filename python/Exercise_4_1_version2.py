@@ -42,6 +42,13 @@ def rotate(r, v):
 arlo.start_camera()
 
 ids, rvecs, tvecs = arlo.picDetectMarkersPose()
+# tvec[cm relative to the camera center, 
+#     something,
+#     distance to the target]
+# rvec[x Vektorens længde (Euklidisk norm) radianer,
+#     y Vektorens længde (Euklidisk norm) radianer,
+#     Enhedsvektoren, der angiver aksen i 3D-rummet, der roteres om,
+#     
 
 # Robot coords
 # +X : Right
