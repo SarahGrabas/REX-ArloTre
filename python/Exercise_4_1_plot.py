@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import json
+#import robot
+
+arlo_radius =  0.225 #robot.ARLO_RADIUS
 
 with open('/Users/sarahgrabas/Desktop/REX/REX-ArloTre/python/coordinates.json') as file:
     data = json.load(file)
@@ -14,31 +17,30 @@ with open('/Users/sarahgrabas/Desktop/REX/REX-ArloTre/python/coordinates.json') 
         landmarks_list.append((id,center,radius))
     print(landmarks_list)
     
-       
-for marker_id, centrum, radius in landmarks_list:
-    print(f"Afstand til markør ID {marker_id}: {np.linalg.norm(tuple(centrum))+ radius:.3f} m")
-
 fig, ax = plt.subplots()
-
-ax.scatter(0, 0, color="black", label="Kamera")
-
-for marker_id, centrum, radius in landmarks_list:
+       
+for marker_id, centrum, radius_box in landmarks_list:
     X=centrum[0]
     Y=centrum[1]
-    ax.scatter(X, Y, color="tab:blue")
-    ax.annotate(
-        f"ID {marker_id}",
-        (X, Y),
-        xytext=(5, 5),
-        textcoords="offset points",
-    )
-    circle = plt.Circle((X, Y), radius, fill=False)
-    ax.add_patch(circle)
+    
+    distance=np.linalg.norm(tuple(centrum))- radius_box-arlo_radius
+    print(f"Afstand til markør ID {marker_id}: {distance:.3f} m")
+    
+    circle_box = plt.Circle((X, Y), radius_box, edgecolor='red', facecolor='lightblue', linewidth=1, fill=True)
+    ax.add_patch(circle_box)
+    ax.scatter(X,Y, color="red")
+    
+circle_robot= plt.Circle((0, 0), arlo_radius, linewidth=2, edgecolor='black', facecolor='grey', fill=True)
+ax.add_patch(circle_robot)
+ax.scatter(0, 0, color="black", label="Robot") #Robot i origi
+    
+    
 
 ax.set_xlabel("X")
 ax.set_ylabel("Y (forward)")
 ax.set_title("Markørernes positioner set ovenfra med robot i origo")
 ax.set_aspect("equal", adjustable="box")
+ax.autoscale()
 #ax.margins(0.2)
 ax.grid(True)
 ax.legend()
