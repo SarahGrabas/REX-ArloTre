@@ -43,12 +43,12 @@ arlo.start_camera()
 ids, tvecs, rvecs, normals = arlo.picDetectMarkersPose()
 
 # centers in camera coords
-centers = [tvec - normal * MAX_BOX_SIZES.get(id, max(iter(MAX_BOX_SIZES.values()))) for id, tvec, normal in zip(id, tvecs, normals)]
+centers = [tvec - normal * MAX_BOX_SIZES.get(id, max(MAX_BOX_SIZES.values())) for id, tvec, normal in zip(ids, tvecs, normals)]
 # centers in robot coords
 centers = [CAMERA_TO_ROBOT @ np.array([x,y,z,1]) for x,y,z in tvecs]
 
 # assumes box is perfectly square
-radiuses = [sqrt(2 * MAX_BOX_SIZES.get(id, max(iter(MAX_BOX_SIZES.values()))) ** 2) / 2 for id in ids]
+radiuses = [sqrt(2 * MAX_BOX_SIZES.get(id, max(MAX_BOX_SIZES.values())) ** 2) / 2 for id in ids]
 
 
 coordinates_json = [
