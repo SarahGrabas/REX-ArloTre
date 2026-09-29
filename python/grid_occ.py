@@ -52,16 +52,16 @@ class GridOccupancyMap(object):
                         break
 
     
-    def draw_map(self):
-        #note the x-y axes difference between imshow and plot
-        plt.imshow(self.grid.T, cmap="Greys", origin='lower', vmin=0, vmax=1, extent=self.extent, interpolation='none')
+    # def draw_map(self):
+    #     #note the x-y axes difference between imshow and plot
+    #     plt.imshow(self.grid.T, cmap="Greys", origin='lower', vmin=0, vmax=1, extent=self.extent, interpolation='none')
 
-if __name__ == '__main__':
-    map = GridOccupancyMap()
-    map.populate()
+# if __name__ == '__main__':
+#     map = GridOccupancyMap()
+#     map.populate()
 
-    plt.clf()
-    map.draw_map()
-    plt.show()
+#     plt.clf()
+#     map.draw_map()
+#     plt.show()
 
         

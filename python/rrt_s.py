@@ -184,7 +184,7 @@ class RRT:
         return True
 
 
-import grid_occ, robot_models
+import grid_occ_s, robot_models
 import Exercise_4_1_plot as ex4_1
 import json
 #import robot
@@ -206,13 +206,12 @@ with open('./python/coordinates.json') as file:
 
 def main():
     goal=[0, 5]
-    path_res = 0.05
-    map = grid_occ.GridOccupancyMap(low=(-3, 0), high=(1, 5.5), res=path_res)
-    map.populate(landmarks_list,
-    robot_radius=arlo_radius) #generer vores landmarks som obstacles
+    grid_cell_size= 0.1
+    map = grid_occ_s.Grid(x_min=1,x_max=5,y_min=0, y_max=7, grid_cell_size=grid_cell_size)
+    map.obstacles(landmarks_list, robot_radius=arlo_radius) #generer vores landmarks som obstacles
     print()
 
-    robot = robot_models.PointMassModel(ctrl_range=[-path_res, path_res])   #
+    robot = robot_models.PointMassModel(ctrl_range=[-grid_cell_size, grid_cell_size])   #
 
     rrt = RRT(
         start=[0, 0],
@@ -220,7 +219,7 @@ def main():
         robot_model=robot,
         map=map,
         expand_dis=0.2,
-        path_resolution=path_res,
+        path_resolution=grid_cell_size,
         )
     
     show_animation = False
