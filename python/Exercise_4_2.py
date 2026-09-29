@@ -57,11 +57,11 @@ with open('./python/coordinates.json') as file:
 def main():
     
     START_POINT=[0, 0]
-    GOAL=[0,6]
+    GOAL=[0,5]
     GRID_CELL_SIZE= 0.1
-    X_MIN=-1
+    X_MIN=-2
     X_MAX=10
-    Y_MIN=0
+    Y_MIN=-2
     Y_MAX=10
     
     

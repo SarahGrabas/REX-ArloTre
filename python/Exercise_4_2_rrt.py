@@ -18,17 +18,18 @@ class Node:
             
                         
 class RRT:
-    
+    """Jo højere max_iter vi har, jo lavere moving distance limit, kan vi have hvor den stadig finder path.
+    Dette gør måske path mere præcis??"""
     
     def __init__(self,
                  start, #start coords
                  goal,  #goal coords
                  robot_model, 
                  map,
-                 moving_dist_limit=1, #Hvad vi max bevæger os ved ny node
+                 moving_dist_limit=0.2, #Hvad vi max bevæger os ved ny node
                  grid_cell_size=0.05,
                  goal_sample_rate=5,    #Procentdel på hvor tit en random node skal være goal node
-                 max_iter=500,          #Max forsøg på at finde path
+                 max_iter=1000,          #Max forsøg på at finde path
                  ):
 
         self.start = Node(start) #create start node
@@ -48,7 +49,7 @@ class RRT:
     
     def path_planning(self):
 
-        self.node_list = [self.start]
+        self.node_list = [self.start] #til start har vi kun startnode
 
         for i in range(self.max_iter):
             print(f"iteration{i}")
@@ -61,7 +62,7 @@ class RRT:
             if self.check_collision(nearest_node,new_node):
                 self.node_list.append(new_node)
 
-            #Denne blok kode tager vi fra dem
+            #Denne blok kode har vi taget vi fra dem
             #try to steer towards the goal if we are already close enough
             if self.node_list[-1].eucl_dist(self.end) <= self.moving_dist_limit:
                 final_node = self.steering(self.node_list[-1], self.end,
@@ -128,6 +129,9 @@ class RRT:
         
 #tjekker om der er obstacles på vejen fra old_node til new_node
     def check_collision(self, old_node, new_node): 
+        """Funktion til at checke collision.
+        Vi opretter punkter i hvert gridcell på distance mellem to noder.
+        Vi tjekker obstacles på hvert af disse punkter"""
         print("collision")
         x1, y1=old_node.position
         x2, y2=new_node.position
