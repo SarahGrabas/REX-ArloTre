@@ -162,6 +162,8 @@ class RRT:
             path.append(node.position)
             node = node.parent
         path.append(node.position)
+        
+        path.reverse()
 
         return path
     

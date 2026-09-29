@@ -80,7 +80,9 @@ def main():
             print("Cannot find path")
     else:
         print("found path!!")
+        print(path)
         simpler_path=rrt.simpler_path(path)
+        print(simpler_path)
         execute_path=robot_path(robot,simpler_path)
         
         
