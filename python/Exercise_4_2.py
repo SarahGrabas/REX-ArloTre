@@ -72,10 +72,10 @@ def main():
     robot = grid_rm.PointMassModel(ctrl_range=[-GRID_CELL_SIZE, GRID_CELL_SIZE])   #
 
     rrt = rrt_class.RRT(start=START_POINT
-              ,goal=GOAL,
-        robot_model=robot,
-        map=map,
-        grid_cell_size=GRID_CELL_SIZE,
+                        ,goal=GOAL,
+                        robot_model=robot,
+                        map=map,
+                        grid_cell_size=GRID_CELL_SIZE,
         )
     
     
