@@ -23,8 +23,7 @@ class RRT:
     
     def __init__(self,
                  start, #start coords
-                 goal,  #goal coords
-                 robot_model, 
+                 goal,  #goal coords 
                  map,
                  moving_dist_limit=0.5, #Hvad vi max bevæger os ved ny node
                  grid_cell_size=0.05,
@@ -34,7 +33,6 @@ class RRT:
 
         self.start = Node(start) #create start node
         self.end = Node(goal) #create goal node
-        self.robot = robot_model
         self.map = map
         
         #self.min_rand = (map.x_limits[0],map.y_limits[0])

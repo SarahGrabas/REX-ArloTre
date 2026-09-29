@@ -23,9 +23,8 @@ def robot_path(arlo,path):
 
         desired_angle = np.degrees(np.arctan2(dy, dx))
         
-       # ex1.rotate_inplace(arlo,degrees=desired_angle)
+        #ex1.rotate_inplace(arlo,degrees=desired_angle)
 
-        # Kør frem
         #ex1.straight_ahead(arlo,meters=distance)
         
         executed_path.append([x2, y2])
@@ -67,20 +66,15 @@ def main():
     
     map = grid_rm.Grid(x_min=X_MIN,x_max=X_MAX,y_min=Y_MIN, y_max=Y_MAX, grid_cell_size=GRID_CELL_SIZE)
     map.obstacles(landmarks_list, robot_radius=arlo_radius) #generer vores landmarks som obstacles
-    print()
+    
+    #from robot import Robot, sleep
 
-    robot = grid_rm.PointMassModel(ctrl_range=[-GRID_CELL_SIZE, GRID_CELL_SIZE])   #
+    robot = grid_rm.PointMassModel(ctrl_range=[-GRID_CELL_SIZE, GRID_CELL_SIZE])  #Robot 
 
-    rrt = rrt_class.RRT(start=START_POINT
-                        ,goal=GOAL,
-                        robot_model=robot,
-                        map=map,
-                        grid_cell_size=GRID_CELL_SIZE,
-        )
+    rrt = rrt_class.RRT(start=START_POINT,goal=GOAL,map=map,grid_cell_size=GRID_CELL_SIZE,)
     
     
     path = rrt.path_planning()
-    
     
     if path is None:
             print("Cannot find path")
@@ -93,15 +87,19 @@ def main():
         fig, ax =plt.subplots()
         ex4_1.draw_landmarks(ax, landmarks_list, arlo_radius)
         
+        pathx = [p[0] for p in path]
+        pathy = [p[1] for p in path]
+
+        ax.plot(pathx,pathy,'-',linewidth=2,label="RRT path")
         
+        print(path)
+        print(execute_path)
         executed_x = [p[0] for p in execute_path]
         executed_y = [p[1] for p in execute_path]
 
         ax.plot(executed_x,executed_y,'-',linewidth=2,label="Robot path")
         plt.grid(True)
         plt.pause(0.01)
-        #ax.set_xlim(-10,10)
-        #ax.set_ylim(-10,10)
         ax.scatter(GOAL[0],GOAL[1], color='green')
     
         plt.show()
