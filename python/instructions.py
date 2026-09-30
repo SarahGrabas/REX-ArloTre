@@ -13,10 +13,15 @@ from robot import arlo
 # right, forward, deg 360, 8 sec, 57
 # right, backward, deg 360, 8 sec, 53
 
-while True:
-    usr = input("speed = ")
-    for _ in range(3):
-        sleep(0.5)
-        arlo.go_diff(int(usr), 0, 0, 0)
-        sleep(8)
-        arlo.stop()
+arlo.go_diff(0, 0, 0, 0)
+sleep(1)
+arlo.drive(1)
+arlo.rotate(360+90)
+
+# while True:
+#     usr = input("speed = ")
+#     for _ in range(3):
+#         sleep(0.5)
+#         arlo.go_diff(int(usr), 0, 0, 0)
+#         sleep(8)
+#         arlo.stop()
