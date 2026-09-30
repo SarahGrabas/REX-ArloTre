@@ -55,9 +55,9 @@ for id, tvec, rvec in zip(ids,tvecs,rvecs):
     R, _ = cv2.Rodrigues(rvec)
     SIDE_TO_CENTER_camera=R @ SIDE_TO_CENTER #Vi roterer til kamera koordinater
     vektor_with_center= np.add(tvec,SIDE_TO_CENTER_camera)
-    center= CAMERA_TO_ROBOT @ np.append(vektor_with_center, 1)[:3]
+    center= CAMERA_TO_ROBOT @ np.append(vektor_with_center, 1)
 
-    centers.append(id,center)
+    centers.append(id,center[:3])
     
 radiuses = [
     sqrt(MAX_BOX_SIZES.get(int(id), max_box_size) ** 2 / 2)
