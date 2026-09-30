@@ -1,7 +1,7 @@
 import Exercise_4_2_rrt as rrt_class   
 import Exercise_4_2_grid_robotmodel as grid_rm
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 import Exercise_1 as ex1
     
