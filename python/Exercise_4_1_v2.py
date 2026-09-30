@@ -57,7 +57,7 @@ for id, tvec, rvec in zip(ids,tvecs,rvecs):
     vektor_with_center= np.add(tvec,SIDE_TO_CENTER_camera)
     center= CAMERA_TO_ROBOT @ np.append(vektor_with_center, 1)
 
-    centers.append(id,center[:3])
+    centers.append(center[:3])
     
 radiuses = [
     sqrt(MAX_BOX_SIZES.get(int(id), max_box_size) ** 2 / 2)
@@ -70,7 +70,7 @@ coordinates_json = [
         "center": [float(i) for _, i in center],
         "radius": float(radius),
     }
-    for id, center, radius in zip(centers,radiuses)
+    for id, center, radius in zip(ids,centers,radiuses)
 ]
 
 with open("coordinates.json", "w") as f:
