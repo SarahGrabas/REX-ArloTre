@@ -206,7 +206,7 @@ class Robot(object):
             self.go_diff_calibrated(-1, 1)
         else:
             return
-        sleep(degrees / degrees_pr_second)
+        sleep(abs(degrees) / degrees_pr_second)
         if stop_when_done: arlo.stop()
             
 
