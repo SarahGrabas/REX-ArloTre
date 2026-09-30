@@ -6,9 +6,9 @@ class Grid:
         self.y_limits = (y_min, y_max)
         self.grid_cell_size = grid_cell_size
         
-        self.number_of_celles= [(x_max-x_min)//grid_cell_size, (y_max-y_min)//grid_cell_size] #Beregner hvor mange celler vi skal have for at ramme m og cellestørrelse
+        self.number_of_celles= [int((x_max-x_min)//grid_cell_size), int((y_max-y_min)//grid_cell_size)] #Beregner hvor mange celler vi skal have for at ramme m og cellestørrelse
         
-        self.grid_matrix = np.zeros((int(self.number_of_celles[0]), int(self.number_of_celles[1]))) #lav matrix der svarer til grid størrelse med korrekt cellestørrlese, men kun med 0.
+        self.grid_matrix = np.zeros((self.number_of_celles[0], self.number_of_celles[1]), dtype=bool) #lav matrix der svarer til grid størrelse med korrekt cellestørrlese, men kun med 0.
         
     
     def obstacles(self, landmarks_list, robot_radius):
