@@ -22,11 +22,11 @@ from robot import arlo
 #         arlo.stop()
 
 arlo.drive(1, stop_when_done=False)
-arlo.rotate(-360, False)
+arlo.rotate(-90, False)
 arlo.drive(1, stop_when_done=False)
-arlo.rotate(-360, False)
+arlo.rotate(-90, False)
 arlo.drive(1, stop_when_done=False)
-arlo.rotate(-360, False)
+arlo.rotate(-90, False)
 arlo.drive(1, stop_when_done=False)
-arlo.rotate(-360)
+arlo.rotate(-90)
 
