@@ -189,7 +189,7 @@ class Robot(object):
         """
         Drives straight forward or backward at ~0.3 meters/second.
         """
-        meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8
+        meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8   * 3/3.26 # last factor is correction
         self.go_diff_calibrated(2 * forward - 1, 2 * forward - 1)
         sleep(meters / meters_pr_sec)
         if stop_when_done: arlo.stop()
