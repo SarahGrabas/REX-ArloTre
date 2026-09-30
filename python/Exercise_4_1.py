@@ -42,6 +42,7 @@ arlo.start_camera()
 
 ids, tvecs, rvecs, normals = arlo.picDetectMarkersPose()
 
+print("         "+[np.linalg.norm(norm) for norm in normals])
 print(tuple(zip(ids, tvecs)))
 
 max_box_size = max(MAX_BOX_SIZES.values())
@@ -59,7 +60,7 @@ centers = [
 ]
 
 radiuses = [
-    sqrt(2 * MAX_BOX_SIZES.get(int(id), max_box_size) ** 2) / 2
+    sqrt(MAX_BOX_SIZES.get(int(id), max_box_size) ** 2 / 2)
     for id in ids
 ]
 
