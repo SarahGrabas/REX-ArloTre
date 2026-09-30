@@ -183,7 +183,7 @@ class Robot(object):
         speedLeft = (0, 51, 51)[dirLeft]
         speedRight = (0, 57, 53)[dirRight]
 
-        self.go_diff(speedLeft, speedRight, 1 if dirLeft==1 else -1, 1 if dirRight==1 else -1)
+        self.go_diff(speedLeft, speedRight, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
 
     def drive(self, meters:float, forward=True, stop_when_done=True):
         """
