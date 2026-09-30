@@ -14,7 +14,7 @@ ARLO_RADIUS = 0.225 # in meters
 
 WHEEL_2_WHEEL_DIST = 0.381 # center of wheel to center of wheel, not edge to edge
 
-MARKER_SIZE = 0.15 # markørstørrelse i meter på landmarkbox
+MARKER_SIZE = 0.146 # markørstørrelse i meter på landmarkbox
 
 FOCAL_LENGTH = 1288.9 # Camera focal length from Exercise 3.1
 
