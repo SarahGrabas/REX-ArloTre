@@ -1,11 +1,12 @@
 import Exercise_4_2_rrt as rrt_class   
 import Exercise_4_2_grid_robotmodel as grid_rm
 import numpy as np
+from robot import Robot, sleep
 # import matplotlib.pyplot as plt
 
 import Exercise_1 as ex1
     
-def robot_path(arlo,path):
+def robot_path(arlo:Robot,path):
     """Funktion til at køre den simpler path
     Gridsize er længde på x og y akse i meter"""
     
@@ -26,9 +27,10 @@ def robot_path(arlo,path):
         desired_angle = np.degrees(np.arctan2(dy, dx))
         
 
-        ex1.rotate_inplace(arlo,degrees=desired_angle)
-
-        ex1.straight_ahead(arlo,meters=distance)
+        arlo.rotate(desired_angle)
+        sleep(0.5)
+        arlo.drive(distance)
+        sleep(0.5)
         
         executed_path.append([x2, y2])
 
