@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 class Grid:
     def __init__(self, x_min, x_max, y_min, y_max, grid_cell_size):
