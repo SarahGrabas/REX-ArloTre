@@ -21,4 +21,4 @@ from robot import arlo
 #         sleep(8)
 #         arlo.stop()
 
-arlo.rotate(-360)
+arlo.rotate(-3*360)
