@@ -15,15 +15,6 @@ import json
 # +Z : Front
 # ---------------------------------------------------------------------------
 
-ROBOT_TO_CAMERA = np.array([
-    [1, 0, 0, 0],
-    [0, 0, -1, 0.208],
-    [0, 1, 0, -0.225],
-    [0, 0, 0, 1]
-])
-
-CAMERA_TO_ROBOT = np.linalg.inv(ROBOT_TO_CAMERA)
-
 MAX_BOX_SIZES = {
     1  : 0.28,
     2  : 0.275,
@@ -38,31 +29,40 @@ MAX_BOX_SIZES = {
     11 : 0.305,
 }
 
+ROBOT_TO_CAMERA = np.array([
+    [1, 0, 0, 0],
+    [0, 0, -1, 0.208],
+    [0, 1, 0, -0.225],
+    [0, 0, 0, 1]
+])
+
+CAMERA_TO_ROBOT = np.linalg.inv(ROBOT_TO_CAMERA)
+
+BOX_SIZE=0.27
+
+SIDE_TO_CENTER=[0,0, -BOX_SIZE/2] #negativ da vi går mod -Z aksen for boxen
+
+max_box_size = max(MAX_BOX_SIZES.values())
+
 arlo.start_camera()
 
 ids, tvecs, rvecs, normals = arlo.picDetectMarkersPose()
 
-print(tuple(zip(ids, tvecs)))
+zip(tvecs,rvecs)
 
-max_box_size = max(MAX_BOX_SIZES.values())
+centers=[]
+for id, tvec, rvec in zip(ids,tvecs,rvecs):
+    R, _ = cv2.Rodrigues(rvec)
+    SIDE_TO_CENTER_camera=R @ SIDE_TO_CENTER #Vi roterer til kamera koordinater
+    vektor_with_center= np.add(tvec,SIDE_TO_CENTER_camera)
+    center= CAMERA_TO_ROBOT @ np.append(vektor_with_center, 1)
 
-# Box centers in camera coordinates 
-centers = [
-    tvec + normal * MAX_BOX_SIZES.get(int(id), max_box_size)/2
-    for id, tvec, normal in zip(ids, tvecs, normals)
-]
-
-# Box centers in robot coordinates
-centers = [
-    (CAMERA_TO_ROBOT @ np.append(center, 1))[:3]
-    for center in centers
-]
-
+    centers.append(center[:3])
+    
 radiuses = [
     sqrt(MAX_BOX_SIZES.get(int(id), max_box_size) ** 2 / 2)
     for id in ids
 ]
-
 
 coordinates_json = [
     {
@@ -70,7 +70,7 @@ coordinates_json = [
         "center": [float(i) for i in center],
         "radius": float(radius),
     }
-    for id, center, radius in zip(ids, centers, radiuses)
+    for id, center, radius in zip(ids,centers,radiuses)
 ]
 
 with open("coordinates.json", "w") as f:

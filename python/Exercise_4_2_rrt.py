@@ -67,20 +67,9 @@ class RRT:
     
 
     
-    #Vi bruger den givne random node funktion, hvor målnode vælges en lille procentdel af tidel
-    # def random_node(self):
-    #     if np.random.randint(0, 100) > self.goal_sample_rate:
-    #         rnd = Node(
-    #             np.random.uniform((self.map.x_limits[0],self.map.y_limits[0]), (self.map.x_limits[1],self.map.y_limits[1]))
-    #             )
-    #     else:  #goal point sampling
-    #         rnd = Node(self.end.position)
-    #     return rnd
-    
     def random_node(self):
         rnd = Node(np.random.uniform((self.map.x_limits[0],self.map.y_limits[0]), 
                                      (self.map.x_limits[1],self.map.y_limits[1])))
-        
         
         return rnd
     
