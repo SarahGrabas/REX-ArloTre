@@ -59,7 +59,7 @@ centers = [
 ]
 
 radiuses = [
-    sqrt(MAX_BOX_SIZES.get(int(id), max_box_size) ** 2 / 2)
+    sqrt(2 * MAX_BOX_SIZES.get(int(id), max_box_size) ** 2) / 2
     for id in ids
 ]
 
