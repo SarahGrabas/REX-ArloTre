@@ -4,8 +4,7 @@ import robot
 import particles
 import numpy as np
 
-def sample_motion_model_velocity(particles, velocity, angular_velocity, current_time, last_time):
-    delta_t = current_time - last_time  # f.eks. målt via timer()
+def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t):
 
     a1 = 0.05  # Translationsfejl fra translation (cm fejl per cm kørt)
     a2 = 0.01  # Translationsfejl fra rotation
