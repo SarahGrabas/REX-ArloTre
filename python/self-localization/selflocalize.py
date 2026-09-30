@@ -181,6 +181,7 @@ try:
         # XXX: Make the robot drive
         # XXX: You do this
 
+        # Simon
         V_CALIB = 30.0   # Fremadrettet hastighed ved go_diff_calibrated(1, 1)
         W_CALIB = 0.785  # Rotationshastighed (~45 deg/s) ved go_diff_calibrated(-1, 1)
 
