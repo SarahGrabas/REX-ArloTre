@@ -26,7 +26,7 @@ class RRT:
                  moving_dist_limit=0.5, #Hvad vi max bevæger os ved ny node
                  grid_cell_size=0.05,
                  goal_sample_rate=5,    #Procentdel på hvor tit en random node skal være goal node
-                 max_iter=10000,          #Max forsøg på at finde path
+                 max_iter=1000,          #Max forsøg på at finde path
                  ):
 
         self.start = Node(start) #create start node
