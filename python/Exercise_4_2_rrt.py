@@ -35,9 +35,6 @@ class RRT:
         self.end = Node(goal) #create goal node
         self.map = map
         
-        #self.min_rand = (map.x_limits[0],map.y_limits[0])
-        #self.max_rand = (map.x_limits[1],map.y_limits[1])
-
         self.moving_dist_limit = moving_dist_limit
         self.grid_cell_size=grid_cell_size
         self.goal_sample_rate = goal_sample_rate
@@ -85,6 +82,8 @@ class RRT:
     def random_node(self):
         rnd = Node(np.random.uniform((self.map.x_limits[0],self.map.y_limits[0]), 
                                      (self.map.x_limits[1],self.map.y_limits[1])))
+        
+        
         return rnd
     
     
