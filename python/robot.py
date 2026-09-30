@@ -206,10 +206,10 @@ class Robot(object):
             self.go_diff_calibrated(-1, 1)
         else:
             return
-        sleep(abs(degrees) / degrees_pr_second)
+        sleep(abs(degrees) / degrees_pr_second / (3*360+20 if degrees<0 else 1))
         if stop_when_done: arlo.stop()
             
-
+# 3*360 = 3*360 + 30
 
     ### CAMERA
 
