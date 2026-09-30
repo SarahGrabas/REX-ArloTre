@@ -76,7 +76,7 @@ except:
 if __name__ == '__main__':
 
     START_POINT=[0, 0]
-    GOAL=[-1.5,2.5]
+    GOAL=[0,2.5]
 
     GRID_CELL_SIZE= 0.1
     X_MIN=-2
