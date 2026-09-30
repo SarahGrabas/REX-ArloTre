@@ -116,13 +116,13 @@ except:
 if __name__ == '__main__':
 
     START_POINT=[0, 0]
-    GOAL=[-0.09,3.37]
+    GOAL=[0, 5.89]
 
     GRID_CELL_SIZE= 0.1
-    X_MIN=-1
-    X_MAX=1
+    X_MIN=-0.7
+    X_MAX=0.7
     Y_MIN=0
-    Y_MAX=4
+    Y_MAX=6.5
     
     
     map = grid_rm.Grid(X_MIN, X_MAX, Y_MIN, Y_MAX, GRID_CELL_SIZE)
