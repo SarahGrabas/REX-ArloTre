@@ -67,7 +67,7 @@ radiuses = [
 coordinates_json = [
     {
         "id": int(id),
-        "center": [float(i) for _, i in center],
+        "center": [float(i) for i in center],
         "radius": float(radius),
     }
     for id, center, radius in zip(ids,centers,radiuses)
