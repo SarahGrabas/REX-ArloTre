@@ -42,6 +42,8 @@ arlo.start_camera()
 
 ids, tvecs, rvecs, normals = arlo.picDetectMarkersPose()
 
+print(tuple(zip(ids, tvecs)))
+
 max_box_size = max(MAX_BOX_SIZES.values())
 
 # Box centers in camera coordinates
