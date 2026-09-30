@@ -14,7 +14,7 @@ from robot import arlo
 # right, backward, deg 360, 8 sec, 53
 
 
-arlo.drive(3)
+arlo.rotate(90)
 
 # while True:
 #     usr = input("speed = ")
