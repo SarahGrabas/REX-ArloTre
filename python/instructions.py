@@ -15,7 +15,7 @@ from robot import arlo
 
 arlo.go_diff(0, 0, 0, 0)
 sleep(1)
-arlo.drive(1)
+arlo.drive(1, stop_when_done=False)
 arlo.rotate(360+90)
 
 # while True:
