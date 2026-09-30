@@ -24,8 +24,7 @@ def robot_path(arlo:Robot,path):
 
         distance = np.sqrt(dx**2 + dy**2)
 
-        desired_angle = np.degrees(np.arctan2(dy, dx))
-        turn_angle = (desired_angle + 180) % 360 - 180
+        desired_angle = np.degrees(np.arctan2(dx, dy))
         
         print("         desired_angle, distance", desired_angle, distance)
         arlo.rotate(desired_angle)
