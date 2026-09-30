@@ -101,6 +101,7 @@ if __name__ == '__main__':
         simpler_path=rrt.simpler_path(path)
         print(simpler_path)
         execute_path=robot_path(arlo,simpler_path)
+        print(execute_path)
         
         
         # fig, ax =plt.subplots()
