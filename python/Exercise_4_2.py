@@ -6,13 +6,46 @@ from robot import Robot, sleep, arlo
 
 import Exercise_1 as ex1
     
+# def robot_path(arlo:Robot,path):
+#     """Funktion til at køre den simpler path
+#     Gridsize er længde på x og y akse i meter"""
+    
+#     executed_path = [path[0]]
+    
+#     path_length=len(path)
+    
+#     for i in range(path_length - 1):
+
+#         x1, y1 = path[i] #from node
+#         x2, y2 = path[i + 1]# til node
+
+#         dx = x2 - x1
+#         dy = y2 - y1
+
+#         distance = np.sqrt(dx**2 + dy**2)
+
+#         desired_angle = -np.degrees(np.arctan2(dx, dy))
+        
+#         print("         desired_angle, distance", desired_angle, distance)
+#         arlo.rotate(desired_angle)
+#         sleep(0.5)
+#         arlo.drive(distance)
+#         sleep(0.5)
+        
+#         executed_path.append([x2, y2])
+
+#     return executed_path
+
+
 def robot_path(arlo:Robot,path):
     """Funktion til at køre den simpler path
     Gridsize er længde på x og y akse i meter"""
-    
+
     executed_path = [path[0]]
     
     path_length=len(path)
+
+    current_angle = 0  # Robotten starter med at pege ligeud
     
     for i in range(path_length - 1):
 
@@ -24,17 +57,24 @@ def robot_path(arlo:Robot,path):
 
         distance = np.sqrt(dx**2 + dy**2)
 
-        desired_angle = np.degrees(np.arctan2(dx, dy))
+        desired_angle = -np.degrees(np.arctan2(dx, dy))
+
+        relative_angle = desired_angle - current_angle
         
-        print("         desired_angle, distance", desired_angle, distance)
-        arlo.rotate(-desired_angle)
+        print("         desired_angle, relative_angle, distance",
+              desired_angle, relative_angle, distance)
+
+        arlo.rotate(relative_angle)
         sleep(0.5)
         arlo.drive(distance)
         sleep(0.5)
+
+        current_angle = desired_angle
         
         executed_path.append([x2, y2])
 
     return executed_path
+
 
         
     
