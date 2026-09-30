@@ -5,16 +5,10 @@ import matplotlib.pyplot as plt
 
 import Exercise_1 as ex1
     
-def robot_path(arlo,grid_size,path):
+def robot_path(arlo,path):
     """Funktion til at køre den simpler path
     Gridsize er længde på x og y akse i meter"""
     
-    
-<<<<<<< HEAD
-def robot_path(arlo, path):
-    """Funktion til at køre den simpler path"""
-=======
->>>>>>> fa0ba31 (push)
     executed_path = [path[0]]
     
     path_length=len(path)
@@ -24,21 +18,17 @@ def robot_path(arlo, path):
         x1, y1 = path[i] #from node
         x2, y2 = path[i + 1]# til node
 
-        # dx = x2 - x1 # apparently unused?
-        # dy = y2 - y1
+        dx = x2 - x1
+        dy = y2 - y1
 
-        # distance = np.sqrt(dx**2 + dy**2)
+        distance = np.sqrt(dx**2 + dy**2)
 
-        # desired_angle = np.degrees(np.arctan2(dy, dx))
+        desired_angle = np.degrees(np.arctan2(dy, dx))
         
-<<<<<<< HEAD
-        #ex1.rotate_inplace(arlo,degrees=desired_angle)
-        #ex1.straight_ahead(arlo,meters=distance)
-=======
+
         ex1.rotate_inplace(arlo,degrees=desired_angle)
 
         ex1.straight_ahead(arlo,meters=distance)
->>>>>>> fa0ba31 (push)
         
         executed_path.append([x2, y2])
 
