@@ -13,10 +13,8 @@ from robot import arlo
 # right, forward, deg 360, 8 sec, 57
 # right, backward, deg 360, 8 sec, 53
 
-arlo.go_diff(0, 0, 0, 0)
-sleep(1)
-arlo.drive(1, stop_when_done=False)
-arlo.rotate(360+90)
+
+arlo.drive(1)
 
 # while True:
 #     usr = input("speed = ")
