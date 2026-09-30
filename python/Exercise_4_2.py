@@ -100,7 +100,7 @@ if __name__ == '__main__':
         print(path)
         simpler_path=rrt.simpler_path(path)
         print(simpler_path)
-        execute_path=robot_path(arlo,map.grid_size,simpler_path)
+        execute_path=robot_path(arlo,simpler_path)
         
         
         # fig, ax =plt.subplots()
