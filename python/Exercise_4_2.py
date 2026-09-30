@@ -48,16 +48,28 @@ arlo = Robot
 arlo_radius=robot.ARLO_RADIUS
 
 #Hent info fra json
-with open('./python/coordinates.json') as file:
-    data = json.load(file)
-    landmarks=data
-    landmarks_list=[]
-    for landmark in landmarks:
-        id=landmark["id"]
-        center=landmark["center"]
-        radius=landmark["radius"]
-        landmarks_list.append((id,center,radius))
-    print(landmarks_list)
+try:
+    with open('coordinates.json') as file:
+        data = json.load(file)
+        landmarks=data
+        landmarks_list=[]
+        for landmark in landmarks:
+            id=landmark["id"]
+            center=landmark["center"]
+            radius=landmark["radius"]
+            landmarks_list.append((id,center,radius))
+        print(landmarks_list)
+except:
+    with open('./python/coordinates.json') as file:
+        data = json.load(file)
+        landmarks=data
+        landmarks_list=[]
+        for landmark in landmarks:
+            id=landmark["id"]
+            center=landmark["center"]
+            radius=landmark["radius"]
+            landmarks_list.append((id,center,radius))
+        print(landmarks_list)
 
 
 
