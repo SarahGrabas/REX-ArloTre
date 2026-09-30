@@ -21,4 +21,12 @@ from robot import arlo
 #         sleep(8)
 #         arlo.stop()
 
+arlo.drive(1, stop_when_done=False)
+arlo.rotate(-360, False)
+arlo.drive(1, stop_when_done=False)
+arlo.rotate(-360, False)
+arlo.drive(1, stop_when_done=False)
+arlo.rotate(-360, False)
+arlo.drive(1, stop_when_done=False)
 arlo.rotate(-360)
+
