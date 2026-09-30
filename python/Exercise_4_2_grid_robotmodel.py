@@ -21,7 +21,7 @@ class Grid:
         Hvis x_min =0 og y_min=2 og cellestørrelse er 0.3, så ligger celle (1,1)'s centrum:
         (0+0.3*(1+0,5),2+0.3*(1+0,5))
         
-        Vi tjekker for hvert celle i grid, om der ligger landmark i cellen.
+        Vi tjekker for hvert celle i grid, om der ligger landmark+robot+buffer i cellen.
         Hvis landmark er i cellen sætter vi 0 til 1 i vores grid.
         
         """
