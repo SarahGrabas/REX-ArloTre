@@ -1,7 +1,7 @@
 import Exercise_4_2_rrt as rrt_class   
 import Exercise_4_2_grid_robotmodel as grid_rm
 import numpy as np
-from robot import Robot, sleep
+from robot import Robot, sleep, arlo
 # import matplotlib.pyplot as plt
 
 import Exercise_1 as ex1
@@ -27,9 +27,9 @@ def robot_path(arlo:Robot,path):
         desired_angle = np.degrees(np.arctan2(dy, dx))
         
 
-        arlo.rotate(degrees=desired_angle)
+        arlo.rotate(desired_angle)
         sleep(0.5)
-        arlo.drive(meters=distance)
+        arlo.drive(distance)
         sleep(0.5)
         
         executed_path.append([x2, y2])
@@ -42,10 +42,8 @@ import robot_models
 #import Exercise_4_1_plot as ex4_1
 import json
 
-from robot import Robot
 import robot
 
-arlo = Robot 
 
 arlo_radius=robot.ARLO_RADIUS
 
