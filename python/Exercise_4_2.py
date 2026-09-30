@@ -119,7 +119,7 @@ if __name__ == '__main__':
     GOAL=[-0.09,3.37]
 
     GRID_CELL_SIZE= 0.1
-    X_MIN=-2
+    X_MIN=-1
     X_MAX=1
     Y_MIN=0
     Y_MAX=4
