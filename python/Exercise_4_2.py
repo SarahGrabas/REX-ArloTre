@@ -1,11 +1,11 @@
 import Exercise_4_2_rrt as rrt_class   
 import Exercise_4_2_grid_robotmodel as grid_rm
 import numpy as np
-import matplotlib.pyplot  as plt
+import matplotlib.pyplot as plt
 
 #import Exercise_1 as ex1
     
-def robot_path(arlo,path):
+def robot_path(arlo, path):
     """Funktion til at køre den simpler path"""
     executed_path = [path[0]]
     
@@ -16,15 +16,14 @@ def robot_path(arlo,path):
         x1, y1 = path[i] #from node
         x2, y2 = path[i + 1]# til node
 
-        dx = x2 - x1 
-        dy = y2 - y1
+        # dx = x2 - x1 # apparently unused?
+        # dy = y2 - y1
 
-        distance = np.sqrt(dx**2 + dy**2)
+        # distance = np.sqrt(dx**2 + dy**2)
 
-        desired_angle = np.degrees(np.arctan2(dy, dx))
+        # desired_angle = np.degrees(np.arctan2(dy, dx))
         
         #ex1.rotate_inplace(arlo,degrees=desired_angle)
-
         #ex1.straight_ahead(arlo,meters=distance)
         
         executed_path.append([x2, y2])
@@ -53,10 +52,12 @@ with open('./python/coordinates.json') as file:
     print(landmarks_list)
 
 
-def main():
-    
+
+if __name__ == '__main__':
+
     START_POINT=[0, 0]
     GOAL=[0,5]
+
     GRID_CELL_SIZE= 0.1
     X_MIN=-2
     X_MAX=10
@@ -64,7 +65,7 @@ def main():
     Y_MAX=10
     
     
-    map = grid_rm.Grid(x_min=X_MIN,x_max=X_MAX,y_min=Y_MIN, y_max=Y_MAX, grid_cell_size=GRID_CELL_SIZE)
+    map = grid_rm.Grid(X_MIN, X_MAX, Y_MIN, Y_MAX, GRID_CELL_SIZE)
     map.obstacles(landmarks_list, robot_radius=arlo_radius) #generer vores landmarks som obstacles
     
     #from robot import Robot, sleep
@@ -105,8 +106,4 @@ def main():
         ax.scatter(GOAL[0],GOAL[1], color='green')
     
         plt.show()
-
-
-
-if __name__ == '__main__':
-    main()
+    

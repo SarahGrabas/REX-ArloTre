@@ -2,22 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Grid:
-    
     def __init__(self, x_min, x_max, y_min, y_max, grid_cell_size):
-        self.x_limits=[x_min, x_max]
-        self.y_limits=[y_min, y_max]
-        self.grid_cell_size=grid_cell_size
+        self.x_limits = (x_min, x_max)
+        self.y_limits = (y_min, y_max)
+        self.grid_cell_size = grid_cell_size
         
-        self.grid_size = [x_max-x_min, y_max-y_min] #(længde af x-akse, længde af y-akse)
+        self.number_of_celles= [(x_max-x_min)//grid_cell_size, (y_max-y_min)//grid_cell_size] #Beregner hvor mange celler vi skal have for at ramme m og cellestørrelse
         
-        self.number_of_celles= [int(x/grid_cell_size) for x in self.grid_size] #Beregner hvor mange celler vi skal have for at ramme m og cellestørrelse
-        
-        self.grid_matrix= np.zeros((self.number_of_celles[0], self.number_of_celles[1])) #lav matrix der svarer til grid størrelse med korrekt cellestørrlese, men kun med 0.
+        self.grid_matrix = np.zeros((self.number_of_celles[0], self.number_of_celles[1]), dtype=bool) #lav matrix der svarer til grid størrelse med korrekt cellestørrlese, men kun med 0.
         
     
     def obstacles(self, landmarks_list, robot_radius):
         """
-        obstacles are =1 in the grid
+        obstacles are equal to ``1`` or ``True`` in the grid, otherwise ``0`` or ``False``.
         
         centrum for celle (i,j).
         Calculation i row dimension is x_min + grid størrelse * rækkenummer+ 0.5 (så vi lander i midten)
@@ -29,7 +26,6 @@ class Grid:
         Hvis landmark er i cellen sætter vi 0 til 1 i vores grid.
         
         """
-        
          
         for i in range(self.number_of_celles[0]):
             for j in range(self.number_of_celles[1]):
