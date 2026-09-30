@@ -37,7 +37,7 @@ def robot_path(arlo,path):
         
     
 import robot_models
-import Exercise_4_1_plot as ex4_1
+#import Exercise_4_1_plot as ex4_1
 import json
 
 from robot import Robot
@@ -91,23 +91,23 @@ if __name__ == '__main__':
         execute_path=robot_path(arlo,map.grid_size,simpler_path)
         
         
-        fig, ax =plt.subplots()
-        ex4_1.draw_landmarks(ax, landmarks_list, arlo_radius)
+        # fig, ax =plt.subplots()
+        # ex4_1.draw_landmarks(ax, landmarks_list, arlo_radius)
         
-        pathx = [p[0] for p in path]
-        pathy = [p[1] for p in path]
+        # pathx = [p[0] for p in path]
+        # pathy = [p[1] for p in path]
 
-        ax.plot(pathx,pathy,'-',linewidth=2,label="RRT path")
+        # ax.plot(pathx,pathy,'-',linewidth=2,label="RRT path")
         
-        print(path)
-        print(execute_path)
-        executed_x = [p[0] for p in execute_path]
-        executed_y = [p[1] for p in execute_path]
+        # print(path)
+        # print(execute_path)
+        # executed_x = [p[0] for p in execute_path]
+        # executed_y = [p[1] for p in execute_path]
 
-        ax.plot(executed_x,executed_y,'-',linewidth=2,label="Robot path")
-        plt.grid(True)
-        plt.pause(0.01)
-        ax.scatter(GOAL[0],GOAL[1], color='green')
+        # ax.plot(executed_x,executed_y,'-',linewidth=2,label="Robot path")
+        # plt.grid(True)
+        # plt.pause(0.01)
+        # ax.scatter(GOAL[0],GOAL[1], color='green')
     
-        plt.show()
+        # plt.show()
     
