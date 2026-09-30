@@ -27,9 +27,9 @@ def robot_path(arlo:Robot,path):
         desired_angle = np.degrees(np.arctan2(dy, dx))
         
 
-        arlo.rotate(desired_angle)
+        arlo.rotate(degrees=desired_angle)
         sleep(0.5)
-        arlo.drive(distance)
+        arlo.drive(meters=distance)
         sleep(0.5)
         
         executed_path.append([x2, y2])
