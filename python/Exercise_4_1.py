@@ -73,4 +73,5 @@ coordinates_json = [
 
 with open("coordinates.json", "w") as f:
     json.dump(coordinates_json, f, indent=4)
+    print(coordinates_json)
 
