@@ -164,6 +164,23 @@ def resample_particles(particles):
         for index in selected
     ]
 
+def mcl_step(particles, u_t, z_t, delta_t):
+    """
+    Udfører ét komplet MCL-skridt: Prediction, Correction og Resampling.
+    """
+    velocity, angular_velocity = u_t
+    objectIDs, dists, angles = z_t
+
+    # 1. Prediction (Motion model - Linje 4 i pseudokode)
+    if velocity != 0.0 or angular_velocity != 0.0:
+        sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
+
+    # 2. Correction (Measurement model - Linje 5-6) og 3. Resampling (Linje 8-11)
+    if not isinstance(objectIDs, type(None)):
+        if update_particle_weights(particles, objectIDs, dists, angles):
+            particles = resample_particles(particles)
+
+    return particles
 
 # Main program #
 cam = None
@@ -209,44 +226,23 @@ try:
     last_time = timer()
     while True:
 
-        # Move the robot according to user input (only for testing)
         action = cv2.waitKey(10)
         if action == ord('q'): # Quit
             break
-    
-        # if not isRunningOnArlo():
-        #     if action == ord('w'): # Forward
-        #         velocity += 4.0
-        #     elif action == ord('x'): # Backwards
-        #         velocity -= 4.0
-        #     elif action == ord('s'): # Stop
-        #         velocity = 0.0
-        #         angular_velocity = 0.0
-        #     elif action == ord('a'): # Left
-        #         angular_velocity += 0.2
-        #     elif action == ord('d'): # Right
-        #         angular_velocity -= 0.2
 
-        # Use motor controls to update particles
-        # XXX: Make the robot drive
-        # XXX: You do this
-
-        # Simon
-        V_CALIB = 30.0   # Fremadrettet hastighed ved go_diff_calibrated(1, 1)
-        W_CALIB = 0.785  # Rotationshastighed (~45 deg/s) ved go_diff_calibrated(-1, 1)
-
+        # Sæt velocity og angular_velocity (manuelt eller via autonom kørestrategi)
         if action == ord('w'):     # Fremad
-            velocity = V_CALIB
+            velocity += V_CALIB
             angular_velocity = 0.0
         elif action == ord('x'):   # Bagud
-            velocity = -V_CALIB
+            velocity += -V_CALIB
             angular_velocity = 0.0
         elif action == ord('a'):   # Venstre-rotation
             velocity = 0.0
-            angular_velocity = W_CALIB
+            angular_velocity += W_CALIB
         elif action == ord('d'):   # Højre-rotation
             velocity = 0.0
-            angular_velocity = -W_CALIB
+            angular_velocity += -W_CALIB
         elif action == ord('s'):   # Stop
             velocity = 0.0
             angular_velocity = 0.0
@@ -267,39 +263,31 @@ try:
         delta_t = current_time - last_time
         last_time = current_time
 
-        # 3. Opdater partiklerne med de nøjagtige fysiske parametre
-        if velocity != 0.0 or angular_velocity != 0.0:
-            sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
-
-
-        # Fetch next frame
+        # Hent kamerabillede og detekter ArUco-mærker (giver z_t)
         colour = cam.get_next_frame()
-        
-        # Detect objects
         objectIDs, dists, angles = cam.detect_aruco_objects(colour)
-        if not isinstance(objectIDs, type(None)):
-            # List detected objects
-            for i in range(len(objectIDs)):
-                print("Object ID = ", objectIDs[i], ", Distance = ", dists[i], ", angle = ", angles[i])
-                # XXX: Do something for each detected object - remember, the same ID may appear several times
-            # simon
-            if update_particle_weights(particles, objectIDs, dists, angles):
-                particles = resample_particles(particles)
 
-            # Draw detected objects
+        # =========================================================================
+        # KORREKT MCL-KALD
+        # =========================================================================
+        u_t = (velocity, angular_velocity)
+        z_t = (objectIDs, dists, angles)
+
+        # Kør det samlede MCL-skridt
+        particles = mcl_step(particles, u_t, z_t, delta_t)
+        # =========================================================================
+
+        # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
+        if not isinstance(objectIDs, type(None)):
             cam.draw_aruco_objects(colour)
-        est_pose = particle.estimate_pose(particles) # The estimate of the robots current pose
+
+        # Beregn robottens estimerede position efter MCL-opdateringen
+        est_pose = particle.estimate_pose(particles)
 
         if showGUI:
-            # Draw map
             draw_world(est_pose, particles, world)
-    
-            # Show frame
             cv2.imshow(WIN_RF1, colour)
-
-            # Show world
             cv2.imshow(WIN_World, world)
-    
   
 finally: 
     # Make sure to clean up even if an exception occurred
