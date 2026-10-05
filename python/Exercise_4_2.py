@@ -1,5 +1,5 @@
 import Exercise_4_2_rrt as rrt_class   
-import python.Exercise_4_2_grid as grid
+import Exercise_4_2_grid as grid
 import numpy as np
 from robot import Robot, sleep, arlo
 # import matplotlib.pyplot as plt
