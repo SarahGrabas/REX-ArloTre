@@ -189,27 +189,32 @@ class Robot(object):
         """
         Drives straight forward or backward at ~0.3 meters/second.
         """
-        meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8   * 3.26/3 # last factor is correction
+        meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8   * 3.14/3 # last factor is correction
         self.go_diff_calibrated(2 * forward - 1, 2 * forward - 1)
         sleep(meters / meters_pr_sec)
         if stop_when_done: arlo.stop()
 
     def rotate(self, degrees:float, stop_when_done=True):
         """
-        Rotates ``degrees`` inplace, at 90°/second, and stops.\\
+        Rotates ``degrees`` inplace, at 90°/second, and stops.\
         Negative rotation is right, positive rotation is left.
         """
         degrees_pr_second = 360 / 4 # 4 instead of 8 is intentional
+        correction_fraction_negative = 1.0
+        correction_fraction_positive = 1.0
+    
         if degrees < 0:
             self.go_diff_calibrated(1, -1)
+            correction_fraction = correction_fraction_negative
         elif degrees > 0:
             self.go_diff_calibrated(-1, 1)
+            correction_fraction = correction_fraction_positive
         else:
             return
-        sleep(abs(degrees) / degrees_pr_second) if degrees>0 else sleep(abs(degrees) / (degrees_pr_second * (3*360+10)/(3*360))) # the last factor is a correction
+        sleep(abs(degrees) / degrees_pr_second / correction_fraction)
         if stop_when_done: arlo.stop()
-            
-# 3*360 = 3*360 + 30
+
+
 
     ### CAMERA
 
