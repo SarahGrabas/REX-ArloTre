@@ -184,7 +184,7 @@ class RRT:
         return True
 
 
-import grid_occ, robot_models
+import python.OLD.grid_occ as grid_occ, robot_models
 import Exercise_4_1_plot as ex4_1
 import json
 #import robot
