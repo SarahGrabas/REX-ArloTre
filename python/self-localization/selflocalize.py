@@ -2,10 +2,8 @@ import cv2
 import particle
 import camera
 import numpy as np
-import time
 from timeit import default_timer as timer
 import sys
-import robot
 from motion_model import sample_motion_model_velocity
 
 
@@ -21,17 +19,15 @@ def isRunningOnArlo():
     return onRobot
 
 
+robot_module = None
 if isRunningOnArlo():
     # XXX: You need to change this path to point to where your robot.py file is located
     sys.path.append("../../../../Arlo/python")
-
-
-try:
-    import robot
-    onRobot = True
-except ImportError:
-    print("selflocalize.py: robot module not present - forcing not running on Arlo!")
-    onRobot = False
+    try:
+        import robot as robot_module
+    except ImportError:
+        print("selflocalize.py: robot module not present - forcing not running on Arlo!")
+        onRobot = False
 
 
 
@@ -54,6 +50,8 @@ landmarks = {
     2: (300.0, 0.0)  # Coordinates for landmark 2
 }
 landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
+range_sigma = 10.0
+bearing_sigma = 0.15
 
 def jet(x):
     """Colour map for drawing particles. This function determines the colour of 
@@ -116,8 +114,59 @@ def initialize_particles(num_particles):
 
     return particles
 
+# Simon, funktioner til vægte og resampling af partikler
+def wrap_angle(angle):
+    return (angle + np.pi) % (2.0 * np.pi) - np.pi
+
+
+def update_particle_weights(particles, object_ids, distances, angles):
+    observations = [
+        (int(object_id), distance, angle)
+        for object_id, distance, angle in zip(object_ids, distances, angles)
+        if int(object_id) in landmarks
+    ]
+    if not observations:
+        return False
+
+    log_weights = []
+    for p in particles:
+        log_weight = np.log(max(p.getWeight(), 1e-300))
+        for object_id, measured_range, measured_bearing in observations:
+            landmark_x, landmark_y = landmarks[object_id]
+            dx = landmark_x - p.getX()
+            dy = landmark_y - p.getY()
+            predicted_range = np.hypot(dx, dy)
+            predicted_bearing = wrap_angle(np.arctan2(dy, dx) - p.getTheta())
+
+            range_error = (measured_range - predicted_range) / range_sigma
+            bearing_error = wrap_angle(measured_bearing - predicted_bearing) / bearing_sigma
+            log_weight -= 0.5 * (range_error**2 + bearing_error**2)
+        log_weights.append(log_weight)
+
+    weights = np.exp(np.asarray(log_weights) - np.max(log_weights))
+    weights /= np.sum(weights)
+    for p, weight in zip(particles, weights):
+        p.setWeight(weight)
+    return True
+
+
+def resample_particles(particles):
+    weights = np.asarray([p.getWeight() for p in particles], dtype=float)
+    weights /= np.sum(weights)
+    selected = np.random.choice(len(particles), size=len(particles), replace=True, p=weights)
+    return [
+        particle.Particle(
+            particles[index].getX(),
+            particles[index].getY(),
+            particles[index].getTheta(),
+            1.0 / len(particles),
+        )
+        for index in selected
+    ]
+
 
 # Main program #
+cam = None
 try:
     if showGUI:
         # Open windows
@@ -141,7 +190,7 @@ try:
     angular_velocity = 0.0 # radians/sec
 
     # Initialize the robot (XXX: You do this)
-    robot = robot.Robot()
+    robot_controller = robot_module.Robot() if isRunningOnArlo() else None
 
     # Allocate space for world map
     world = np.zeros((500,500,3), dtype=np.uint8)
@@ -157,6 +206,7 @@ try:
         cam = camera.Camera(0, robottype='macbookpro', useCaptureThread=True)
         #cam = camera.Camera(1, robottype='macbookpro', useCaptureThread=False)
 
+    last_time = timer()
     while True:
 
         # Move the robot according to user input (only for testing)
@@ -203,15 +253,15 @@ try:
 
         if isRunningOnArlo():
             if velocity > 0:
-                robot.go_diff_calibrated(1, 1)
+                robot_controller.go_diff_calibrated(1, 1)
             elif velocity < 0:
-                robot.go_diff_calibrated(-1, -1)
+                robot_controller.go_diff_calibrated(-1, -1)
             elif angular_velocity > 0:
-                robot.go_diff_calibrated(-1, 1)
+                robot_controller.go_diff_calibrated(-1, 1)
             elif angular_velocity < 0:
-                robot.go_diff_calibrated(1, -1)
+                robot_controller.go_diff_calibrated(1, -1)
             else:
-                robot.stop()
+                robot_controller.stop()
 
         current_time = timer()
         delta_t = current_time - last_time
@@ -232,21 +282,12 @@ try:
             for i in range(len(objectIDs)):
                 print("Object ID = ", objectIDs[i], ", Distance = ", dists[i], ", angle = ", angles[i])
                 # XXX: Do something for each detected object - remember, the same ID may appear several times
-
-            # Compute particle weights
-            # XXX: You do this
-
-            # Resampling
-            # XXX: You do this
+            # simon
+            if update_particle_weights(particles, objectIDs, dists, angles):
+                particles = resample_particles(particles)
 
             # Draw detected objects
             cam.draw_aruco_objects(colour)
-        else:
-            # No observation - reset weights to uniform distribution
-            for p in particles:
-                p.setWeight(1.0/num_particles)
-
-    
         est_pose = particle.estimate_pose(particles) # The estimate of the robots current pose
 
         if showGUI:
@@ -267,5 +308,6 @@ finally:
     cv2.destroyAllWindows()
 
     # Clean-up capture thread
-    cam.terminateCaptureThread()
+    if cam is not None:
+        cam.terminateCaptureThread()
 

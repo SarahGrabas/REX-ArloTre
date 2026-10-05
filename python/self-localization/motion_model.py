@@ -1,7 +1,3 @@
-# Tidsdifferens fra sidste iteration
-from selflocalize import isRunningOnArlo
-import robot
-import particles
 import numpy as np
 
 def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t):
@@ -12,10 +8,6 @@ def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
     a4 = 0.05  # Rotationsfejl fra rotation (rad fejl per rad drejet)
     a5 = 0.01  # Ekstra slutrotationsstøj fra translation
     a6 = 0.01  # Ekstra slutrotationsstøj fra rotation
-
-    # Hvis robotten faktisk kører på Arlo, sendes kommandoerne til hardwaren
-    if isRunningOnArlo():
-        robot.move(velocity, angular_velocity)
 
     # Prediktionstrin (sample_motion_model_velocity) for alle partikler
     for p in particles:
