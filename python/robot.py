@@ -1,7 +1,33 @@
 # Arlo Robot Controller
 
 from time import sleep
-import serial
+import serial # type: ignore
+from math import gcd
+import cv2 # type: ignore
+import picamera2 # type: ignore
+import numpy as np
+from math import pi as PI
+
+
+### CONSTANTS
+ARLO_RADIUS = 0.225 # in meters
+
+WHEEL_2_WHEEL_DIST = 0.381 # center of wheel to center of wheel, not edge to edge
+
+MARKER_SIZE = 0.146 # markørstørrelse i meter på landmarkbox
+
+FOCAL_LENGTH = 1288.9 # Camera focal length from Exercise 3.1
+
+CX, CY = 1640/2, 1232/2 # Camera center in pixels
+
+CAMERA_MATRIX = np.array([
+    [FOCAL_LENGTH, 0, CX], 
+    [0, FOCAL_LENGTH, CY], 
+    [0, 0, 1]
+], dtype=np.float32) # 3x3 matrix 
+
+DISTORTION_MATRIX = np.zeros((5, 1), dtype=np.float32) # Zero vector ; assumes no camera (lens) distortion
+
 
 
 class Robot(object):
@@ -12,7 +38,7 @@ class Robot(object):
        Arduino too frequently (give it time to process the command by adding a short sleep wait
        statement). Failure to do some may lead to strange robot behaviour.
        
-       In case you experience trouble - consider using only commands that do not use the wheel 
+       In elif userinput == you experience trouble - consider using only commands that do not use the wheel 
        encoders.
     
        This class is not thread-safe and you should only use it from one thread. However, this does not have
@@ -56,7 +82,8 @@ class Robot(object):
         return str_val
 
 
-    def _power_checker(self, power):
+    @staticmethod
+    def _power_checker(power):
         """Checks if a power value is in the set {0, [40;127]}.
            This is an internal utility function."""
         return  (power == 0) or (power >=40 and power <=127) 
@@ -132,7 +159,219 @@ class Robot(object):
         cmd='c\n'
         return self.send_command(cmd)
     
+
+
+    ### MOVEMENT 
+
+    # measurements where not inplace rotation
+    # left, forward, deg 360, 8 sec, 51
+    # left, backward, deg 360, 8 sec, 51
+    # right, forward, deg 360, 8 sec, 57
+    # right, backward, deg 360, 8 sec, 53
+
+    def go_diff_calibrated(self, dirLeft:int, dirRight:int):
+        """
+        Like ``Robot.go_diff`` but calibrated for speeds in the range [50;60].\\
+        ``dirLeft`` and ``dirRight`` can be ``[-1,0,1]``, where:
+        - ``-1`` is backwards
+        - ``0`` is still/none
+        - ``1`` is forward.
+        """
+        assert dirLeft in (-1,0,1), f"Error: Expected dirLeft to be either -1,0 or 1, but recieved {dirLeft}"
+        assert dirRight in (-1,0,1), f"Error: Expected dirRight to be either -1,0 or 1, but recieved {dirRight}"
+        
+        speedLeft = (0, 51, 51)[dirLeft]
+        speedRight = (0, 57, 53)[dirRight]
+
+        self.go_diff(speedLeft, speedRight, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
+
+    def drive(self, meters:float, forward=True, stop_when_done=True):
+        """
+        Drives straight forward or backward at ~0.3 meters/second.
+        """
+        meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8   * 3.26/3 # last factor is correction
+        self.go_diff_calibrated(2 * forward - 1, 2 * forward - 1)
+        sleep(meters / meters_pr_sec)
+        if stop_when_done: arlo.stop()
+
+    def rotate(self, degrees:float, stop_when_done=True):
+        """
+        Rotates ``degrees`` inplace, at 90°/second, and stops.\\
+        Negative rotation is right, positive rotation is left.
+        """
+        degrees_pr_second = 360 / 4 # 4 instead of 8 is intentional
+        if degrees < 0:
+            self.go_diff_calibrated(1, -1)
+        elif degrees > 0:
+            self.go_diff_calibrated(-1, 1)
+        else:
+            return
+        sleep(abs(degrees) / degrees_pr_second) if degrees>0 else sleep(abs(degrees) / (degrees_pr_second * (3*360+10)/(3*360))) # the last factor is a correction
+        if stop_when_done: arlo.stop()
+            
+# 3*360 = 3*360 + 30
+
+    ### CAMERA
+
+    def start_camera(self):
+        self.cam = picamera2.Picamera2() #open camera
+        config = self.cam.create_video_configuration({ # define camera config suitable for recording video
+            "size": (1640, 1232), 
+            "format": "RGB888"
+        }) 
+
+        self.cam.configure(config) #use config
+        self.cam.start(show_preview=False) #start camera (turn on)
+        sleep(1) #wait for camera to start
+
+    def take_picture(self):
+        """Takes image in RBG format and return array of shape (hight, width, rbg)
+        Returns (ids, rvecs, tvecs)"""
+        return self.cam.capture_array("main") #the capture array function captures next image from the stream
     
+    @staticmethod
+    def _face_normal(rvec):
+        """Given an rotation vector, returns the unit length normal vector for the marker face."""
+        R, _ = cv2.Rodrigues(np.asarray(rvec, dtype=float))
+        return R[:, 2]
+
+    def picDetectMarkersPose(self):
+        """
+        Takes picture, detects markers in image and estimates poses for detected markers. \\
+        Returns: ```(list[ids], list[tvecs], list[rvecs], list[face_norms])```
+        """
+        dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+
+        frame = self.take_picture()  #hent frame fra PiCamera2, dette er array med shape: (height, width,rbg)
+        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) #laver billed om til gråbilled
+
+        corners, ids, _  = cv2.aruco.detectMarkers(gray, dictionary) #tjekker om vi kan finde nogle Aruco markers fra vores dictionary i billedet corners er hvor markeren er
+
+        rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(  #vi beregner translation og rotation
+            corners, #vi tager position fra den marker vi ønsker at kører til
+            MARKER_SIZE,  #size of marker
+            CAMERA_MATRIX, #camera calibration parametre
+            DISTORTION_MATRIX
+        )
+        # fixing weird default shapes
+        ids = ids.flatten()
+        rvecs = rvecs.reshape(-1, 3)
+        tvecs = tvecs.reshape(-1, 3)
+
+        return ids, tvecs, rvecs, [self._face_normal(rvec) for rvec in rvecs]
+
+
+
+    ### CALIBRATION
+
+    def _calibrate_sleep(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, speed:int, _range=(0,1,None), wait=0.5):
+        
+        lower, middle, upper = _range
+                
+        for _ in range(n * 360//gcd(degrees, 360)):
+            sleep(wait)
+            arlo.go_diff(speed*left_wheel, speed*(not left_wheel), forward_drive, forward_drive)
+            sleep(middle)
+            arlo.stop()
+                
+        while True:
+            userinput = input("""
+Enter adjustment action [?/-/0/+/<Enter>]:
+[?] Again
+[-] Decrease sleep
+[0] Spot on
+[+] Increase sleep
+<Enter> Abort
+> """)
+            if userinput == '?':
+                pass
+            elif userinput == '-':
+                upper = middle
+                middle = (lower+upper)/2
+            elif userinput == '0':
+                return {
+                    "left_wheel": left_wheel,
+                    "forward_drive": forward_drive,
+                    "wait": wait,
+                    "n": n,
+                    "result": (degrees, speed, middle) # (turning degrees, wheel speed, sleep time)
+                }
+            elif userinput == '+':
+                lower = middle
+                middle = middle*2 if upper is None else (lower+upper)/2
+            elif userinput == '':
+                return
+            else:
+                print("Invalid input!")
+                continue
+                
+            for _ in range(n * 360//gcd(degrees, 360)):
+                sleep(wait)
+                arlo.go_diff(speed*left_wheel, speed*(not left_wheel), forward_drive, forward_drive)
+                sleep(middle)
+                arlo.stop()
+
+    def _calibrate_speed(self, left_wheel:bool, forward_drive:bool, n:int, degrees:int, _sleep:float, _range=(40,83,127), wait=0.5):
+        
+        # if (2 * 9.8/(3*360) * degrees) < _sleep:
+        #     raise Warning("_sleep is likely to high to be satisfied by even the lowest speed.")
+
+        lower, middle, upper = _range
+                
+        for _ in range(n * 360//gcd(degrees, 360)):
+            sleep(wait)
+            arlo.go_diff(middle*left_wheel, middle*(not left_wheel), forward_drive, forward_drive)
+            sleep(_sleep)
+            arlo.stop()
+                
+        while True:
+            userinput = input("""
+Enter adjustment action [?/-/0/+/<Enter>]:
+[?] Again
+[-] Decrease speed
+[0] Spot on
+[+] Increase speed
+<Enter> Abort
+> """)
+            if userinput == '?':
+                pass
+            elif userinput == '-':
+                upper = middle
+                middle = (lower+upper)/2
+            elif userinput == '0':
+                return {
+                    "left_wheel": left_wheel,
+                    "forward_drive": forward_drive,
+                    "wait": wait,
+                    "n": n,
+                    "result": (degrees, middle, _sleep) # (turning degrees, wheel speed, sleep time)
+                }
+            elif userinput == '+':
+                lower = middle
+                middle = middle*2 if upper is None else (lower+upper)/2
+            elif userinput == '':
+                return
+            else:
+                print("Invalid input!")
+                continue
+                
+            for _ in range(n * 360//gcd(degrees, 360)):
+                sleep(wait)
+                arlo.go_diff(middle*left_wheel, middle*(not left_wheel), forward_drive, forward_drive)
+                sleep(_sleep)
+                arlo.stop()
+
+    # # actual calibration used
+    # while True:
+    #     usr = input("speed = ")
+    #     for _ in range(3):
+    #         sleep(0.5)
+    #         arlo.go_diff(int(usr), 0, 0, 0)
+    #         sleep(8)
+    #         arlo.stop()
+
+
+
     ### OBSOLETE STUFF
         
     def go(self):
@@ -205,4 +444,4 @@ class Robot(object):
         cmd='y' + str(turntime) + '\n'
         return self.send_command(cmd)
         
-
+arlo = Robot()
