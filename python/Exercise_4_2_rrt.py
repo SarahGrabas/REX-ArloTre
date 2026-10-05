@@ -132,8 +132,8 @@ class RRT:
     
         #Nu skal vi så tjekke collision for hvert punkt(celle).
         for x,y in coords:
-            x_cell=int((x-self.map.x_limits[0]) //self.grid_cell_size) #x-x.min//cell_size, dette er x_cell for punktet
-            y_cell=int((y-self.map.y_limits[0]) //self.grid_cell_size) #y-y.min//cell_size, dette er y_cell for punktet
+            x_cell = max(0, min(int((x-self.map.x_limits[0]) // self.grid_cell_size), self.map.grid_matrix.shape[0]-1)) # x-x.min//cell_size, dette er x_cell for punktet
+            y_cell = max(0, min(int((y-self.map.y_limits[0]) // self.grid_cell_size), self.map.grid_matrix.shape[1]-1)) # y-y.min//cell_size, dette er y_cell for punktet
 
             if self.map.grid_matrix[x_cell][y_cell]==1:
                 return False    #Collision
