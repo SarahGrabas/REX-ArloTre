@@ -4,7 +4,7 @@ Module for interfacing a 2D Map in the form of Grid Occupancy
 
 import numpy as np
 import matplotlib.pyplot as plt
-import rrt as rrt
+import python.OLD.rrt as rrt
 
 class GridOccupancyMap(object):
     """

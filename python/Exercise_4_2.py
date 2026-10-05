@@ -1,5 +1,5 @@
 import Exercise_4_2_rrt as rrt_class   
-import Exercise_4_2_grid_robotmodel as grid_rm
+import python.Exercise_4_2_grid as grid
 import numpy as np
 from robot import Robot, sleep, arlo
 # import matplotlib.pyplot as plt
@@ -78,7 +78,7 @@ def robot_path(arlo:Robot,path):
 
         
     
-import robot_models
+#import python.OLD.robot_models as robot_models
 #import Exercise_4_1_plot as ex4_1
 import json
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     Y_MAX=6.5
     
     
-    map = grid_rm.Grid(X_MIN, X_MAX, Y_MIN, Y_MAX, GRID_CELL_SIZE)
+    map = grid.Grid(X_MIN, X_MAX, Y_MIN, Y_MAX, GRID_CELL_SIZE)
     map.obstacles(landmarks_list, robot_radius=arlo_radius) #generer vores landmarks som obstacles
     
     rrt = rrt_class.RRT(start=START_POINT,goal=GOAL,map=map,grid_cell_size=GRID_CELL_SIZE,)
