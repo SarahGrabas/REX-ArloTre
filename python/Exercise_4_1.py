@@ -48,7 +48,7 @@ max_box_size = max(MAX_BOX_SIZES.values())
 
 # Box centers in camera coordinates 
 centers = [
-    tvec + normal * MAX_BOX_SIZES.get(int(id), max_box_size)/2
+    tvec - normal * MAX_BOX_SIZES.get(int(id), max_box_size)/2
     for id, tvec, normal in zip(ids, tvecs, normals)
 ]
 
