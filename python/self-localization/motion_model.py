@@ -2,12 +2,19 @@ import numpy as np
 
 def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t):
 
-    a1 = 0.05  # Translationsfejl fra translation (cm fejl per cm kørt)
-    a2 = 0.01  # Translationsfejl fra rotation
-    a3 = 0.01  # Rotationsfejl fra translation
-    a4 = 0.05  # Rotationsfejl fra rotation (rad fejl per rad drejet)
-    a5 = 0.01  # Ekstra slutrotationsstøj fra translation
-    a6 = 0.01  # Ekstra slutrotationsstøj fra rotation
+    # a1 = 0.05  # Translationsfejl fra translation (cm fejl per cm kørt)
+    # a2 = 0.01  # Translationsfejl fra rotation
+    # a3 = 0.01  # Rotationsfejl fra translation
+    # a4 = 0.05  # Rotationsfejl fra rotation (rad fejl per rad drejet)
+    # a5 = 0.01  # Ekstra slutrotationsstøj fra translation
+    # a6 = 0.01  # Ekstra slutrotationsstøj fra rotation
+
+    a1 = 0.01
+    a2 = 0.001
+    a3 = 0.001
+    a4 = 0.01
+    a5 = 0.001
+    a6 = 0.001
 
     # Prediktionstrin (sample_motion_model_velocity) for alle partikler
     for p in particles:
