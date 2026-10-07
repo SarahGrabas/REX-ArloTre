@@ -1,20 +1,19 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Sequence, Optional, Union
 
 import numpy as np
-from numpy.typing import NDArray
 
 if TYPE_CHECKING:
     from Exercise_4_2_grid import Grid
 
-Position = Sequence[float] | NDArray[np.float64]
+Position = Union[Sequence[float], np.ndarray]
 
 class Node:
     position: Position
-    distance: float | np.float64
+    distance: Union[float, np.float64]
     node_path: list[Position]
-    parent: Node | None
+    parent: Optional[Node]
     
     def __init__(self, position: Position) -> None:
         self.position=position #x, y 
@@ -63,7 +62,7 @@ class RRT:
 
         self.node_list = []
     
-    def path_planning(self) -> list[Position] | None:
+    def path_planning(self) -> Optional[list[Position]]:
 
         self.node_list = [self.start] #til start har vi kun startnode
 
