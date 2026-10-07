@@ -182,6 +182,54 @@ def mcl_step(particles, u_t, z_t, delta_t):
 
     return particles
 
+# udkast til en tilstandsmaskine ift. at finde midterpunktet mellem to landmarks
+def autonomous_controller(est_pose, objectIDs, drive_state):
+    """
+    Beregner motorkommandoer (velocity, angular_velocity) baseret på 
+    MCL-estimatet (est_pose) og den aktive tilstand.
+    """
+    target_x, target_y = 150.0, 0.0  # Mål: midten mellem landemærkerne (0,0) og (300,0)
+    
+    # 1. Udregn distancer og vinkel-fejl til målet ud fra MCL-poseringen[cite: 1, 4]
+    dx = target_x - est_pose.getX()
+    dy = target_y - est_pose.getY()
+    dist_to_target = np.hypot(dx, dy)
+    
+    target_angle = np.arctan2(dy, dx)
+    angle_error = wrap_angle(target_angle - est_pose.getTheta())
+    
+    velocity = 0.0
+    angular_velocity = 0.0
+
+    # 2. Tilstandsmaskinens logik. Skal indsætte nogle af de oprindelige funktioner for robotstyring.
+    if drive_state == "SCAN":
+        angular_velocity = W_CALIB
+        velocity = 0.0
+        
+        if not isinstance(objectIDs, type(None)) and len(set(objectIDs)) >= 2:
+            drive_state = "ROTATE_TO_TARGET"
+
+    elif drive_state == "ROTATE_TO_TARGET":
+        if abs(angle_error) > 0.08:  # Ca. 4.5 grader
+            angular_velocity = np.sign(angle_error) * W_CALIB 
+            velocity = 0.0
+        else:
+            drive_state = "DRIVE_TO_TARGET"
+
+    elif drive_state == "DRIVE_TO_TARGET":
+        if dist_to_target > 10.0:
+            velocity = V_CALIB
+            # P-regulator der holder kursen mod målet under kørsel
+            angular_velocity = np.clip(0.8 * angle_error, -W_CALIB, W_CALIB)
+        else:
+            drive_state = "STOP"
+
+    elif drive_state == "STOP":
+        velocity = 0.0
+        angular_velocity = 0.0
+
+    return velocity, angular_velocity, drive_state
+
 # Main program #
 cam = None
 try:
@@ -223,41 +271,15 @@ try:
         cam = camera.Camera(0, robottype='macbookpro', useCaptureThread=True)
         #cam = camera.Camera(1, robottype='macbookpro', useCaptureThread=False)
 
+    velocity = 0.0
+    angular_velocity = 0.0
+    drive_state = "SCAN"
     last_time = timer()
     while True:
 
         action = cv2.waitKey(10)
         if action == ord('q'): # Quit
             break
-
-        # Sæt velocity og angular_velocity (manuelt eller via autonom kørestrategi)
-        if action == ord('w'):     # Fremad
-            velocity += V_CALIB
-            angular_velocity = 0.0
-        elif action == ord('x'):   # Bagud
-            velocity += -V_CALIB
-            angular_velocity = 0.0
-        elif action == ord('a'):   # Venstre-rotation
-            velocity = 0.0
-            angular_velocity += W_CALIB
-        elif action == ord('d'):   # Højre-rotation
-            velocity = 0.0
-            angular_velocity += -W_CALIB
-        elif action == ord('s'):   # Stop
-            velocity = 0.0
-            angular_velocity = 0.0
-
-        if isRunningOnArlo():
-            if velocity > 0:
-                robot_controller.go_diff_calibrated(1, 1)
-            elif velocity < 0:
-                robot_controller.go_diff_calibrated(-1, -1)
-            elif angular_velocity > 0:
-                robot_controller.go_diff_calibrated(-1, 1)
-            elif angular_velocity < 0:
-                robot_controller.go_diff_calibrated(1, -1)
-            else:
-                robot_controller.stop()
 
         current_time = timer()
         delta_t = current_time - last_time
@@ -270,8 +292,6 @@ try:
         # MCL-KALD
         u_t = (velocity, angular_velocity)
         z_t = (objectIDs, dists, angles)
-
-        # Kør det samlede MCL-skridt
         particles = mcl_step(particles, u_t, z_t, delta_t)
 
         # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
@@ -281,6 +301,23 @@ try:
         # Beregn robottens estimerede position efter MCL-opdateringen
         est_pose = particle.estimate_pose(particles)
 
+        velocity, angular_velocity, drive_state = autonomous_controller(
+        est_pose, objectIDs, drive_state)
+
+        if isRunningOnArlo():
+                    if velocity > 0 and abs(angular_velocity) < 0.05:
+                        robot_controller.go_diff_calibrated(1, 1)
+                    elif velocity > 0 and angular_velocity > 0:
+                        robot_controller.go_diff_calibrated(0.5, 1)   # Blødt sving mod venstre under fremkørsel
+                    elif velocity > 0 and angular_velocity < 0:
+                        robot_controller.go_diff_calibrated(1, 0.5)   # Blødt sving mod højre under fremkørsel
+                    elif angular_velocity > 0:
+                        robot_controller.go_diff_calibrated(-1, 1)   # Roter til venstre på stedet
+                    elif angular_velocity < 0:
+                        robot_controller.go_diff_calibrated(1, -1)   # Roter til højre på stedet
+                    else:
+                        robot_controller.stop()
+    
         if showGUI:
             draw_world(est_pose, particles, world)
             cv2.imshow(WIN_RF1, colour)
