@@ -64,15 +64,14 @@ def robot_path(arlo:Robot,path):
         print("         desired_angle, relative_angle, distance",
               desired_angle, relative_angle, distance)
 
-        arlo.rotate(relative_angle)
-        sleep(0.5)
-        arlo.drive(distance)
-        sleep(0.5)
+        arlo.rotate(relative_angle, stop_when_done=False)
+        arlo.drive(distance, stop_when_done=False)
 
         current_angle = desired_angle
         
         executed_path.append([x2, y2])
 
+    arlo.stop()
     return executed_path
 
 
