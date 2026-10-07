@@ -358,10 +358,6 @@ try:
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
     while True:
 
-        objectIDs=[]
-        dists=[]
-        angles=[]
-
         action = cv2.waitKey(10)
         if action == ord('q'): # Quit
             break
@@ -377,26 +373,72 @@ try:
             # List detected objects
             for i in range(len(detected_objectIDs)):
                 print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
-            
-        if detected_objectIDs is not None:   
-            VALID_IDS = {1, 11}
-            observations={}
-                #hvis vi har dubletter af samme id, vælger vi tætteste distance
-            for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
-                    
+                
+        VALID_IDS = {1, 11}
+
+        objectIDs = []
+        dists = []
+        angles = []
+
+        observations = {}
+
+        if (
+            detected_objectIDs is not None
+            and detected_dists is not None
+            and detected_angles is not None
+        ):
+
+            for ID, dist, angle in zip(
+                detected_objectIDs,
+                detected_dists,
+                detected_angles
+            ):
+
+                ID = int(ID)
+
                 if ID not in VALID_IDS:
-                        continue
-                    
+                    continue
+
+                # Gem nærmeste observation for hvert gyldigt landmark
                 if ID not in observations or dist < observations[ID][0]:
-                        observations[ID] = (dist, angle)
+                    observations[ID] = (dist, angle)
+
+        # Lav observationerne til MCL
+        for ID, (measured_dist, measured_angle) in observations.items():
+
+            objectIDs.append(ID)
+            dists.append(measured_dist)
+            angles.append(measured_angle)
+
+            # Husk at landmark er blevet set
+            seen_landmarks.add(ID)
+
+        print("OBSERVATIONS:", observations)
+        print("objectIDs:", objectIDs)
+        print("seen_landmarks:", seen_landmarks)
+
+        print("VALID OBJECTS:", objectIDs)
+        print("SEEN LANDMARKS:", seen_landmarks)
+            
+        # if detected_objectIDs is not None:   
+        #     VALID_IDS = {1, 11}
+        #     observations={}
+        #         #hvis vi har dubletter af samme id, vælger vi tætteste distance
+        #     for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
+                    
+        #         if ID not in VALID_IDS:
+        #                 continue
+                    
+        #         if ID not in observations or dist < observations[ID][0]:
+        #                 observations[ID] = (dist, angle)
 
             
-            for ID, (measured_dist, measured_angle) in observations.items():
-                    objectIDs.append(ID)
-                    dists.append(measured_dist)
-                    angles.append(measured_angle)
+        #     for ID, (measured_dist, measured_angle) in observations.items():
+        #             objectIDs.append(ID)
+        #             dists.append(measured_dist)
+        #             angles.append(measured_angle)
                     
-                    seen_landmarks.add(ID)
+        #             seen_landmarks.add(ID)
                 
 
         # MCL-KALD
