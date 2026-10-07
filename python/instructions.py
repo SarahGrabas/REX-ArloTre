@@ -23,5 +23,5 @@ from robot import arlo
 
 x = 8
 for _ in range(4*x):
-    arlo.rotate(-360/x)
+    arlo.rotate(360/x)
     sleep(0.5)
