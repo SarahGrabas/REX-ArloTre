@@ -220,8 +220,14 @@ def mcl_step(particles, u_t, z_t, delta_t):
         sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
 
     # 2. Correction 
-    if not isinstance(objectIDs, type(None)): #Hvis der er observeret objekter, opdateres partikel vægt
-        update_particle_weights(particles, objectIDs, dists, angles)
+    if objectIDs:
+        update_particle_weights(
+        particles,
+        objectIDs,
+        dists,
+        angles
+    )
+
         particles = resample_particles(particles)
 
     return particles
@@ -246,12 +252,18 @@ def autonomous_controller(est_pose, objectIDs, drive_state, seen_landmarks):
 
     # 2. Tilstandsmaskinens logik. Skal indsætte nogle af de oprindelige funktioner for robotstyring.
     if drive_state == "SCAN":
-        angular_velocity = W_CALIB
+
         velocity = 0.0
+        angular_velocity = 0.0
+
         print("SCAN")
-        
-        if not isinstance(objectIDs, type(None)) and len(seen_landmarks) >= 2:
+
+        if 1 in seen_landmarks and 11 in seen_landmarks:
             drive_state = "ROTATE_TO_TARGET"
+            
+        
+        # if not isinstance(objectIDs, type(None)) and len(seen_landmarks) >= 2:
+        #     drive_state = "ROTATE_TO_TARGET"
 
     if drive_state == "ROTATE_TO_TARGET":
 
@@ -345,6 +357,9 @@ try:
     
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
     while True:
+        objectIDs=[]
+        dists=[]
+        angles=[]
 
         action = cv2.waitKey(10)
         if action == ord('q'): # Quit
@@ -374,9 +389,7 @@ try:
                 if ID not in observations or dist < observations[ID][0]:
                     observations[ID] = (dist, angle)
 
-            objectIDs=[]
-            dists=[]
-            angles=[]
+        
             for ID, (measured_dist, measured_angle) in observations.items():
                 objectIDs.append(ID)
                 dists.append(measured_dist)
@@ -404,41 +417,31 @@ try:
 
             if drive_state == "SCAN":
 
-            # Brug delta_t til scan-timeren
                 scan_timer += delta_t
 
-            # -------------------------
-            # ROTATE
-            # -------------------------
+                print(
+                    "SCAN timer:",
+                    round(scan_timer, 2),
+                    "direction:",
+                    scan_direction,
+                    "seen:",
+                    seen_landmarks
+                )
 
+                # Drej
                 if scan_timer < SCAN_ROTATE_TIME:
 
                     if scan_direction > 0:
-
-                        robot_controller.go_diff_calibrated(
-                        -1, 1
-                    )
-
+                        robot_controller.go_diff_calibrated(-1, 1)
                     else:
+                        robot_controller.go_diff_calibrated(1, -1)
 
-                        robot_controller.go_diff_calibrated(
-                            1, -1
-                        )
-
-                # -------------------------
-                # PAUSE
-                # -------------------------
-
-                elif scan_timer < (
-                    SCAN_ROTATE_TIME + SCAN_PAUSE_TIME
-                ):
+                # Pause
+                elif scan_timer < SCAN_ROTATE_TIME + SCAN_PAUSE_TIME:
 
                     robot_controller.stop()
 
-                # -------------------------
-                # NEXT ROTATION
-                # -------------------------
-
+                # Ny rotationsperiode
                 else:
 
                     scan_timer = 0.0
@@ -446,46 +449,31 @@ try:
 
                     robot_controller.stop()
 
-
             else:
 
                 if velocity > 0 and abs(angular_velocity) < 0.05:
 
-                    robot_controller.go_diff_calibrated(
-                        1, 1
-                    )
+                    robot_controller.go_diff_calibrated(1, 1)
 
                 elif velocity > 0 and angular_velocity > 0:
 
-                    robot_controller.go_diff_calibrated(
-                        0.5, 1
-                    )
+                    robot_controller.go_diff_calibrated(0, 1)
 
                 elif velocity > 0 and angular_velocity < 0:
 
-                    robot_controller.go_diff_calibrated(
-                        1, 0.5
-                    )
+                    robot_controller.go_diff_calibrated(1, 0)
 
                 elif angular_velocity > 0:
 
-                    robot_controller.go_diff_calibrated(
-                        -1, 1
-                    )
+                    robot_controller.go_diff_calibrated(-1, 1)
 
                 elif angular_velocity < 0:
 
-                    robot_controller.go_diff_calibrated(
-                        1, -1
-                    )
+                    robot_controller.go_diff_calibrated(1, -1)
 
                 else:
 
                     robot_controller.stop()
-
-        else:
-
-            robot_controller.stop()
 
         # if isRunningOnArlo():
         #             if velocity > 0 and abs(angular_velocity) < 0.05:
