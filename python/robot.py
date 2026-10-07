@@ -200,7 +200,7 @@ class Robot(object):
         Negative rotation is right, positive rotation is left.
         """
         degrees_pr_second = 360 / 4 # 4 instead of 8 is intentional
-        correction_fraction_negative = (4*360+75)/(4*360)
+        correction_fraction_negative = (4*360+20)/(4*360)
         correction_fraction_positive = (4*360-20)/(4*360)
     
         if degrees < 0:
