@@ -379,19 +379,19 @@ try:
                 print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
             
             
-            VALID_IDS = {1, 11}
-            observations={}
+        VALID_IDS = {1, 11}
+        observations={}
             #hvis vi har dubletter af samme id, vælger vi tætteste distance
-            for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
+        for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
                 
-                if ID not in VALID_IDS:
+            if ID not in VALID_IDS:
                     continue
                 
-                if ID not in observations or dist < observations[ID][0]:
+            if ID not in observations or dist < observations[ID][0]:
                     observations[ID] = (dist, angle)
 
         
-            for ID, (measured_dist, measured_angle) in observations.items():
+        for ID, (measured_dist, measured_angle) in observations.items():
                 objectIDs.append(ID)
                 dists.append(measured_dist)
                 angles.append(measured_angle)
