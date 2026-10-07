@@ -50,8 +50,7 @@ landmarks = {
     2: (300.0, 0.0)  # Coordinates for landmark 2
 }
 landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
-range_sigma = 10.0
-bearing_sigma = 0.15
+target_x, target_y = 150.0, 0.0 #MÅL: midten mellem landmarks
 
 def jet(x):
     """Colour map for drawing particles. This function determines the colour of 
@@ -217,7 +216,6 @@ def autonomous_controller(est_pose, objectIDs, drive_state):
     Beregner motorkommandoer (velocity, angular_velocity) baseret på 
     MCL-estimatet (est_pose) og den aktive tilstand.
     """
-    target_x, target_y = 150.0, 0.0  # Mål: midten mellem landemærkerne (0,0) og (300,0)
     
     # 1. Udregn distancer og vinkel-fejl til målet ud fra MCL-poseringen[cite: 1, 4]
     dx = target_x - est_pose.getX()
@@ -334,8 +332,7 @@ try:
         # Beregn robottens estimerede position efter MCL-opdateringen
         est_pose = particle.estimate_pose(particles)
 
-        velocity, angular_velocity, drive_state = autonomous_controller(
-        est_pose, objectIDs, drive_state)
+        velocity, angular_velocity, drive_state = autonomous_controller(est_pose, objectIDs, drive_state)
 
         if isRunningOnArlo():
                     if velocity > 0 and abs(angular_velocity) < 0.05:
@@ -355,6 +352,11 @@ try:
             draw_world(est_pose, particles, world)
             cv2.imshow(WIN_RF1, colour)
             cv2.imshow(WIN_World, world)
+        
+        #Vi stopper nå estimeret position for robotten er ved mål 
+        if (est_pose.getX, est_pose.getY)==(target_x,target_y):
+            break
+            
   
 finally: 
     # Make sure to clean up even if an exception occurred
