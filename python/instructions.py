@@ -21,20 +21,7 @@ from robot import arlo
 #         sleep(8)
 #         arlo.stop()
 
-arlo.drive(0.1)
-sleep(0.5)
-
-arlo.rotate(360)
-sleep(0.5)
-arlo.rotate(-360)
-sleep(0.5)
-
-arlo.rotate(45)
-sleep(1)
-arlo.rotate(-45)
-sleep(1)
-
-arlo.rotate(3*360)
-sleep(0.5)
-arlo.rotate(-3*360)
-sleep(0.5)
+x = 4
+for _ in range(x):
+    arlo.rotate(360/x)
+    sleep(0.5)
