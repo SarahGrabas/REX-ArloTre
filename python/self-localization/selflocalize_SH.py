@@ -52,6 +52,9 @@ landmarks = {
 landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
 target_x, target_y = 150.0, 0.0 #MÅL: midten mellem landmarks
 
+V_CALIB = 40.0   # Den kører 40 cm pr. sekund ca. Fremadrettet hastighed ved go_diff_calibrated(1, 1)
+W_CALIB = 1.9234  # I radianer/pr. sekund. Rotationshastighed (~110,2 degree/s) ved go_diff_calibrated(-1, 1)
+
 def jet(x):
     """Colour map for drawing particles. This function determines the colour of 
     a particle from its weight."""
@@ -121,7 +124,7 @@ def wrap_angle(angle):
 def update_particle_weights(particles, objectIDs, dists, angles):
         #Vi beregn weight ved distance og vinkler
     particle_weights =[]
-    sigma_dist = 0.15
+    sigma_dist = 15.0 #cm
     sigma_angle=0.10
     for p in particles:
         x,y,theta =p
@@ -151,10 +154,16 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             enheds_theta=np.array(np.cos(theta), np.sin(theta))
             enheds_particle=np.array(diff_x, diff_y)/np.linalg.norm(np.array(diff_x, diff_y))
             
-            theta_particle=np.arccos(np.dot(enheds_theta,enheds_particle) )
+            dot_product = np.dot(enheds_theta, enheds_particle)
+            dot_product = np.clip(dot_product, -1.0, 1.0)
+
+            theta_particle = np.arccos(dot_product)     
             
             #Vi skal finde ud af om theta_p er negativ eller positiv, dvs om den ligger på højre eller venstre side af enheds theta
-            enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
+            #enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
+            enheds_theta_hat=np.array(-np.sin(theta),np.cos(theta))
+            
+            
             
             final_theta_particle=np.sign(np.dot(enheds_particle, enheds_theta_hat))*theta_particle
             
@@ -174,6 +183,8 @@ def update_particle_weights(particles, objectIDs, dists, angles):
 
         if total_weight > 0:
             particle_weights = particle_weights / total_weight
+        else:
+            particle_weights[:] = 1.0 / len(particle_weights)
         
         for p, p_weight in zip(particles,particle_weights):
             p.setWeight(p_weight)
@@ -314,11 +325,27 @@ try:
 
         # Hent kamerabillede og detekter ArUco-mærker (giver z_t)
         colour = cam.get_next_frame()
-        objectIDs, dists, angles = cam.detect_aruco_objects(colour)
-        if not isinstance(objectIDs, type(None)):
+        detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
+        if not isinstance(detected_objectIDs, type(None)):
             # List detected objects
-            for i in range(len(objectIDs)):
-                print("Object ID = ", objectIDs[i], ", Distance = ", dists[i], ", angle = ", angles[i])
+            for i in range(len(detected_objectIDs)):
+                print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
+            
+            #hvis vi har dubletter af samme id, vælger vi tætteste distance
+            observations = {}
+
+            for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
+                if ID not in observations or dist < observations[ID][0]:
+                    observations[ID] = (dist, angle)
+
+            objectIDs=[]
+            dists=[]
+            angles=[]
+            for ID, (measured_dist, measured_angle) in observations.items():
+                objectIDs.append(ID)
+                dists.append(measured_dist)
+                angles.append(measured_angle)
+                
 
         # MCL-KALD
         u_t = (velocity, angular_velocity)
