@@ -509,6 +509,13 @@ try:
         # MCL-KALD
         u_t = (velocity, angular_velocity)
         z_t = (objectIDs, dists, angles)
+        
+        print(
+        "MOTION INPUT:",
+        "v =", round(velocity, 2),
+        "w =", round(angular_velocity, 2),
+        "dt =", round(delta_t, 3)
+    )
         particles = mcl_step(particles, u_t, z_t, delta_t)
 
         # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
@@ -518,16 +525,13 @@ try:
         # Beregn robottens estimerede position efter MCL-opdateringen
         est_pose = particle.estimate_pose(particles)
 
-        print("BEFORE CONTROLLER:",
-      "state =", drive_state,
-      "seen =", seen_landmarks)
-
+    
         velocity, angular_velocity, new_drive_state = autonomous_controller(
                 est_pose, objectIDs, drive_state, seen_landmarks
 )
 
-        print("AFTER CONTROLLER:",
-      "state =", new_drive_state)
+        print( new_drive_state,"state =", drive_state,
+      "seen =", seen_landmarks)
 
         drive_state = new_drive_state
         if isRunningOnArlo():

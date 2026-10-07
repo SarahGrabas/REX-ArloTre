@@ -9,8 +9,8 @@ def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
     # a5 = 0.01  # Ekstra slutrotationsstøj fra translation
     # a6 = 0.01  # Ekstra slutrotationsstøj fra rotation
 
-    a1 = 0.01
-    a2 = 0.001
+    a1 = 0.02
+    a2 = 0.005
     a3 = 0.001
     a4 = 0.01
     a5 = 0.001
@@ -31,7 +31,8 @@ def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
         # Opdater tilstand
         x_new = x + v_hat * delta_t * np.cos(theta)
         y_new = y + v_hat * delta_t * np.sin(theta)
-        theta_new = np.mod(theta + w_hat * delta_t + gamma_hat * delta_t, 2.0 * np.pi)
+        
+        #theta_new = np.mod(theta + w_hat * delta_t + gamma_hat * delta_t, 2.0 * np.pi)
 
         # Gem ny tilstand i partiklen
         p.setX(x_new)
