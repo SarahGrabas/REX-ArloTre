@@ -263,16 +263,7 @@ def mcl_step(particles, u_t, z_t, delta_t):
             angles
         )
 
-        weights = np.array([
-            p.getWeight() for p in particles
-        ])
-
-        ess = 1.0 / np.sum(weights ** 2)
-
-        # Resample kun hvis partiklerne er blevet
-        # tilstrækkeligt koncentrerede
-        if ess < 0.5 * len(particles):
-            particles = resample_particles(particles)
+        particles = resample_particles(particles)
 
     return particles
 
