@@ -22,6 +22,6 @@ from robot import arlo
 #         arlo.stop()
 
 x = 8
-for _ in range(x):
-    arlo.rotate(4 * 360/x)
+for _ in range(4*x):
+    arlo.rotate(360/x)
     sleep(0.5)
