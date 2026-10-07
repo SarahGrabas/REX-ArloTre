@@ -47,10 +47,10 @@ CBLACK = (0, 0, 0)
 landmarkIDs = [1, 11]
 landmarks = {
     1: (0.0, 0.0),  # Coordinates for landmark 1
-    11: (300.0, 0.0)  # Coordinates for landmark 2
+    11: (150.0, 0.0)  # Coordinates for landmark 2
 }
 landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
-target_x, target_y = 150.0, 0.0 #MÅL: midten mellem landmarks
+target_x, target_y = 75.0, 0.0 #MÅL: midten mellem landmarks
 
 V_CALIB = 40.0   # Den kører 40 cm pr. sekund ca. Fremadrettet hastighed ved go_diff_calibrated(1, 1)
 W_CALIB = 1.9234  # I radianer/pr. sekund. Rotationshastighed (~110,2 degree/s) ved go_diff_calibrated(-1, 1)
