@@ -32,7 +32,7 @@ def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
         x_new = x + v_hat * delta_t * np.cos(theta)
         y_new = y + v_hat * delta_t * np.sin(theta)
         
-        #theta_new = np.mod(theta + w_hat * delta_t + gamma_hat * delta_t, 2.0 * np.pi)
+        theta_new = np.mod(theta + w_hat * delta_t + gamma_hat * delta_t, 2.0 * np.pi)
 
         # Gem ny tilstand i partiklen
         p.setX(x_new)
