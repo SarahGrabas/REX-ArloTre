@@ -15,7 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 
@@ -113,7 +113,7 @@ def make_plot(data: PlotData) -> Figure:
     return fig
 
 
-def plot_json(input_path: Path, output_dir: Path | None = None,
+def plot_json(input_path: Path, output_dir: Optional[Path] = None,
               overwrite: bool = False) -> tuple[Figure, Path]:
     """Læs et snapshot og gem PNG med samme nummer; behold JSON uændret."""
     import matplotlib.pyplot as plt
