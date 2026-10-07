@@ -352,11 +352,16 @@ try:
     scan_direction = 1
     scan_timer = 0.0
 
-    SCAN_ROTATE_TIME = 0.30
-    SCAN_PAUSE_TIME = 0.20
+    SCAN_ROTATE_TIME = 1.0
+    SCAN_PAUSE_TIME = 0.50
     
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
     while True:
+        print(
+        f"dt={delta_t:.2f}  "
+        f"scan={scan_timer:.2f}  "
+        f"direction={scan_direction}"
+)
         objectIDs=[]
         dists=[]
         angles=[]
