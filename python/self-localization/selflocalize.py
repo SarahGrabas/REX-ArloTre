@@ -171,11 +171,11 @@ def mcl_step(particles, u_t, z_t, delta_t):
     velocity, angular_velocity = u_t
     objectIDs, dists, angles = z_t
 
-    # 1. Prediction (Motion model - Linje 4 i pseudokode)
+    # 1. Prediction 
     if velocity != 0.0 or angular_velocity != 0.0:
         sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
 
-    # 2. Correction (Measurement model - Linje 5-6) og 3. Resampling (Linje 8-11)
+    # 2. Correction 
     if not isinstance(objectIDs, type(None)):
         if update_particle_weights(particles, objectIDs, dists, angles):
             particles = resample_particles(particles)
@@ -267,15 +267,12 @@ try:
         colour = cam.get_next_frame()
         objectIDs, dists, angles = cam.detect_aruco_objects(colour)
 
-        # =========================================================================
-        # KORREKT MCL-KALD
-        # =========================================================================
+        # MCL-KALD
         u_t = (velocity, angular_velocity)
         z_t = (objectIDs, dists, angles)
 
         # Kør det samlede MCL-skridt
         particles = mcl_step(particles, u_t, z_t, delta_t)
-        # =========================================================================
 
         # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
         if not isinstance(objectIDs, type(None)):
