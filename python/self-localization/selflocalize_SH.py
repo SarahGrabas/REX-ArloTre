@@ -279,6 +279,18 @@ def autonomous_controller(est_pose, objectIDs, drive_state, seen_landmarks):
         else:
             angular_velocity = 0.0
             drive_state = "DRIVE_TO_TARGET"
+        
+        print(
+            "ROTATE:",
+            "pose =",
+            round(est_pose.getX(), 2),
+            round(est_pose.getY(), 2),
+            round(est_pose.getTheta(), 3),
+            "target_angle =",
+            round(target_angle, 3),
+            "angle_error =",
+            round(angle_error, 3)
+        )
 
     elif drive_state == "DRIVE_TO_TARGET":
 
