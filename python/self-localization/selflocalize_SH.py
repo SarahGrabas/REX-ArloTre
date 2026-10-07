@@ -453,9 +453,18 @@ try:
         # Beregn robottens estimerede position efter MCL-opdateringen
         est_pose = particle.estimate_pose(particles)
 
-        velocity, angular_velocity, drive_state = autonomous_controller(est_pose, objectIDs, drive_state,seen_landmarks)
-        
-        
+        print("BEFORE CONTROLLER:",
+      "state =", drive_state,
+      "seen =", seen_landmarks)
+
+        velocity, angular_velocity, new_drive_state = autonomous_controller(
+                est_pose, objectIDs, drive_state, seen_landmarks
+)
+
+        print("AFTER CONTROLLER:",
+      "state =", new_drive_state)
+
+        drive_state = new_drive_state
         if isRunningOnArlo():
 
             if drive_state == "SCAN":
