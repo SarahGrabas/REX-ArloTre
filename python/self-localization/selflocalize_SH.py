@@ -395,15 +395,15 @@ try:
 
         if isRunningOnArlo():
                     if velocity > 0 and abs(angular_velocity) < 0.05:
-                        robot_controller.go_diff_calibrated(1, 1)
+                        robot_controller.go_diff_scan(1, 1)
                     elif velocity > 0 and angular_velocity > 0:
-                        robot_controller.go_diff_calibrated(0.5, 1)   # Blødt sving mod venstre under fremkørsel
+                        robot_controller.go_diff_scan(0.5, 1)   # Blødt sving mod venstre under fremkørsel
                     elif velocity > 0 and angular_velocity < 0:
-                        robot_controller.go_diff_calibrated(1, 0.5)   # Blødt sving mod højre under fremkørsel
+                        robot_controller.go_diff_scan(1, 0.5)   # Blødt sving mod højre under fremkørsel
                     elif angular_velocity > 0:
-                        robot_controller.go_diff_calibrated(-1, 1)   # Roter til venstre på stedet
+                        robot_controller.go_diff_scan(-1, 1)   # Roter til venstre på stedet
                     elif angular_velocity < 0:
-                        robot_controller.go_diff_calibrated(1, -1)   # Roter til højre på stedet
+                        robot_controller.go_diff_scan(1, -1)   # Roter til højre på stedet
                     else:
                         robot_controller.stop()
     

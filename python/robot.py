@@ -214,7 +214,19 @@ class Robot(object):
         sleep(abs(degrees) / degrees_pr_second / correction_fraction)
         if stop_when_done: arlo.stop()
 
+    def go_diff_scan(self, dirLeft: int, dirRight: int):
+        assert dirLeft in (-1, 0, 1)
+        assert dirRight in (-1, 0, 1)
 
+        speedLeft = (0, 40, 40)[dirLeft]
+        speedRight = (0, 44, 42)[dirRight]
+
+        self.go_diff(
+            speedLeft,
+            speedRight,
+            1 if dirLeft == 1 else 0,
+            1 if dirRight == 1 else 0
+    )
 
     ### CAMERA
 
