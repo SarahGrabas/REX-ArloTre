@@ -143,7 +143,8 @@ if __name__ == '__main__':
         print(path)
         simpler_path=rrt.simpler_path(path)
         print(simpler_path)
-        execute_path=robot_path(arlo,simpler_path)
+        # execute_path=robot_path(arlo,simpler_path)
+        execute_path=robot_path(arlo,path)
         print(execute_path)
         
         

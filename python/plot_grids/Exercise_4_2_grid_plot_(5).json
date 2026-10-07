@@ -99,72 +99,6 @@
       true,
       true,
       true,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
-    ],
-    [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
       true,
       false,
       false,
@@ -436,78 +370,12 @@
       false,
       false,
       false,
-      true,
-      true,
-      true,
-      true,
       false,
       false,
       false,
       false,
       false,
       false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
-    ],
-    [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      false,
-      false,
-      false,
-      false,
-      false,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
       false,
       false,
       false,
@@ -551,6 +419,21 @@
       false,
       false,
       false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
       false,
       true,
       true,
@@ -558,23 +441,8 @@
       true,
       true,
       true,
-      true,
-      true,
-      true,
-      true,
       false,
       false,
-      false,
-      false,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
       false,
       false,
       false,
@@ -627,6 +495,7 @@
       true,
       true,
       true,
+      true,
       false,
       false,
       false,
@@ -639,8 +508,7 @@
       true,
       true,
       true,
-      true,
-      true,
+      false,
       false,
       false,
       false,
@@ -684,16 +552,16 @@
       false,
       false,
       false,
-      false,
-      false,
       true,
       true,
       true,
       true,
       true,
       true,
-      false,
-      false,
+      true,
+      true,
+      true,
+      true,
       false,
       false,
       false,
@@ -751,11 +619,94 @@
       false,
       false,
       false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
       false,
       false,
       false,
       true,
       true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
       false,
       false,
       false,
@@ -763,6 +714,55 @@
       false,
       false,
       false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
       true,
       true,
       true,
@@ -773,7 +773,7 @@
       true,
       true,
       true,
-      true,
+      false,
       false,
       false,
       false,
@@ -873,38 +873,47 @@
     {
       "id": 8,
       "center": [
-        0.9037601164472271,
-        4.020104052560122,
-        0.20173810515296486
+        0.8609830375744044,
+        4.062224469325317,
+        0.18404271295613286
       ],
       "radius": 0.17324116139070414
     },
     {
       "id": 11,
       "center": [
-        0.45443368694909064,
-        4.110598869095231,
-        0.16827723273469056
+        0.40676403119212734,
+        4.09624802585556,
+        0.18098972426566992
       ],
       "radius": 0.21566756826189698
     },
     {
       "id": 9,
       "center": [
-        -0.5189613309735626,
-        2.7262080894125225,
-        0.16079275926521375
+        -0.5535558522417996,
+        2.7141410590667268,
+        0.16456727782563216
       ],
       "radius": 0.17324116139070414
     },
     {
       "id": 7,
       "center": [
-        -0.13227558101128842,
-        2.790994770017226,
-        0.16792707774027354
+        -0.20596914404602418,
+        2.7915473148264653,
+        0.19274761920827976
       ],
       "radius": 0.2616295090390226
+    },
+    {
+      "id": 1,
+      "center": [
+        -0.4074401736359299,
+        2.7695648799896606,
+        0.47666281152376977
+      ],
+      "radius": 0.19798989873223333
     }
   ],
   "path": [
@@ -913,56 +922,76 @@
       0.0
     ],
     [
-      0.07541933876990624,
-      0.4942791957381072
+      0.01259691441215595,
+      0.4998412925592411
     ],
     [
-      -0.025398981162170473,
-      0.9840093932612672
+      -0.11524004402738487,
+      0.8484619076394216
     ],
     [
-      0.25649459735924285,
-      1.3969694523328338
+      -0.2121737302716391,
+      1.3389757815218029
     ],
     [
-      0.10845703951105606,
-      1.8745517818492687
+      -0.21625950070089484,
+      1.8389590877231194
     ],
     [
-      0.37797517016450444,
-      2.2956930612901125
+      0.2667535453956986,
+      1.9681813663769572
     ],
     [
-      0.5227680753207333,
-      2.7742690893320727
+      0.3509943095614549,
+      2.461033771923252
     ],
     [
-      0.520816357575607,
-      3.274265280115406
+      0.4393503582370606,
+      2.5816058879979833
     ],
     [
-      0.1675601761477039,
-      3.628115630239546
+      0.4253105563538736,
+      3.0814087330910067
     ],
     [
-      -0.17796174405957554,
-      3.989522053337247
+      0.2933578014198749,
+      3.563683002014125
     ],
     [
-      -0.19867464959429101,
-      4.48909284466147
+      0.2598810283767251,
+      3.5767376054016293
     ],
     [
-      0.15216337934565352,
-      4.845340900725689
+      0.14903059423078302,
+      3.4187071571723493
     ],
     [
-      0.251083347346584,
-      5.3354580703195476
+      -0.23396085451210874,
+      3.6122205180899885
     ],
     [
-      0.16161260591362675,
-      5.8273879295753535
+      -0.17550653263503285,
+      4.108791854610625
+    ],
+    [
+      -0.07381271035263039,
+      4.598341000774313
+    ],
+    [
+      -0.5731676992416191,
+      4.623729877702565
+    ],
+    [
+      -0.6292276250916544,
+      5.120577223185751
+    ],
+    [
+      -0.42206422725914705,
+      5.575641313835068
+    ],
+    [
+      -0.12541212573037241,
+      5.978130482209276
     ],
     [
       0.0,
@@ -975,16 +1004,20 @@
       0.0
     ],
     [
-      0.5227680753207333,
-      2.7742690893320727
+      0.4393503582370606,
+      2.5816058879979833
     ],
     [
-      0.520816357575607,
-      3.274265280115406
+      0.4253105563538736,
+      3.0814087330910067
     ],
     [
-      -0.17796174405957554,
-      3.989522053337247
+      0.14903059423078302,
+      3.4187071571723493
+    ],
+    [
+      -0.5731676992416191,
+      4.623729877702565
     ],
     [
       0.0,
@@ -997,16 +1030,20 @@
       0.0
     ],
     [
-      0.5227680753207333,
-      2.7742690893320727
+      0.4393503582370606,
+      2.5816058879979833
     ],
     [
-      0.520816357575607,
-      3.274265280115406
+      0.4253105563538736,
+      3.0814087330910067
     ],
     [
-      -0.17796174405957554,
-      3.989522053337247
+      0.14903059423078302,
+      3.4187071571723493
+    ],
+    [
+      -0.5731676992416191,
+      4.623729877702565
     ],
     [
       0.0,
