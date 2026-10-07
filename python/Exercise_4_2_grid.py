@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-from typing import Sequence
+from typing import Sequence, Union
 
 import numpy as np
-from numpy.typing import NDArray
 
-Landmark = tuple[int, Sequence[float] | NDArray[np.float64], float]
+Landmark = tuple[int, Union[Sequence[float], np.ndarray], float]
 
 class Grid:
     x_limits: tuple[float, float]
     y_limits: tuple[float, float]
     grid_cell_size: float
     number_of_celles: list[int]
-    grid_matrix: NDArray[np.bool_]
+    grid_matrix: np.ndarray
     def __init__(self, x_min: float, x_max: float, y_min: float, y_max: float, grid_cell_size: float) -> None:
         self.x_limits = (x_min, x_max)
         self.y_limits = (y_min, y_max)
