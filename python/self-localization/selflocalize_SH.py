@@ -248,26 +248,44 @@ def autonomous_controller(est_pose, objectIDs, drive_state, seen_landmarks):
     if drive_state == "SCAN":
         angular_velocity = W_CALIB
         velocity = 0.0
+        print("SCAN")
         
         if not isinstance(objectIDs, type(None)) and len(seen_landmarks) >= 2:
             drive_state = "ROTATE_TO_TARGET"
 
-    elif drive_state == "ROTATE_TO_TARGET":
-        if abs(angle_error) > 0.08:  # Ca. 4.5 grader
-            angular_velocity = np.sign(angle_error) * W_CALIB 
+    if drive_state == "ROTATE_TO_TARGET":
+
+        if abs(angle_error) > 0.08:
+
+            if angle_error > 0:
+                angular_velocity = W_CALIB
+            else:
+                angular_velocity = -W_CALIB
+
             velocity = 0.0
+
         else:
+            angular_velocity = 0.0
             drive_state = "DRIVE_TO_TARGET"
 
     elif drive_state == "DRIVE_TO_TARGET":
+
         if dist_to_target > 10.0:
+
             velocity = V_CALIB
-            # P-regulator der holder kursen mod målet under kørsel
-            angular_velocity = np.clip(0.8 * angle_error, -W_CALIB, W_CALIB)
+
+            if abs(angle_error) > 0.08:
+                angular_velocity = np.sign(angle_error) * W_CALIB
+            else:
+                angular_velocity = 0.0
+
         else:
+            velocity = 0.0
+            angular_velocity = 0.0
             drive_state = "STOP"
 
     elif drive_state == "STOP":
+        print("STOP")
         velocity = 0.0
         angular_velocity = 0.0
 
