@@ -362,7 +362,11 @@ def autonomous_controller(est_pose, objectIDs, drive_state, seen_landmarks):
 
             if abs(angle_error) > 0.15:
                 velocity = 0.0
-                angular_velocity = np.sign(angle_error) * W_CALIB
+                angular_velocity = np.clip(
+                    1.0 * angle_error,
+                    -W_CALIB,
+                    W_CALIB
+                )
             else:
                 velocity = V_CALIB
                 angular_velocity = 0.0
