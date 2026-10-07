@@ -193,6 +193,17 @@ def update_particle_weights(particles, objectIDs, dists, angles):
         
     for p, p_weight in zip(particles,particle_weights):
             p.setWeight(p_weight)
+            
+    print(
+    "x =", round(x, 2),
+    "y =", round(y, 2),
+    "theta =", round(theta, 2),
+    "pred_dist =", round(particle_dist, 2),
+    "measured_dist =", round(measured_dist, 2),
+    "pred_angle =", round(final_theta_particle, 3),
+    "measured_angle =", round(angles[i], 3),
+    "weight =", weight
+)
 
 
 def resample_particles(particles):
@@ -208,27 +219,60 @@ def resample_particles(particles):
         for index in selected
     ]
 
+# def mcl_step(particles, u_t, z_t, delta_t):
+#     """
+#     Udfører ét komplet MCL-skridt: Prediction, Correction og Resampling.
+#     """
+#     velocity, angular_velocity = u_t
+#     objectIDs, dists, angles = z_t
+
+#     # 1. Prediction 
+#     if velocity != 0.0 or angular_velocity != 0.0:
+#         sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
+
+#     # 2. Correction 
+#     if objectIDs:
+#         update_particle_weights(
+#         particles,
+#         objectIDs,
+#         dists,
+#         angles
+#     )
+
+#         particles = resample_particles(particles)
+
+#     return particles
+
 def mcl_step(particles, u_t, z_t, delta_t):
-    """
-    Udfører ét komplet MCL-skridt: Prediction, Correction og Resampling.
-    """
     velocity, angular_velocity = u_t
     objectIDs, dists, angles = z_t
 
-    # 1. Prediction 
     if velocity != 0.0 or angular_velocity != 0.0:
-        sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
+        sample_motion_model_velocity(
+            particles,
+            velocity,
+            angular_velocity,
+            delta_t
+        )
 
-    # 2. Correction 
     if objectIDs:
         update_particle_weights(
-        particles,
-        objectIDs,
-        dists,
-        angles
-    )
+            particles,
+            objectIDs,
+            dists,
+            angles
+        )
 
-        particles = resample_particles(particles)
+        weights = np.array([
+            p.getWeight() for p in particles
+        ])
+
+        ess = 1.0 / np.sum(weights ** 2)
+
+        # Resample kun hvis partiklerne er blevet
+        # tilstrækkeligt koncentrerede
+        if ess < 0.5 * len(particles):
+            particles = resample_particles(particles)
 
     return particles
 
