@@ -392,7 +392,9 @@ try:
     scan_direction = 1
     scan_timer = 0.0
 
-    SCAN_ROTATE_TIME = 1.0
+    import random
+
+    SCAN_ROTATE_TIME = random.uniform(1.0, 2.3)
     SCAN_PAUSE_TIME = 0.50
     
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
@@ -537,6 +539,7 @@ try:
         drive_state = new_drive_state
         if isRunningOnArlo():
             
+
             if drive_state == "SCAN":
 
                 scan_timer += delta_t
@@ -544,59 +547,32 @@ try:
                 print(
                     "SCAN timer:",
                     round(scan_timer, 2),
+                    "direction:",
+                    scan_direction,
                     "seen:",
                     seen_landmarks
                 )
 
-                # Drej konstant samme vej
-                robot_controller.go_diff_calibrated(-1, 1)
+                # Drej
+                if scan_timer < SCAN_ROTATE_TIME:
 
-                velocity = 0.0
-                angular_velocity = W_CALIB
+                    if scan_direction > 0:
+                        robot_controller.go_diff_calibrated(-1, 1)
+                    else:
+                        robot_controller.go_diff_calibrated(1, -1)
 
-                # Når begge landmarks er fundet
-                if 1 in seen_landmarks and 11 in seen_landmarks:
+                # Pause
+                elif scan_timer < SCAN_ROTATE_TIME + SCAN_PAUSE_TIME:
+
                     robot_controller.stop()
 
-                    velocity = 0.0
-                    angular_velocity = 0.0
+                # Ny rotationsperiode
+                else:
 
-                    drive_state = "ROTATE_TO_TARGET"
                     scan_timer = 0.0
+                    scan_direction *= -1
 
-            # if drive_state == "SCAN":
-
-            #     scan_timer += delta_t
-
-            #     print(
-            #         "SCAN timer:",
-            #         round(scan_timer, 2),
-            #         "direction:",
-            #         scan_direction,
-            #         "seen:",
-            #         seen_landmarks
-            #     )
-
-            #     # Drej
-            #     if scan_timer < SCAN_ROTATE_TIME:
-
-            #         if scan_direction > 0:
-            #             robot_controller.go_diff_calibrated(-1, 1)
-            #         else:
-            #             robot_controller.go_diff_calibrated(1, -1)
-
-            #     # Pause
-            #     elif scan_timer < SCAN_ROTATE_TIME + SCAN_PAUSE_TIME:
-
-            #         robot_controller.stop()
-
-            #     # Ny rotationsperiode
-            #     else:
-
-            #         scan_timer = 0.0
-            #         scan_direction *= -1
-
-            #         robot_controller.stop()
+                    robot_controller.stop()
 
             else:
 
