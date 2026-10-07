@@ -22,7 +22,7 @@ def isRunningOnArlo():
 robot_module = None
 if isRunningOnArlo():
     # XXX: You need to change this path to point to where your robot.py file is located
-    sys.path.append("../../../../Arlo/python")
+    sys.path.append("../python")
     try:
         import robot as robot_module
     except ImportError:
@@ -124,8 +124,11 @@ def wrap_angle(angle):
 def update_particle_weights(particles, objectIDs, dists, angles):
         #Vi beregn weight ved distance og vinkler
     particle_weights =[]
+    
+    #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
     sigma_dist = 15.0 #cm
     sigma_angle=0.10
+    
     for p in particles:
         x,y,theta =p
         
@@ -222,7 +225,7 @@ def mcl_step(particles, u_t, z_t, delta_t):
     return particles
 
 # udkast til en tilstandsmaskine ift. at finde midterpunktet mellem to landmarks
-def autonomous_controller(est_pose, objectIDs, drive_state):
+def autonomous_controller(est_pose, objectIDs, drive_state, seen_landmarks):
     """
     Beregner motorkommandoer (velocity, angular_velocity) baseret på 
     MCL-estimatet (est_pose) og den aktive tilstand.
@@ -244,7 +247,7 @@ def autonomous_controller(est_pose, objectIDs, drive_state):
         angular_velocity = W_CALIB
         velocity = 0.0
         
-        if not isinstance(objectIDs, type(None)) and len(set(objectIDs)) >= 2:
+        if not isinstance(objectIDs, type(None)) and len(seen_landmarks) >= 2:
             drive_state = "ROTATE_TO_TARGET"
 
     elif drive_state == "ROTATE_TO_TARGET":
@@ -313,6 +316,8 @@ try:
     angular_velocity = 0.0
     drive_state = "SCAN"
     last_time = timer()
+    
+    seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
     while True:
 
         action = cv2.waitKey(10)
@@ -331,9 +336,8 @@ try:
             for i in range(len(detected_objectIDs)):
                 print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
             
+            observations={}
             #hvis vi har dubletter af samme id, vælger vi tætteste distance
-            observations = {}
-
             for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
                 if ID not in observations or dist < observations[ID][0]:
                     observations[ID] = (dist, angle)
@@ -345,6 +349,8 @@ try:
                 objectIDs.append(ID)
                 dists.append(measured_dist)
                 angles.append(measured_angle)
+                
+                seen_landmarks.add(ID)
                 
 
         # MCL-KALD
@@ -359,7 +365,7 @@ try:
         # Beregn robottens estimerede position efter MCL-opdateringen
         est_pose = particle.estimate_pose(particles)
 
-        velocity, angular_velocity, drive_state = autonomous_controller(est_pose, objectIDs, drive_state)
+        velocity, angular_velocity, drive_state = autonomous_controller(est_pose, objectIDs, drive_state,seen_landmarks)
 
         if isRunningOnArlo():
                     if velocity > 0 and abs(angular_velocity) < 0.05:
@@ -381,7 +387,7 @@ try:
             cv2.imshow(WIN_World, world)
         
         #Vi stopper nå estimeret position for robotten er ved mål 
-        if (est_pose.getX, est_pose.getY)==(target_x,target_y):
+        if np.hypot(est_pose.getX() - target_x,est_pose.getY() - target_y) < 10.0:
             break
             
   
