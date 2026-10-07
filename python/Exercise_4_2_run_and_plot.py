@@ -1,15 +1,15 @@
-"""Kør Exercise 4 og gem det faktiske grid og ruter uden at ændre robotfilerne.
+"""Kør Exercise 4 på robotten og gem kun JSON; kræver ikke Matplotlib.
 
-På robotten (udfører også den normale robotkørsel):
-    python3 Exercise_4_2_run_and_plot.py --run
+Fra robotprojektets python-mappe:
+    python3 Exercise_4_1.py && python3 Exercise_4_2_run_and_plot.py --run
 
-Genplot gemte data uden robotforbindelse:
-    python3 Exercise_4_2_run_and_plot.py --input "plot_grids/Exercise_4_2_grid_plot_(1).json"
-
-PNG og JSON gemmes ved siden af hinanden i python/plot_grids. --show åbner
-desuden figuren. --output-dir kan bruges til at vælge en anden mappe.
-Koordinatfilen til --run læses fra samme mappe som Exercise_4_2.py.
+--run udfører den normale fysiske robotkørsel. Efter afslutning gemmes grid,
+landmarks og ruter i plot_grids/Exercise_4_2_grid_plot_(N).json.
+Overfør JSON til computeren og brug Exercise_4_2_plot_from_json.py til PNG.
+Koordinatfilen læses fra samme mappe som Exercise_4_2.py.
 """
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -17,6 +17,7 @@ from pathlib import Path
 import re
 import runpy
 import sys
+from typing import Any, Literal, Mapping, TypedDict, overload
 
 import numpy as np
 
@@ -25,11 +26,37 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 PREFIX = 'Exercise_4_2_grid_plot_'
 
 
-def capture_result(namespace):
+class LandmarkData(TypedDict):
+    id: int
+    center: list[float]
+    radius: float
+
+
+class PlotData(TypedDict):
+    grid_matrix: list[list[bool]]
+    x_limits: list[float]
+    y_limits: list[float]
+    grid_cell_size: float
+    robot_radius: float
+    coordinates: list[LandmarkData]
+    path: list[list[float]] | None
+    simpler_path: list[list[float]] | None
+    execute_path: list[list[float]] | None
+    start: list[float] | None
+    goal: list[float] | None
+
+
+def capture_result(namespace: Mapping[str, Any]) -> PlotData:
     """Gem selve matrixen: ingen genberegning af grid eller ny RRT-kørsel."""
     grid = namespace['map']
 
-    def points(name):
+    @overload
+    def points(name: Literal['START_POINT', 'GOAL']) -> list[float] | None: ...
+
+    @overload
+    def points(name: Literal['path', 'simpler_path', 'execute_path']) -> list[list[float]] | None: ...
+
+    def points(name: str) -> list[float] | list[list[float]] | None:
         value = namespace.get(name)
         return None if value is None else np.asarray(value, dtype=float).tolist()
 
@@ -52,7 +79,7 @@ def capture_result(namespace):
     }
 
 
-def run_exercise():
+def run_exercise() -> PlotData:
     """Kører den eksisterende hovedfil uændret, inklusive motorstyringen."""
     previous_cwd = Path.cwd()
     previous_path = sys.path[:]
@@ -66,149 +93,42 @@ def run_exercise():
         sys.path[:] = previous_path
 
 
-def make_plot(data):
-    import matplotlib.pyplot as plt
-    from matplotlib.colors import ListedColormap
-    from matplotlib.patches import Circle, Patch, Rectangle
-
-    grid = np.asarray(data['grid_matrix'], dtype=bool)
-    low = np.array([data['x_limits'][0], data['y_limits'][0]], dtype=float)
-    high = np.array([data['x_limits'][1], data['y_limits'][1]], dtype=float)
-    cell_size = float(data['grid_cell_size'])
-    if grid.ndim != 2 or not grid.size or cell_size <= 0 or np.any(high <= low):
-        raise ValueError('Ugyldigt grid eller ugyldige kortgrænser i input')
-    # Brug faktiske cellekanter, også hvis grid er mindre end kortgrænsen.
-    xs = np.minimum(low[0] + np.arange(grid.shape[0] + 1) * cell_size, high[0])
-    ys = np.minimum(low[1] + np.arange(grid.shape[1] + 1) * cell_size, high[1])
-    coordinates = data['coordinates']
-    fig, axes = plt.subplots(1, 2, figsize=(12, 9), gridspec_kw={'width_ratios': [1, 1.5]})
-    fig.suptitle('Exercise 4.2 – grid og ruter fra samme kørsel', fontsize=15)
-    route_styles = [
-        ('path', '.--', '#287bb5', 'RRT-rute', 1.2),
-        ('simpler_path', '--', '#15956a', 'Simpler path', 2.8),
-        ('execute_path', 'o-', '#ce3047', 'execute_path (kommandoer)', 1.5),
-    ]
-    for ax in axes:
-        ax.pcolormesh(xs, ys, grid.T, cmap=ListedColormap(['#ffffff', '#c7cdd5']),
-                      vmin=0, vmax=1, edgecolors='#e3e6eb', linewidth=0.35)
-        ax.add_patch(Rectangle(low, *(high-low), fill=False, linestyle='--',
-                               edgecolor='black', label='Angivet kortgrænse'))
-        for i, item in enumerate(coordinates):
-            center = item['center'][:2]
-            radius = item['radius']
-            ax.add_patch(Circle(center, radius, color='#efaa45', alpha=0.65,
-                                label='Landmarkets modelcirkel' if i == 0 else None))
-            # Bufferen er allerede med i den gemte gridmatrix. Her vises kun
-            # fysisk modelradius + robotradius, så vi ikke gætter på en buffer.
-            ax.add_patch(Circle(center, radius + data['robot_radius'], fill=False,
-                                linestyle=':', edgecolor='#91652c',
-                                label='Landmarkradius + robotradius' if i == 0 else None))
-            ax.text(*center, str(item['id']), ha='center', va='center',
-                    fontweight='bold', clip_on=True)
-        for key, style, color, label, width in route_styles:
-            route = data.get(key)
-            if route is not None and len(route):
-                points = np.asarray(route, dtype=float)
-                ax.plot(*points[:, :2].T, style, color=color, linewidth=width,
-                        markersize=4, label=label)
-        for key, label, marker, color in [('start', 'Start', 'o', 'black'),
-                                           ('goal', 'Mål', '*', '#15956a')]:
-            if data.get(key) is not None:
-                ax.scatter(*data[key][:2], marker=marker, color=color, s=65,
-                           zorder=6, label=label)
-        ax.set_aspect('equal')
-        ax.set_xlabel('X (meter)')
-        ax.set_ylabel('Y (meter)')
-
-    # Oversigten inkluderer også landmarks, som ligger uden for kortet.
-    bounds_low, bounds_high = low.copy(), high.copy()
-    for item in coordinates:
-        c, r = np.asarray(item['center'][:2]), item['radius']
-        bounds_low = np.minimum(bounds_low, c-r)
-        bounds_high = np.maximum(bounds_high, c+r)
-    axes[0].set(xlim=(bounds_low[0]-.15, bounds_high[0]+.15),
-                ylim=(bounds_low[1]-.15, bounds_high[1]+.15),
-                title=f'Hele grid: {grid.shape[0]} × {grid.shape[1]} celler')
-    # Zoom omkring landmarks, ikke en hardkodet placering fra en gammel rute.
-    if coordinates:
-        centers = np.array([item['center'][:2] for item in coordinates])
-        radii = np.array([item['radius'] + data['robot_radius'] for item in coordinates])
-        zoom_low = np.min(centers-radii[:, None], axis=0)-.15
-        zoom_high = np.max(centers+radii[:, None], axis=0)+.15
-    else:
-        zoom_low, zoom_high = low-.15, high+.15
-    axes[1].set(xlim=(zoom_low[0], zoom_high[0]), ylim=(zoom_low[1], zoom_high[1]),
-                title='Zoom omkring landmarks')
-    if data.get('path') is None:
-        axes[0].text(.5, .97, 'Ingen rute fundet', transform=axes[0].transAxes,
-                     ha='center', va='top', color='#ce3047',
-                     bbox={'facecolor': 'white', 'alpha': .9})
-    handles, labels = axes[0].get_legend_handles_labels()
-    handles.insert(0, Patch(facecolor='#c7cdd5'))
-    labels.insert(0, 'Optaget celle (inkl. gridbuffer)')
-    fig.legend(handles, labels, loc='lower center', bbox_to_anchor=(.5, .04), ncol=3, fontsize=9)
-    fig.text(.5, .015,
-             f'Celler: {cell_size*100:g} × {cell_size*100:g} cm. '
-             'execute_path er kommanderede punkter, ikke en målt robotbane.',
-             ha='center', fontsize=9)
-    fig.tight_layout(rect=(0, .19, 1, .95))
-    return fig
-
-
-def save_plot(data, output_dir):
-    """Næste nummer er største eksisterende nummer + 1, overskriv aldrig."""
+def save_data(data: PlotData, output_dir: str | os.PathLike[str]) -> Path:
+    """Gem JSON med næste ledige nummer uden at importere Matplotlib."""
+    # Valider serialisering inden oprettelse af filen.
+    serialized = json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     pattern = re.compile(r'Exercise_4_2_grid_plot_\((\d+)\)\.(png|json)$')
     numbers = [int(match.group(1)) for path in output_dir.iterdir()
                if (match := pattern.fullmatch(path.name))]
     number = max(numbers, default=0) + 1
-    fig = make_plot(data)
     while True:
-        png_path = output_dir / f'{PREFIX}({number}).png'
-        json_path = png_path.with_suffix('.json')
-        if json_path.exists():
+        json_path = output_dir / f'{PREFIX}({number}).json'
+        if json_path.with_suffix('.png').exists():
             number += 1
             continue
         try:
-            # Eksklusiv oprettelse beskytter også mod samtidige kørsler.
-            stream = png_path.open('xb')
+            stream = json_path.open('x', encoding='utf-8')
             break
         except FileExistsError:
             number += 1
     with stream:
-        fig.savefig(stream, format='png', dpi=180)
-    with json_path.open('x', encoding='utf-8') as stream:
-        json.dump(data, stream, indent=2, ensure_ascii=False, allow_nan=False)
-    return fig, png_path, json_path
+        stream.write(serialized)
+    return json_path
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    source = parser.add_mutually_exclusive_group(required=True)
-    source.add_argument('--run', action='store_true',
-                        help='Kør Exercise_4_2.py, inklusive fysisk robotkørsel, og gem plot')
-    source.add_argument('--input', type=Path, help='Genplot en gemt JSON uden robotforbindelse')
+    parser.add_argument('--run', action='store_true', required=True,
+                        help='Kør Exercise_4_2.py inklusive robotkørsel, og gem kun JSON')
     parser.add_argument('--output-dir', type=Path, default=SCRIPT_DIR / 'plot_grids')
-    parser.add_argument('--show', action='store_true', help='Åbn også plotvinduet')
     args = parser.parse_args()
-    import matplotlib
-    if not args.show:
-        matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-    if args.run:
-        print('Kører Exercise_4_2.py inklusive robotkørsel. Plot gemmes efter afslutning.', flush=True)
-        data = run_exercise()
-    else:
-        with args.input.open(encoding='utf-8') as stream:
-            data = json.load(stream)
-    fig, png_path, json_path = save_plot(data, args.output_dir.resolve())
-    print(f'Plot gemt: {png_path}')
+    print('Kører Exercise_4_2.py inklusive robotkørsel. JSON gemmes efter afslutning.', flush=True)
+    data = run_exercise()
+    json_path = save_data(data, args.output_dir.resolve())
     print(f'Data gemt: {json_path}')
-    if args.show:
-        plt.show()
-    plt.close(fig)
 
 
 if __name__ == '__main__':
