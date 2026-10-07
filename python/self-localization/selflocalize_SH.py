@@ -44,10 +44,10 @@ CBLACK = (0, 0, 0)
 
 # Landmarks.
 # The robot knows the position of 2 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [1, 2]
+landmarkIDs = [1, 11]
 landmarks = {
     1: (0.0, 0.0),  # Coordinates for landmark 1
-    2: (300.0, 0.0)  # Coordinates for landmark 2
+    11: (300.0, 0.0)  # Coordinates for landmark 2
 }
 landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
 target_x, target_y = 150.0, 0.0 #MÅL: midten mellem landmarks
@@ -337,6 +337,12 @@ try:
     drive_state = "SCAN"
     last_time = timer()
     
+    scan_direction = 1
+    scan_timer = 0.0
+
+    SCAN_ROTATE_TIME = 0.30
+    SCAN_PAUSE_TIME = 0.20
+    
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
     while True:
 
@@ -357,7 +363,7 @@ try:
                 print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
             
             
-            VALID_IDS = {1, 2}
+            VALID_IDS = {1, 11}
             observations={}
             #hvis vi har dubletter af samme id, vælger vi tætteste distance
             for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
@@ -392,20 +398,108 @@ try:
         est_pose = particle.estimate_pose(particles)
 
         velocity, angular_velocity, drive_state = autonomous_controller(est_pose, objectIDs, drive_state,seen_landmarks)
-
+        
+        
         if isRunningOnArlo():
-                    if velocity > 0 and abs(angular_velocity) < 0.05:
-                        robot_controller.go_diff_scan(1, 1)
-                    elif velocity > 0 and angular_velocity > 0:
-                        robot_controller.go_diff_scan(0.5, 1)   # Blødt sving mod venstre under fremkørsel
-                    elif velocity > 0 and angular_velocity < 0:
-                        robot_controller.go_diff_scan(1, 0.5)   # Blødt sving mod højre under fremkørsel
-                    elif angular_velocity > 0:
-                        robot_controller.go_diff_scan(-1, 1)   # Roter til venstre på stedet
-                    elif angular_velocity < 0:
-                        robot_controller.go_diff_scan(1, -1)   # Roter til højre på stedet
+
+            if drive_state == "SCAN":
+
+            # Brug delta_t til scan-timeren
+                scan_timer += delta_t
+
+            # -------------------------
+            # ROTATE
+            # -------------------------
+
+                if scan_timer < SCAN_ROTATE_TIME:
+
+                    if scan_direction > 0:
+
+                        robot_controller.go_diff_calibrated(
+                        -1, 1
+                    )
+
                     else:
-                        robot_controller.stop()
+
+                        robot_controller.go_diff_calibrated(
+                            1, -1
+                        )
+
+                # -------------------------
+                # PAUSE
+                # -------------------------
+
+                elif scan_timer < (
+                    SCAN_ROTATE_TIME + SCAN_PAUSE_TIME
+                ):
+
+                    robot_controller.stop()
+
+                # -------------------------
+                # NEXT ROTATION
+                # -------------------------
+
+                else:
+
+                    scan_timer = 0.0
+                    scan_direction *= -1
+
+                    robot_controller.stop()
+
+
+            else:
+
+                if velocity > 0 and abs(angular_velocity) < 0.05:
+
+                    robot_controller.go_diff_calibrated(
+                        1, 1
+                    )
+
+                elif velocity > 0 and angular_velocity > 0:
+
+                    robot_controller.go_diff_calibrated(
+                        0.5, 1
+                    )
+
+                elif velocity > 0 and angular_velocity < 0:
+
+                    robot_controller.go_diff_calibrated(
+                        1, 0.5
+                    )
+
+                elif angular_velocity > 0:
+
+                    robot_controller.go_diff_calibrated(
+                        -1, 1
+                    )
+
+                elif angular_velocity < 0:
+
+                    robot_controller.go_diff_calibrated(
+                        1, -1
+                    )
+
+                else:
+
+                    robot_controller.stop()
+
+        else:
+
+            robot_controller.stop()
+
+        # if isRunningOnArlo():
+        #             if velocity > 0 and abs(angular_velocity) < 0.05:
+        #                 robot_controller.go_diff_scan(1, 1)
+        #             elif velocity > 0 and angular_velocity > 0:
+        #                 robot_controller.go_diff_scan(0.5, 1)   # Blødt sving mod venstre under fremkørsel
+        #             elif velocity > 0 and angular_velocity < 0:
+        #                 robot_controller.go_diff_scan(1, 0.5)   # Blødt sving mod højre under fremkørsel
+        #             elif angular_velocity > 0:
+        #                 robot_controller.go_diff_scan(-1, 1)   # Roter til venstre på stedet
+        #             elif angular_velocity < 0:
+        #                 robot_controller.go_diff_scan(1, -1)   # Roter til højre på stedet
+        #             else:
+        #                 robot_controller.stop()
     
         #if showGUI:
             #draw_world(est_pose, particles, world)
