@@ -327,6 +327,13 @@ def autonomous_controller(est_pose, objectIDs, drive_state, seen_landmarks):
             velocity = 0.0
             angular_velocity = 0.0
             drive_state = "STOP"
+            
+        print(
+        "DRIVE COMMAND:",
+        "theta =", round(est_pose.getTheta(), 3),
+        "velocity =", velocity,
+        "angular_velocity =", angular_velocity
+    )
 
     elif drive_state == "STOP":
         print("STOP")
@@ -467,6 +474,16 @@ try:
         )
 
         print("---------------------")
+        
+        print(
+        "POSE:",
+        round(est_pose.getX(), 2),
+        round(est_pose.getY(), 2),
+        "theta:",
+        round(est_pose.getTheta(), 3),
+        "theta_deg:",
+        round(np.degrees(est_pose.getTheta()), 1)
+    )
                     
         # if detected_objectIDs is not None:   
         #     VALID_IDS = {1, 11}
