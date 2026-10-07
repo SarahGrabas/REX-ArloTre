@@ -442,6 +442,10 @@ try:
     SCAN_PAUSE_TIME = 0.50
     
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
+    import time
+
+    last_observations = {}
+    
     while True:
 
         action = cv2.waitKey(10)
@@ -474,6 +478,7 @@ try:
             and detected_angles is not None
         ):
 
+            # Find de nærmeste observationer i denne frame
             for ID, dist, angle in zip(
                 detected_objectIDs,
                 detected_dists,
@@ -485,25 +490,87 @@ try:
                 if ID not in VALID_IDS:
                     continue
 
-                # Gem nærmeste observation for hvert gyldigt landmark
                 if ID not in observations or dist < observations[ID][0]:
                     observations[ID] = (dist, angle)
 
-        # Lav observationerne til MCL
-        for ID, (measured_dist, measured_angle) in observations.items():
+        # Gem de nye observationer
+        current_time = time.time()
 
-            objectIDs.append(ID)
-            dists.append(measured_dist)
-            angles.append(measured_angle)
+        for ID, (dist, angle) in observations.items():
+            last_observations[ID] = (
+                dist,
+                angle,
+                current_time
+            )
 
-            # Husk at landmark er blevet set
             seen_landmarks.add(ID)
 
-        print("OBSERVATIONS:", observations)
-        print("objectIDs:", objectIDs)
-        print("seen_landmarks:", seen_landmarks)
+
+        # Brug også tidligere observationer, hvis de stadig er friske
+        OBSERVATION_TIMEOUT = 1.5
+
+        for ID, (measured_dist, measured_angle, timestamp) in last_observations.items():
+
+            age = current_time - timestamp
+
+            if age <= OBSERVATION_TIMEOUT:
+                objectIDs.append(ID)
+                dists.append(measured_dist)
+                angles.append(measured_angle)
         
-        print("----- MCL CHECK -----")
+        print("MCL observations:")
+        print("objectIDs:", objectIDs)
+        print("dists:", dists)
+        print("angles:", angles)
+                
+        # VALID_IDS = {1, 11}
+
+        # objectIDs = []
+        # dists = []
+        # angles = []
+
+        # observations = {}
+
+        # if (
+        #     detected_objectIDs is not None
+        #     and detected_dists is not None
+        #     and detected_angles is not None
+        # ):
+
+        #     for ID, dist, angle in zip(
+        #         detected_objectIDs,
+        #         detected_dists,
+        #         detected_angles
+        #     ):
+
+        #         ID = int(ID)
+
+        #         if ID not in VALID_IDS:
+        #             continue
+
+        #         # Gem nærmeste observation for hvert gyldigt landmark
+        #         if ID not in observations or dist < observations[ID][0]:
+        #             observations[ID] = (dist, angle)
+                    
+        #         current_time = time.time()
+
+        #         for ID, (dist, angle) in observations.items():
+        #             last_observations[ID] = (
+        #             dist,
+        #             angle,
+        #             current_time
+        #         )
+
+        # # Lav observationerne til MCL
+        # for ID, (measured_dist, measured_angle) in observations.items():
+
+        #     objectIDs.append(ID)
+        #     dists.append(measured_dist)
+        #     angles.append(measured_angle)
+
+        #     # Husk at landmark er blevet set
+        #     seen_landmarks.add(ID)
+
 
         for ID, dist, angle in zip(objectIDs, dists, angles):
             print(
