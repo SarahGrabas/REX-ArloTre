@@ -156,8 +156,8 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             
             
         #Nu gør vi med vinklerne 
-            enheds_theta=np.array(np.cos(theta), np.sin(theta))
-            enheds_particle=np.array(diff_x, diff_y)/np.linalg.norm(np.array(diff_x, diff_y))
+            enheds_theta=np.array([np.cos(theta), np.sin(theta)])
+            enheds_particle=np.array([diff_x, diff_y])/np.linalg.norm(np.array([diff_x, diff_y]))
             
             dot_product = np.dot(enheds_theta, enheds_particle)
             dot_product = np.clip(dot_product, -1.0, 1.0)
@@ -166,7 +166,7 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             
             #Vi skal finde ud af om theta_p er negativ eller positiv, dvs om den ligger på højre eller venstre side af enheds theta
             #enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
-            enheds_theta_hat=np.array(-np.sin(theta),np.cos(theta))
+            enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])
             
             
             
