@@ -1,8 +1,7 @@
 import Exercise_4_2_rrt as rrt_class   
 import Exercise_4_2_grid as grid
 import numpy as np
-from typing import Sequence
-from numpy.typing import NDArray
+from typing import Sequence, Union
 from robot import Robot, sleep, arlo
 # import matplotlib.pyplot as plt
 
@@ -41,8 +40,8 @@ import Exercise_1 as ex1
 
 def robot_path(
     arlo: Robot,
-    path: "Sequence[Sequence[float] | NDArray[np.float64]]",
-) -> "list[Sequence[float] | NDArray[np.float64]]":
+    path: "Sequence[Union[Sequence[float], np.ndarray]]",
+) -> "list[Union[Sequence[float], np.ndarray]]":
     """Funktion til at køre den simpler path
     Gridsize er længde på x og y akse i meter"""
 
