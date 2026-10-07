@@ -119,40 +119,69 @@ def wrap_angle(angle):
     return (angle + np.pi) % (2.0 * np.pi) - np.pi
 
 
-def update_particle_weights(particles, object_ids, distances, angles):
-    observations = [
-        (int(object_id), distance, angle)
-        for object_id, distance, angle in zip(object_ids, distances, angles)
-        if int(object_id) in landmarks
-    ]
-    if not observations:
-        return False
-
-    log_weights = []
+def update_particle_weights(particles, objectIDs, dists, angles):
+        #Vi beregn weight ved distance og vinkler
+    particle_weights =[]
+    sigma_dist = 0.15
+    sigma_angle=0.10
     for p in particles:
-        log_weight = np.log(max(p.getWeight(), 1e-300))
-        for object_id, measured_range, measured_bearing in observations:
-            landmark_x, landmark_y = landmarks[object_id]
-            dx = landmark_x - p.getX()
-            dy = landmark_y - p.getY()
-            predicted_range = np.hypot(dx, dy)
-            predicted_bearing = wrap_angle(np.arctan2(dy, dx) - p.getTheta())
+        x,y,theta =p
+        
+        weight = 1.0
 
-            range_error = (measured_range - predicted_range) / range_sigma
-            bearing_error = wrap_angle(measured_bearing - predicted_bearing) / bearing_sigma
-            log_weight -= 0.5 * (range_error**2 + bearing_error**2)
-        log_weights.append(log_weight)
+        for i in range(len(objectIDs)):
 
-    weights = np.exp(np.asarray(log_weights) - np.max(log_weights))
-    weights /= np.sum(weights)
-    for p, weight in zip(particles, weights):
-        p.setWeight(weight)
-    return True
+        #Landmarkets position i world 
+            x_obj, y_obj = landmarks[objectIDs[i]]
+
+            diff_x = x_obj - x
+            diff_y = y_obj - y
+
+            particle_dist = np.sqrt(diff_x**2 + diff_y**2)
+
+        #Kameraets målte afstand til landmark
+            measured_dist = dists[i]
+
+        #Gaussian probability
+        #particle_dist - measured_dist er forskellen mellem opringelig afstand og målte afstand hvis robotten er på denne partikle.
+            land_dist = (
+                1 / (np.sqrt(2 * np.pi) * sigma_dist)) * np.exp(-0.5 * ((particle_dist - measured_dist) / sigma_dist)**2)
+            
+            
+        #Nu gør vi med vinklerne 
+            enheds_theta=np.array(np.cos(theta), np.sin(theta))
+            enheds_particle=np.array(diff_x, diff_y)/np.linalg.norm(np.array(diff_x, diff_y))
+            
+            theta_particle=np.arccos(np.dot(enheds_theta,enheds_particle) )
+            
+            #Vi skal finde ud af om theta_p er negativ eller positiv, dvs om den ligger på højre eller venstre side af enheds theta
+            enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
+            
+            final_theta_particle=np.sign(np.dot(enheds_particle, enheds_theta_hat))*theta_particle
+            
+            land_angle = (
+                1 / (np.sqrt(2 * np.pi) * sigma_angle)) * np.exp(-0.5 * ((final_theta_particle - angles[i]) / sigma_angle)**2)
+            
+            land_weight=land_dist*land_angle
+
+        #Hvis der er flere landmarks, ganges deres sandsynligheder sammen
+            weight *= land_weight
+        
+        particle_weights.append(weight)    
+        
+        particle_weights = np.array(particle_weights)
+
+        total_weight = np.sum(particle_weights)
+
+        if total_weight > 0:
+            particle_weights = particle_weights / total_weight
+        
+        for p, p_weight in zip(particles,particle_weights):
+            p.setWeight(p_weight)
 
 
 def resample_particles(particles):
     weights = np.asarray([p.getWeight() for p in particles], dtype=float)
-    weights /= np.sum(weights)
     selected = np.random.choice(len(particles), size=len(particles), replace=True, p=weights)
     return [
         particle.Particle(
@@ -176,9 +205,9 @@ def mcl_step(particles, u_t, z_t, delta_t):
         sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
 
     # 2. Correction 
-    if not isinstance(objectIDs, type(None)):
-        if update_particle_weights(particles, objectIDs, dists, angles):
-            particles = resample_particles(particles)
+    if not isinstance(objectIDs, type(None)): #Hvis der er observeret objekter, opdateres partikel vægt
+        update_particle_weights(particles, objectIDs, dists, angles)
+        particles = resample_particles(particles)
 
     return particles
 
@@ -288,6 +317,10 @@ try:
         # Hent kamerabillede og detekter ArUco-mærker (giver z_t)
         colour = cam.get_next_frame()
         objectIDs, dists, angles = cam.detect_aruco_objects(colour)
+        if not isinstance(objectIDs, type(None)):
+            # List detected objects
+            for i in range(len(objectIDs)):
+                print("Object ID = ", objectIDs[i], ", Distance = ", dists[i], ", angle = ", angles[i])
 
         # MCL-KALD
         u_t = (velocity, angular_velocity)
