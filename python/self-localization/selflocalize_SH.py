@@ -299,10 +299,10 @@ try:
     robot_controller = robot_module.Robot() if isRunningOnArlo() else None
 
     # Allocate space for world map
-    world = np.zeros((500,500,3), dtype=np.uint8)
+    #world = np.zeros((500,500,3), dtype=np.uint8)
 
     # Draw map
-    draw_world(est_pose, particles, world)
+    #draw_world(est_pose, particles, world)
 
     print("Opening and initializing camera")
     if isRunningOnArlo():
