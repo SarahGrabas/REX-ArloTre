@@ -357,11 +357,7 @@ try:
     
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
     while True:
-        print(
-        f"dt={delta_t:.2f}  "
-        f"scan={scan_timer:.2f}  "
-        f"direction={scan_direction}"
-)
+
         objectIDs=[]
         dists=[]
         angles=[]
