@@ -182,16 +182,16 @@ def update_particle_weights(particles, objectIDs, dists, angles):
         
         particle_weights.append(weight)    
         
-        particle_weights = np.array(particle_weights)
+    particle_weights = np.array(particle_weights,dtype=float)
 
-        total_weight = np.sum(particle_weights)
+    total_weight = np.sum(particle_weights)
 
-        if total_weight > 0:
+    if total_weight > 0:
             particle_weights = particle_weights / total_weight
-        else:
+    else:
             particle_weights[:] = 1.0 / len(particle_weights)
         
-        for p, p_weight in zip(particles,particle_weights):
+    for p, p_weight in zip(particles,particle_weights):
             p.setWeight(p_weight)
 
 
