@@ -127,7 +127,7 @@ def update_particle_weights(particles, objectIDs, dists, angles):
     
     #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
     sigma_dist = 15.0 #cm
-    sigma_angle=0.10
+    sigma_angle=0.20
     
     for p in particles:
         x = p.getX()
@@ -316,17 +316,18 @@ def autonomous_controller(est_pose, objectIDs, drive_state, seen_landmarks):
 
         if dist_to_target > 10.0:
 
-            velocity = V_CALIB
-
-            if abs(angle_error) > 0.08:
+            if abs(angle_error) > 0.15:
+                velocity = 0.0
                 angular_velocity = np.sign(angle_error) * W_CALIB
             else:
+                velocity = V_CALIB
                 angular_velocity = 0.0
 
         else:
             velocity = 0.0
             angular_velocity = 0.0
             drive_state = "STOP"
+            
             
         print(
         "DRIVE COMMAND:",
@@ -357,7 +358,7 @@ try:
 
 
     # Initialize particles
-    num_particles = 1000
+    num_particles = 500
     particles = initialize_particles(num_particles)
 
     est_pose = particle.estimate_pose(particles) # The estimate of the robots current pose
