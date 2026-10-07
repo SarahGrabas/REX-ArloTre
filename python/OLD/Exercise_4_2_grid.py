@@ -1,19 +1,7 @@
-from __future__ import annotations
-
-from typing import Sequence
-
 import numpy as np
-from numpy.typing import NDArray
-
-Landmark = tuple[int, Sequence[float] | NDArray[np.float64], float]
 
 class Grid:
-    x_limits: tuple[float, float]
-    y_limits: tuple[float, float]
-    grid_cell_size: float
-    number_of_celles: list[int]
-    grid_matrix: NDArray[np.bool_]
-    def __init__(self, x_min: float, x_max: float, y_min: float, y_max: float, grid_cell_size: float) -> None:
+    def __init__(self, x_min, x_max, y_min, y_max, grid_cell_size):
         self.x_limits = (x_min, x_max)
         self.y_limits = (y_min, y_max)
         self.grid_cell_size = grid_cell_size
@@ -23,7 +11,7 @@ class Grid:
         self.grid_matrix = np.zeros((self.number_of_celles[0], self.number_of_celles[1]), dtype=bool) #lav matrix der svarer til grid størrelse med korrekt cellestørrlese, men kun med 0.
         
     
-    def obstacles(self, landmarks_list: Sequence[Landmark], robot_radius: float) -> None:
+    def obstacles(self, landmarks_list, robot_radius):
         """
         obstacles are equal to ``1`` or ``True`` in the grid, otherwise ``0`` or ``False``.
         
@@ -51,4 +39,5 @@ class Grid:
                                                                 
                     
                     if np.linalg.norm(centroid - center) <= added_radius:
-                        self.grid_matrix[i, j] = 1
+                        self.grid_matrix[i, j] = 1 
+

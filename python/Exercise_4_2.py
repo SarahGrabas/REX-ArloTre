@@ -1,6 +1,8 @@
 import Exercise_4_2_rrt as rrt_class   
 import Exercise_4_2_grid as grid
 import numpy as np
+from typing import Sequence
+from numpy.typing import NDArray
 from robot import Robot, sleep, arlo
 # import matplotlib.pyplot as plt
 
@@ -37,7 +39,10 @@ import Exercise_1 as ex1
 #     return executed_path
 
 
-def robot_path(arlo:Robot,path):
+def robot_path(
+    arlo: Robot,
+    path: "Sequence[Sequence[float] | NDArray[np.float64]]",
+) -> "list[Sequence[float] | NDArray[np.float64]]":
     """Funktion til at køre den simpler path
     Gridsize er længde på x og y akse i meter"""
 
@@ -64,14 +69,15 @@ def robot_path(arlo:Robot,path):
         print("         desired_angle, relative_angle, distance",
               desired_angle, relative_angle, distance)
 
-        arlo.rotate(relative_angle, stop_when_done=False)
-        arlo.drive(distance, stop_when_done=False)
+        arlo.rotate(relative_angle)
+        sleep(0.5)
+        arlo.drive(distance)
+        sleep(0.5)
 
         current_angle = desired_angle
         
         executed_path.append([x2, y2])
 
-    arlo.stop()
     return executed_path
 
 
@@ -162,4 +168,3 @@ if __name__ == '__main__':
         # ax.scatter(GOAL[0],GOAL[1], color='green')
     
         # plt.show()
-    

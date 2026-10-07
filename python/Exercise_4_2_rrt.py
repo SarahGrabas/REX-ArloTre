@@ -1,8 +1,22 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Sequence
+
 import numpy as np
+from numpy.typing import NDArray
+
+if TYPE_CHECKING:
+    from Exercise_4_2_grid import Grid
+
+Position = Sequence[float] | NDArray[np.float64]
 
 class Node:
+    position: Position
+    distance: float | np.float64
+    node_path: list[Position]
+    parent: Node | None
     
-    def __init__(self, position):
+    def __init__(self, position: Position) -> None:
         self.position=position #x, y 
         self.distance=0 #betegner distancen vi vælger, da vi mødte denne node
         self.node_path=[]
@@ -11,7 +25,7 @@ class Node:
           
 
     #euclidean distance from node to target node
-    def eucl_dist(self,target_node):
+    def eucl_dist(self, target_node: Node) -> np.float64:
         return np.linalg.norm(np.array(target_node.position[:2]) - np.array(self.position[:2]))        
             
                         
@@ -19,15 +33,24 @@ class RRT:
     """Jo højere max_iter vi har, jo lavere moving distance limit, kan vi have hvor den stadig finder path.
     Dette gør måske path mere præcis??"""
     
+    start: Node
+    end: Node
+    map: Grid
+    moving_dist_limit: float
+    grid_cell_size: float
+    goal_sample_rate: int
+    max_iter: int
+    node_list: list[Node]
+
     def __init__(self,
-                 start, #start coords
-                 goal,  #goal coords 
-                 map,
-                 moving_dist_limit=0.5, #Hvad vi max bevæger os ved ny node
-                 grid_cell_size=0.05,
-                 goal_sample_rate=5,    #Procentdel på hvor tit en random node skal være goal node
-                 max_iter=1000,          #Max forsøg på at finde path
-                 ):
+                 start: Position, #start coords
+                 goal: Position,  #goal coords
+                 map: Grid,
+                 moving_dist_limit: float = 0.5, #Hvad vi max bevæger os ved ny node
+                 grid_cell_size: float = 0.05,
+                 goal_sample_rate: int = 5,    #Procentdel på hvor tit en random node skal være goal node
+                 max_iter: int = 1000,          #Max forsøg på at finde path
+                 ) -> None:
 
         self.start = Node(start) #create start node
         self.end = Node(goal) #create goal node
@@ -40,7 +63,7 @@ class RRT:
 
         self.node_list = []
     
-    def path_planning(self):
+    def path_planning(self) -> list[Position] | None:
 
         self.node_list = [self.start] #til start har vi kun startnode
 
@@ -67,14 +90,14 @@ class RRT:
     
 
     
-    def random_node(self):
+    def random_node(self) -> Node:
         rnd = Node(np.random.uniform((self.map.x_limits[0],self.map.y_limits[0]), 
                                      (self.map.x_limits[1],self.map.y_limits[1])))
         
         return rnd
     
     
-    def nearest_node(self,node_list, random_node):
+    def nearest_node(self, node_list: Sequence[Node], random_node: Node) -> Node:
         distance_list=[]
         for node in node_list:
             node_dist=node.eucl_dist(random_node) #For hver node i listen, beregner vi afstand til random node
@@ -85,7 +108,7 @@ class RRT:
         return node_list[min_index]
     
     
-    def steering(self, old_node, new_node, moving_dist_limit): #moving_dist_limit er hvad vi maksimal bevæger os når vi finder ny node
+    def steering(self, old_node: Node, new_node: Node, moving_dist_limit: float) -> Node: #moving_dist_limit er hvad vi maksimal bevæger os når vi finder ny node
         print("steering")
         x1, y1 =old_node.position
         x2, y2 =new_node.position
@@ -112,7 +135,7 @@ class RRT:
         
         
 #tjekker om der er obstacles på vejen fra old_node til new_node
-    def check_collision(self, old_node, new_node): 
+    def check_collision(self, old_node: Node, new_node: Node) -> bool:
         """Funktion til at checke collision.
         Vi opretter punkter i hvert gridcell på distance mellem to noder.
         Vi tjekker obstacles på hvert af disse punkter"""
@@ -141,7 +164,7 @@ class RRT:
         return True
             
     #Denne kode har vi pt. også taget fra dem
-    def generate_final_course(self, goal_ind):
+    def generate_final_course(self, goal_ind: int) -> list[Position]:
         path = [self.end.position]
         node = self.node_list[goal_ind]
         while node.parent is not None:
@@ -153,7 +176,7 @@ class RRT:
 
         return path
     
-    def simpler_path(self, path):
+    def simpler_path(self, path: Sequence[Position]) -> list[Position]:
         """Vi laver denne funktion, så vi kan springe noder over i pathen, hvis der alligevel ikke er obstacles.
         På den måde undgår vi unødvendige rotationer."""
 
