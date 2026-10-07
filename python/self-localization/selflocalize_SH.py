@@ -130,7 +130,9 @@ def update_particle_weights(particles, objectIDs, dists, angles):
     sigma_angle=0.10
     
     for p in particles:
-        x,y,theta =p
+        x = p.getX()
+        y = p.getY()
+        theta = p.getTheta()
         
         weight = 1.0
 
@@ -381,10 +383,10 @@ try:
                     else:
                         robot_controller.stop()
     
-        if showGUI:
-            draw_world(est_pose, particles, world)
-            cv2.imshow(WIN_RF1, colour)
-            cv2.imshow(WIN_World, world)
+        #if showGUI:
+            #draw_world(est_pose, particles, world)
+            #cv2.imshow(WIN_RF1, colour)
+            #cv2.imshow(WIN_World, world)
         
         #Vi stopper nå estimeret position for robotten er ved mål 
         if np.hypot(est_pose.getX() - target_x,est_pose.getY() - target_y) < 10.0:
