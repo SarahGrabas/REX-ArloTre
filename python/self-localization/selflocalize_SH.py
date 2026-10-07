@@ -265,32 +265,52 @@ def autonomous_controller(est_pose, objectIDs, drive_state, seen_landmarks):
         # if not isinstance(objectIDs, type(None)) and len(seen_landmarks) >= 2:
         #     drive_state = "ROTATE_TO_TARGET"
 
-    if drive_state == "ROTATE_TO_TARGET":
+    elif drive_state == "ROTATE_TO_TARGET":
 
-        if abs(angle_error) > 0.08:
+        # if abs(angle_error) > 0.08:
+
+        #     if angle_error > 0:
+        #         angular_velocity = W_CALIB
+        #     else:
+        #         angular_velocity = -W_CALIB
+
+        #     velocity = 0.0
+
+        # else:
+        #     angular_velocity = 0.0
+        #     drive_state = "DRIVE_TO_TARGET"
+        
+        dx = target_x - est_pose.getX()
+        dy = target_y - est_pose.getY()
+
+        target_angle = np.arctan2(dy, dx)
+        angle_error = wrap_angle(target_angle - est_pose.getTheta())
+
+        print(
+            "ROTATE:",
+            "pose =", round(est_pose.getX(), 2),
+            round(est_pose.getY(), 2),
+            round(est_pose.getTheta(), 3),
+            "target_angle =", round(target_angle, 3),
+            "angle_error =", round(angle_error, 3)
+        )
+
+        if abs(angle_error) > 0.15:
+
+            velocity = 0.0
 
             if angle_error > 0:
                 angular_velocity = W_CALIB
             else:
                 angular_velocity = -W_CALIB
 
-            velocity = 0.0
-
         else:
+
+            print(">>> RETNING OK - DRIVE TO TARGET")
+
+            velocity = 0.0
             angular_velocity = 0.0
             drive_state = "DRIVE_TO_TARGET"
-        
-        print(
-            "ROTATE:",
-            "pose =",
-            round(est_pose.getX(), 2),
-            round(est_pose.getY(), 2),
-            round(est_pose.getTheta(), 3),
-            "target_angle =",
-            round(target_angle, 3),
-            "angle_error =",
-            round(angle_error, 3)
-        )
 
     elif drive_state == "DRIVE_TO_TARGET":
 
