@@ -448,10 +448,26 @@ try:
         print("OBSERVATIONS:", observations)
         print("objectIDs:", objectIDs)
         print("seen_landmarks:", seen_landmarks)
+        
+        print("----- MCL CHECK -----")
 
-        print("VALID OBJECTS:", objectIDs)
-        print("SEEN LANDMARKS:", seen_landmarks)
-            
+        for ID, dist, angle in zip(objectIDs, dists, angles):
+            print(
+                "LANDMARK:",
+                ID,
+                "measured dist =", round(dist, 2),
+                "measured angle =", round(angle, 3)
+            )
+
+        print(
+            "MCL POSE:",
+            round(est_pose.getX(), 2),
+            round(est_pose.getY(), 2),
+            round(est_pose.getTheta(), 3)
+        )
+
+        print("---------------------")
+                    
         # if detected_objectIDs is not None:   
         #     VALID_IDS = {1, 11}
         #     observations={}
