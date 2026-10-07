@@ -536,7 +536,7 @@ try:
 
         drive_state = new_drive_state
         if isRunningOnArlo():
-
+            
             if drive_state == "SCAN":
 
                 scan_timer += delta_t
@@ -544,32 +544,59 @@ try:
                 print(
                     "SCAN timer:",
                     round(scan_timer, 2),
-                    "direction:",
-                    scan_direction,
                     "seen:",
                     seen_landmarks
                 )
 
-                # Drej
-                if scan_timer < SCAN_ROTATE_TIME:
+                # Drej konstant samme vej
+                robot_controller.go_diff_calibrated(-1, 1)
 
-                    if scan_direction > 0:
-                        robot_controller.go_diff_calibrated(-1, 1)
-                    else:
-                        robot_controller.go_diff_calibrated(1, -1)
+                velocity = 0.0
+                angular_velocity = W_CALIB
 
-                # Pause
-                elif scan_timer < SCAN_ROTATE_TIME + SCAN_PAUSE_TIME:
-
+                # Når begge landmarks er fundet
+                if 1 in seen_landmarks and 11 in seen_landmarks:
                     robot_controller.stop()
 
-                # Ny rotationsperiode
-                else:
+                    velocity = 0.0
+                    angular_velocity = 0.0
 
+                    drive_state = "ROTATE_TO_TARGET"
                     scan_timer = 0.0
-                    scan_direction *= -1
 
-                    robot_controller.stop()
+            # if drive_state == "SCAN":
+
+            #     scan_timer += delta_t
+
+            #     print(
+            #         "SCAN timer:",
+            #         round(scan_timer, 2),
+            #         "direction:",
+            #         scan_direction,
+            #         "seen:",
+            #         seen_landmarks
+            #     )
+
+            #     # Drej
+            #     if scan_timer < SCAN_ROTATE_TIME:
+
+            #         if scan_direction > 0:
+            #             robot_controller.go_diff_calibrated(-1, 1)
+            #         else:
+            #             robot_controller.go_diff_calibrated(1, -1)
+
+            #     # Pause
+            #     elif scan_timer < SCAN_ROTATE_TIME + SCAN_PAUSE_TIME:
+
+            #         robot_controller.stop()
+
+            #     # Ny rotationsperiode
+            #     else:
+
+            #         scan_timer = 0.0
+            #         scan_direction *= -1
+
+            #         robot_controller.stop()
 
             else:
 
