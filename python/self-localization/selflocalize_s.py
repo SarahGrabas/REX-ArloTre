@@ -5,10 +5,12 @@ import numpy as np
 from timeit import default_timer as timer
 import sys
 from motion_model import sample_motion_model_velocity
+from math import pi as PI
+import time
 
 
 # Flags
-showGUI = True  # Whether or not to open GUI windows
+showGUI = False  # Whether or not to open GUI windows
 onRobot = True  # Whether or not we are running on the Arlo robot
 
 
@@ -22,7 +24,7 @@ def isRunningOnArlo():
 robot_module = None
 if isRunningOnArlo():
     # XXX: You need to change this path to point to where your robot.py file is located
-    sys.path.append("../../../../Arlo/python")
+    sys.path.append("../python")
     try:
         import robot as robot_module
     except ImportError:
@@ -44,14 +46,24 @@ CBLACK = (0, 0, 0)
 
 # Landmarks.
 # The robot knows the position of 2 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [1, 2]
+landmarkIDs = [1, 11]
 landmarks = {
     1: (0.0, 0.0),  # Coordinates for landmark 1
-    2: (300.0, 0.0)  # Coordinates for landmark 2
+    11: (100.0, 0.0)  # Coordinates for landmark 2
 }
 landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
-range_sigma = 10.0
-bearing_sigma = 0.15
+target_x, target_y = 50.0, 0.0 #MÅL: midten mellem landmarks
+
+WHEEL_2_WHEEL_DIST = 0.381
+
+meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
+degrees_pr_second = 360 / 4
+
+#V_CALIB = 40.0   # Den kører 40 cm pr. sekund ca. Fremadrettet hastighed ved go_diff_calibrated(1, 1)
+#W_CALIB = 1.9234  # I radianer/pr. sekund. Rotationshastighed (~110,2 degree/s) ved go_diff_calibrated(-1, 1)
+
+V_CALIB = meters_pr_sec * 100
+W_CALIB = np.deg2rad(degrees_pr_second)
 
 def jet(x):
     """Colour map for drawing particles. This function determines the colour of 
@@ -119,13 +131,18 @@ def wrap_angle(angle):
     return (angle + np.pi) % (2.0 * np.pi) - np.pi
 
 
-def update_weights(new_particles,objectIDs,angles, dists):
-    #Vi beregn weight ved distance og vinkler
+def update_particle_weights(particles, objectIDs, dists, angles):
+        #Vi beregn weight ved distance og vinkler
     particle_weights =[]
-    sigma_dist = 0.15
-    sigma_angle=0.10
-    for p in new_particles:
-        x,y,theta =p
+    
+    #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
+    sigma_dist = 15.0 #cm
+    sigma_angle=0.20
+    
+    for p in particles:
+        x = p.getX()
+        y = p.getY()
+        theta = p.getTheta()
         
         weight = 1.0
 
@@ -149,13 +166,19 @@ def update_weights(new_particles,objectIDs,angles, dists):
             
             
         #Nu gør vi med vinklerne 
-            enheds_theta=np.array(np.cos(theta), np.sin(theta))
-            enheds_particle=np.array(diff_x, diff_y)/np.linalg.norm(np.array(diff_x, diff_y))
+            enheds_theta=np.array([np.cos(theta), np.sin(theta)])
+            enheds_particle=np.array([diff_x, diff_y])/np.linalg.norm(np.array([diff_x, diff_y]))
             
-            theta_particle=np.arccos(np.dot(enheds_theta,enheds_particle) )
+            dot_product = np.dot(enheds_theta, enheds_particle)
+            dot_product = np.clip(dot_product, -1.0, 1.0)
+
+            theta_particle = np.arccos(dot_product)     
             
             #Vi skal finde ud af om theta_p er negativ eller positiv, dvs om den ligger på højre eller venstre side af enheds theta
-            enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
+            #enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
+            enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])
+            
+            
             
             final_theta_particle=np.sign(np.dot(enheds_particle, enheds_theta_hat))*theta_particle
             
@@ -169,30 +192,179 @@ def update_weights(new_particles,objectIDs,angles, dists):
         
         particle_weights.append(weight)    
         
-        particle_weights = np.array(particle_weights)
+    particle_weights = np.array(particle_weights,dtype=float)
 
-        total_weight = np.sum(particle_weights)
+    total_weight = np.sum(particle_weights)
 
-        if total_weight > 0:
+    if total_weight > 0:
             particle_weights = particle_weights / total_weight
+    else:
+            particle_weights[:] = 1.0 / len(particle_weights)
         
-        for p, p_weight in zip(particles,particle_weights):
+    for p, p_weight in zip(particles,particle_weights):
             p.setWeight(p_weight)
+
 
 
 def resample_particles(particles):
     weights = np.asarray([p.getWeight() for p in particles], dtype=float)
-    #weights /= np.sum(weights)
     selected = np.random.choice(len(particles), size=len(particles), replace=True, p=weights)
     return [
         particle.Particle(
             particles[index].getX(),
             particles[index].getY(),
             particles[index].getTheta(),
-            1.0 / len(particles), #nulstiller vægte
+            1.0 / len(particles),
         )
         for index in selected
     ]
+    
+def mcl_step(particles, u_t, z_t, delta_t):
+    """
+#     Udfører ét komplet MCL-skridt: Prediction, Correction og Resampling.
+#     """
+    velocity, angular_velocity = u_t
+    objectIDs, dists, angles = z_t
+
+    if velocity != 0.0 or angular_velocity != 0.0:
+        sample_motion_model_velocity(
+            particles,
+            velocity,
+            angular_velocity,
+            delta_t
+        )
+
+    if objectIDs:
+        update_particle_weights(
+            particles,
+            objectIDs,
+            dists,
+            angles
+        )
+
+        particles = resample_particles(particles)
+
+    return particles
+
+TARGET_TOLERANCE = 10.0   # cm
+ANGLE_TOLERANCE = 0.15    # rad ≈ 8.6°
+
+def autonomous_controller(
+    drive_state,
+    estimated_pose,
+    target,
+    seen_landmarks
+):
+    x = estimated_pose.getX()
+    y = estimated_pose.getY()
+    theta = estimated_pose.getTheta()
+
+    target_x, target_y = target
+
+    dx = target_x - x
+    dy = target_y - y
+
+    distance = np.hypot(dx, dy)
+
+    target_angle = np.arctan2(dy, dx)
+
+    angle_error = np.arctan2(
+        np.sin(target_angle - theta),
+        np.cos(target_angle - theta)
+    )
+
+    # =====================================
+    # MÅL NÅET
+    # =====================================
+
+    if distance < TARGET_TOLERANCE:
+        return "STOP", "STOP"
+
+    # =====================================
+    # SCAN
+    # =====================================
+
+    if drive_state == "SCAN":
+
+        # Vi scanner indtil begge landmarks er fundet
+        if len(seen_landmarks) >= 2:
+            return "ROTATE_TO_TARGET", "ROTATE_TO_TARGET"
+
+        return "SCAN", "SCAN"
+
+    # =====================================
+    # ROTATE TO TARGET
+    # =====================================
+
+    if drive_state == "ROTATE_TO_TARGET":
+
+        if abs(angle_error) < ANGLE_TOLERANCE:
+            return "DRIVE_TO_TARGET", "DRIVE_TO_TARGET"
+
+        if angle_error > 0:
+            return "ROTATE_LEFT", "ROTATE_TO_TARGET"
+
+        return "ROTATE_RIGHT", "ROTATE_TO_TARGET"
+
+    # =====================================
+    # DRIVE TO TARGET
+    # =====================================
+
+    if drive_state == "DRIVE_TO_TARGET":
+
+        # Hvis vi begynder at pege for meget forkert,
+        # så stop fremdriften og korrigér.
+        if abs(angle_error) > ANGLE_TOLERANCE:
+
+            if angle_error > 0:
+                return "ROTATE_LEFT", "ROTATE_TO_TARGET"
+
+            return "ROTATE_RIGHT", "ROTATE_TO_TARGET"
+
+        return "DRIVE_FORWARD", "DRIVE_TO_TARGET"
+
+    # =====================================
+    # FALLBACK
+    # =====================================
+
+    return "STOP", "STOP"
+
+def execute_robot_command(robot, command):
+    """
+    Udfører én ikke-blokerende robotkommando.
+
+    Returnerer den faktiske bevægelse:
+        velocity       [cm/s]
+        angular_velocity [rad/s]
+
+    som robotten forventes at have under kommandoen.
+    """
+
+    if command == "STOP":
+
+        robot.stop()
+
+        return 0.0, 0.0
+
+    elif command == "DRIVE_FORWARD":
+
+        robot.go_diff_calibrated(1, 1)
+
+        return V_CALIB, 0.0
+
+    elif command == "ROTATE_LEFT":
+
+        robot.go_diff_calibrated(-1, 1)
+
+        return 0.0, W_CALIB
+
+    elif command == "ROTATE_RIGHT":
+
+        robot.go_diff_calibrated(1, -1)
+
+        return 0.0, -W_CALIB
+
+    return 0.0, 0.0
 
 
 # Main program #
@@ -216,17 +388,28 @@ try:
     est_pose = particle.estimate_pose(particles) # The estimate of the robots current pose
 
     # Driving parameters
-    velocity = 0.0 # cm/sec
-    angular_velocity = 0.0 # radians/sec
+    velocity = 0.0
+    angular_velocity = 0.0
+    drive_state = "SCAN"
+
+    # Den kommando robotten faktisk kørte med
+    last_mcl_velocity = 0.0
+    last_mcl_angular_velocity = 0.0
+
+    last_time = time.time()
+
+    # Scan state
+    scan_direction = 1
+    scan_timer = 0.0
 
     # Initialize the robot (XXX: You do this)
     robot_controller = robot_module.Robot() if isRunningOnArlo() else None
 
     # Allocate space for world map
-    world = np.zeros((500,500,3), dtype=np.uint8)
+    #world = np.zeros((500,500,3), dtype=np.uint8)
 
     # Draw map
-    draw_world(est_pose, particles, world)
+    #draw_world(est_pose, particles, world)
 
     print("Opening and initializing camera")
     if isRunningOnArlo():
@@ -236,102 +419,152 @@ try:
         cam = camera.Camera(0, robottype='macbookpro', useCaptureThread=True)
         #cam = camera.Camera(1, robottype='macbookpro', useCaptureThread=False)
 
-    last_time = timer()
+
+    # velocity = 0.0
+    # angular_velocity = 0.0
+    # drive_state = "SCAN"
+    # last_time = timer()
+    
+    # scan_direction = 1
+    # scan_timer = 0.0
+
+    import random
+
+    SCAN_ROTATE_TIME = random.uniform(1.0, 2.3)
+    SCAN_PAUSE_TIME = 0.50
+    
+    seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
+
+    
     while True:
 
-        # Move the robot according to user input (only for testing)
         action = cv2.waitKey(10)
         if action == ord('q'): # Quit
             break
-    
-        # if not isRunningOnArlo():
-        #     if action == ord('w'): # Forward
-        #         velocity += 4.0
-        #     elif action == ord('x'): # Backwards
-        #         velocity -= 4.0
-        #     elif action == ord('s'): # Stop
-        #         velocity = 0.0
-        #         angular_velocity = 0.0
-        #     elif action == ord('a'): # Left
-        #         angular_velocity += 0.2
-        #     elif action == ord('d'): # Right
-        #         angular_velocity -= 0.2
 
-        # Use motor controls to update particles
-        # XXX: Make the robot drive
-        # XXX: You do this
-
-        # Simon
-        V_CALIB = 40.0   # Den kører 40 cm pr. sekund ca. Fremadrettet hastighed ved go_diff_calibrated(1, 1)
-        W_CALIB = 1.9234  # I radianer/pr. sekund. Rotationshastighed (~110,2 degree/s) ved go_diff_calibrated(-1, 1)
-
-        if action == ord('w'):     # Fremad
-            velocity += V_CALIB
-        elif action == ord('x'):   # Bagud
-            velocity += -V_CALIB
-        elif action == ord('a'):   # Venstre-rotation
-            angular_velocity += W_CALIB
-        elif action == ord('d'):   # Højre-rotation
-            angular_velocity += -W_CALIB
-        elif action == ord('s'):   # Stop
-            velocity = 0.0
-            angular_velocity = 0.0
-
-        #Vi skal være opmærksom på at der ikke er sleep i vores funktioner, da den bare skal blive ved med at køre, da vi måler tid den kører
-        if isRunningOnArlo():
-            if velocity > 0:
-                robot_controller.go_diff_calibrated(1, 1)
-            elif velocity < 0:
-                robot_controller.go_diff_calibrated(-1, -1)
-            elif angular_velocity > 0:
-                robot_controller.go_diff_calibrated(-1, 1)
-            elif angular_velocity < 0:
-                robot_controller.go_diff_calibrated(1, -1)
-            else:
-                robot_controller.stop()
-
-        current_time = timer()
+        current_time = time.time()
         delta_t = current_time - last_time
         last_time = current_time
 
-        #Opdater partikler efter robot har kørt
-        if velocity != 0.0 or angular_velocity != 0.0:
-            new_particles=sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
+        # Beskyt mod mærkelige tidsværdier
+        delta_t = max(0.0, min(delta_t, 0.5))
 
-
-        # Fetch next frame
+        # Hent kamerabillede og detekter ArUco-mærker (giver z_t)
         colour = cam.get_next_frame()
-        
-        # Detect objects
-        objectIDs, dists, angles = cam.detect_aruco_objects(colour)
-        if not isinstance(objectIDs, type(None)):
+        detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
+        if not isinstance(detected_objectIDs, type(None)):
             # List detected objects
-            for i in range(len(objectIDs)):
-                print("Object ID = ", objectIDs[i], ", Distance = ", dists[i], ", angle = ", angles[i])
+            for i in range(len(detected_objectIDs)):
+                print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
+        
+        objectIDs=[]    
+        dists=[]
+        angles=[]    
+                    
+        if detected_objectIDs is not None:   
+            VALID_IDS = {1, 11}
+            observations={}
+                #hvis vi har dubletter af samme id, vælger vi tætteste distance
+            for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
+                    
+                if ID not in VALID_IDS:
+                        continue
+                    
+                if ID not in observations or dist < observations[ID][0]:
+                        observations[ID] = (dist, angle)
+
             
-        
-        update_weights(new_particles,objectIDs,angles, dists)
-        
-        resample_particles(new_particles)
-
+            for ID, (measured_dist, measured_angle) in observations.items():
+                    objectIDs.append(ID)
+                    dists.append(measured_dist)
+                    angles.append(measured_angle)
+                    
+                    seen_landmarks.add(ID)
                 
-        #Nu skal vi så resample fra particle weights
 
+        # MCL-KALD
+        u_t = (last_mcl_velocity, last_mcl_angular_velocity)
+        z_t = (objectIDs, dists, angles)
+        particles = mcl_step(particles, u_t, z_t, delta_t)
+        
 
-            # Draw detected objects
-            #cam.draw_aruco_objects(colour)
-        est_pose = particle.estimate_pose(particles) # The estimate of the robots current pose
+        # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
+        if objectIDs:
+            cam.draw_aruco_objects(colour)
 
-        if showGUI:
-            # Draw map
-            draw_world(est_pose, particles, world)
+        # Beregn robottens estimerede position efter MCL-opdateringen
+        est_pose = particle.estimate_pose(particles)
+
     
-            # Show frame
-            cv2.imshow(WIN_RF1, colour)
+        command, drive_state = autonomous_controller(
+                drive_state,
+                est_pose,
+                (target_x, target_y),
+                seen_landmarks
+            )
+        
+        if isRunningOnArlo():
 
-            # Show world
-            cv2.imshow(WIN_World, world)
-    
+            if command == "SCAN":
+
+                scan_timer += delta_t
+
+                print(
+                    "SCAN timer:",
+                    round(scan_timer, 2),
+                    "direction:",
+                    scan_direction,
+                    "seen:",
+                    seen_landmarks
+                )
+
+                if scan_timer < SCAN_ROTATE_TIME:
+
+                    if scan_direction > 0:
+
+                        robot_controller.go_diff_calibrated(-1, 1)
+
+                        last_mcl_velocity = 0.0
+                        last_mcl_angular_velocity = W_CALIB
+
+                    else:
+
+                        robot_controller.go_diff_calibrated(1, -1)
+
+                        last_mcl_velocity = 0.0
+                        last_mcl_angular_velocity = -W_CALIB
+
+                elif scan_timer < SCAN_ROTATE_TIME + SCAN_PAUSE_TIME:
+
+                    robot_controller.stop()
+
+                    last_mcl_velocity = 0.0
+                    last_mcl_angular_velocity = 0.0
+
+                else:
+
+                    scan_timer = 0.0
+                    scan_direction *= -1
+
+                    robot_controller.stop()
+
+                    last_mcl_velocity = 0.0
+                    last_mcl_angular_velocity = 0.0
+
+            else:
+
+                last_mcl_velocity, last_mcl_angular_velocity = \
+                    execute_robot_command(robot_controller, command)
+
+        #if showGUI:
+            #draw_world(est_pose, particles, world)
+            #cv2.imshow(WIN_RF1, colour)
+            #cv2.imshow(WIN_World, world)
+        
+        #Vi stopper nå estimeret position for robotten er ved mål 
+        if np.hypot(est_pose.getX() - target_x,est_pose.getY() - target_y) < 10.0:
+            break
+            
   
 finally: 
     # Make sure to clean up even if an exception occurred
