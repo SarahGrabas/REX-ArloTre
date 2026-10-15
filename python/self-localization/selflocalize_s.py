@@ -207,6 +207,9 @@ def update_particle_weights(particles, objectIDs, dists, angles):
 
 
 def resample_particles(particles):
+    """We use current weight for particles given in the update particle function.
+    We randomly select same number of particles as the set we sample from.
+    We update the particle list by replacing previous particles with new particles, and we set the weight for each particle to be equal"""
     weights = np.asarray([p.getWeight() for p in particles], dtype=float)
     selected = np.random.choice(len(particles), size=len(particles), replace=True, p=weights)
     return [
@@ -214,15 +217,18 @@ def resample_particles(particles):
             particles[index].getX(),
             particles[index].getY(),
             particles[index].getTheta(),
-            1.0 / len(particles),
+            particles[index].setWeight(1.0 / len(particles)),
         )
         for index in selected
     ]
     
 def mcl_step(particles, u_t, z_t, delta_t):
     """
-#     Udfører ét komplet MCL-skridt: Prediction, Correction og Resampling.
-#     """
+    Funktion der udfører MCL-skridt: Prediction, Correction og Resampling.
+    Vi beregner particles movement ud fra velocity og angular verlocity som burde afspejle robottens bevægelse.
+    Vi opdaterer partikel vægt og resampler hvis vi har landmark i frame.
+    Dvs at vi kun gætter på robottens position når vi faktisk har et landmark i framen. 
+     """
     velocity, angular_velocity = u_t
     objectIDs, dists, angles = z_t
 
@@ -246,7 +252,7 @@ def mcl_step(particles, u_t, z_t, delta_t):
 
     return particles
 
-TARGET_TOLERANCE = 10.0   # cm
+TARGET_TOLERANCE = 15.0   # cm
 ANGLE_TOLERANCE = 0.15    # rad ≈ 8.6°
 
 def autonomous_controller(
@@ -273,17 +279,11 @@ def autonomous_controller(
         np.cos(target_angle - theta)
     )
 
-    # =====================================
-    # MÅL NÅET
-    # =====================================
-
+    #Hvis vi er indenfor mål tolerancen, dvs. meget tæt på målet stopper vi
     if distance < TARGET_TOLERANCE:
         return "STOP", "STOP"
 
-    # =====================================
-    # SCAN
-    # =====================================
-
+    #Vi scanner indtil begge landmarks er blevet set
     if drive_state == "SCAN":
 
         # Vi scanner indtil begge landmarks er fundet
@@ -292,9 +292,6 @@ def autonomous_controller(
 
         return "SCAN", "SCAN"
 
-    # =====================================
-    # ROTATE TO TARGET
-    # =====================================
 
     if drive_state == "ROTATE_TO_TARGET":
 
@@ -306,9 +303,6 @@ def autonomous_controller(
 
         return "ROTATE_RIGHT", "ROTATE_TO_TARGET"
 
-    # =====================================
-    # DRIVE TO TARGET
-    # =====================================
 
     if drive_state == "DRIVE_TO_TARGET":
 
@@ -323,9 +317,6 @@ def autonomous_controller(
 
         return "DRIVE_FORWARD", "DRIVE_TO_TARGET"
 
-    # =====================================
-    # FALLBACK
-    # =====================================
 
     return "STOP", "STOP"
 
@@ -430,7 +421,7 @@ try:
 
     import random
 
-    SCAN_ROTATE_TIME = random.uniform(1.0, 2.3)
+    SCAN_ROTATE_TIME = random.uniform(1.0, 2.3) #Når vi er i scan mode vælger vi tilfældig vinkel at dreje 
     SCAN_PAUSE_TIME = 0.50
     
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
@@ -443,7 +434,7 @@ try:
             break
 
         current_time = time.time()
-        delta_t = current_time - last_time
+        delta_t = current_time - last_time #hvor lang tid der er gået siden sidste MCL opdatering og ikke køretiden
         last_time = current_time
 
         # Beskyt mod mærkelige tidsværdier
@@ -483,7 +474,8 @@ try:
                 
 
         # MCL-KALD
-        u_t = (last_mcl_velocity, last_mcl_angular_velocity)
+        u_t = (last_mcl_velocity, last_mcl_angular_velocity) #vi bruger last velocity så det kun er bevægelse i det loop der svarer til delta t tiden.
+                                                            #så når der ikke er nogle bvægelse kaldes motion model ikke.
         z_t = (objectIDs, dists, angles)
         particles = mcl_step(particles, u_t, z_t, delta_t)
         
@@ -553,8 +545,7 @@ try:
 
             else:
 
-                last_mcl_velocity, last_mcl_angular_velocity = \
-                    execute_robot_command(robot_controller, command)
+                last_mcl_velocity, last_mcl_angular_velocity = execute_robot_command(robot_controller, command)
 
         #if showGUI:
             #draw_world(est_pose, particles, world)
