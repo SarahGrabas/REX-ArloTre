@@ -429,9 +429,9 @@ try:
     
     while True:
 
-        action = cv2.waitKey(10)
-        if action == ord('q'): # Quit
-            break
+        #action = cv2.waitKey(10)
+        #if action == ord('q'): # Quit
+            #break
 
         current_time = time.time()
         delta_t = current_time - last_time #hvor lang tid der er gået siden sidste MCL opdatering og ikke køretiden
@@ -453,7 +453,7 @@ try:
         angles=[]    
                     
         if detected_objectIDs is not None:   
-            VALID_IDS = {1, 11}
+            VALID_IDS = {2, 4}
             observations={}
                 #hvis vi har dubletter af samme id, vælger vi tætteste distance
             for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
@@ -506,6 +506,9 @@ try:
         if isRunningOnArlo():
 
             if command == "SCAN":
+                print("SCAN timer:", scan_timer)
+                print("SCAN rotate time:", SCAN_ROTATE_TIME)
+                print("SCAN direction:", scan_direction)
 
                 scan_timer += delta_t
 
