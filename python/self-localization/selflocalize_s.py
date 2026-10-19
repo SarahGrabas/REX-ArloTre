@@ -175,23 +175,20 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             theta_particle = np.arccos(dot_product)     
             
             #Vi skal finde ud af om theta_p er negativ eller positiv, dvs om den ligger på højre eller venstre side af enheds theta
-            #enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
-            enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])
+            enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
+            #enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])
             
             
             
             final_theta_particle=np.sign(np.dot(enheds_particle, enheds_theta_hat))*theta_particle
             
+      
             land_angle = (
                 1 / (np.sqrt(2 * np.pi) * sigma_angle)) * np.exp(-0.5 * ((final_theta_particle - angles[i]) / sigma_angle)**2)
             
             land_weight=land_dist*land_angle
             
-            print("theta:", theta)
-            print("enheds_theta:", enheds_theta)
-            print("enheds_particle:", enheds_particle)
-            print("dot:", np.dot(enheds_particle, enheds_theta_hat))
-            print("final angle:", final_theta_particle)
+
 
         #Hvis der er flere landmarks, ganges deres sandsynligheder sammen
             weight *= land_weight
@@ -209,6 +206,8 @@ def update_particle_weights(particles, objectIDs, dists, angles):
         
     for p, p_weight in zip(particles,particle_weights):
             p.setWeight(p_weight)
+            
+    
 
 
 def resample_particles(particles):
