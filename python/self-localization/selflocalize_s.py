@@ -291,10 +291,8 @@ def mcl_step(particles, u_t, z_t, delta_t):
             dists,
             angles
         )
-        
-        if len(objectIDs) >= 2:
-            print("objects when resampling", objectIDs)
-            particles = resample_particles(particles)
+    
+        particles = resample_particles(particles)
 
 
     return particles
@@ -444,7 +442,7 @@ try:
     robot_controller = robot_module.Robot() if isRunningOnArlo() else None
 
     # Allocate space for world map
-    #world = np.zeros((500,500,3), dtype=np.uint8)
+    world = np.zeros((500,500,3), dtype=np.uint8)
 
     # Draw map
     #draw_world(est_pose, particles, world)
@@ -590,7 +588,9 @@ try:
 
         # Beregn robottens estimerede position efter MCL-opdateringen
         est_pose = particle.estimate_pose(particles)
-
+        
+        draw_world(est_pose, particles, world)
+        cv2.imwrite("mcl_world.png", world)
     
         command, drive_state = autonomous_controller(
                 drive_state,
