@@ -498,7 +498,7 @@ try:
         print("seen objects", seen_landmarks)
         
         print("drive state", drive_state)
-        print("objects", zip(detected_objectIDs, detected_dists, detected_angles))
+        print("objects", detected_objectIDs, detected_dists, detected_angles)
         print("velocity", last_mcl_velocity)
         print("ang velocity", last_mcl_angular_velocity)
         print("robot pose", est_pose.getX, est_pose.getY)
