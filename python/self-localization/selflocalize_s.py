@@ -46,7 +46,7 @@ CBLACK = (0, 0, 0)
 
 # Landmarks.
 # The robot knows the position of 2 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [1, 11]
+landmarkIDs = [2, 4]
 landmarks = {
     1: (0.0, 0.0),  # Coordinates for landmark 1
     11: (100.0, 0.0)  # Coordinates for landmark 2
@@ -494,6 +494,14 @@ try:
                 (target_x, target_y),
                 seen_landmarks
             )
+        
+        print("seen objects", seen_landmarks)
+        
+        print("drive state", drive_state)
+        print("objects", zip(detected_objectIDs, detected_dists, detected_angles))
+        print("velocity", last_mcl_velocity)
+        print("ang velocity", last_mcl_angular_velocity)
+        print("robot pose", est_pose.getX, est_pose.getY)
         
         if isRunningOnArlo():
 
