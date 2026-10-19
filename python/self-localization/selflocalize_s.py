@@ -90,12 +90,8 @@ def draw_world(est_pose, particles, world):
     # Find largest weight
     max_weight = 0
     for particle in particles:
-        weight = particle.getWeight()
-
-        if weight is None:
-            weight = 0.0
             
-        max_weight = max(max_weight, weight)
+        max_weight = max(max_weight, particle.getWeight())
 
     # Draw particles
     for particle in particles:
@@ -584,6 +580,13 @@ try:
 
         # Beregn robottens estimerede position efter MCL-opdateringen
         est_pose = particle.estimate_pose(particles)
+        none_weights = 0
+
+        for i, p in enumerate(particles):
+            if p.getWeight() is None:
+                none_weights += 1
+
+        print("Particles with None weight:", none_weights)
         
         draw_world(est_pose, particles, world)
         cv2.imwrite(f"mcl_world{current_time}.png", world)
