@@ -186,6 +186,12 @@ def update_particle_weights(particles, objectIDs, dists, angles):
                 1 / (np.sqrt(2 * np.pi) * sigma_angle)) * np.exp(-0.5 * ((final_theta_particle - angles[i]) / sigma_angle)**2)
             
             land_weight=land_dist*land_angle
+            
+            print("theta:", theta)
+            print("enheds_theta:", enheds_theta)
+            print("enheds_particle:", enheds_particle)
+            print("dot:", np.dot(enheds_particle, enheds_theta_hat))
+            print("final angle:", final_theta_particle)
 
         #Hvis der er flere landmarks, ganges deres sandsynligheder sammen
             weight *= land_weight
