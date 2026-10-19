@@ -618,7 +618,7 @@ try:
                 # Ny rotation starter
                 if scan_timer == 0.0:
 
-                    scan_angle = random.uniform(5, 90)
+                    scan_angle = random.uniform(5, 60)
 
                     # Tid der kræves for den valgte vinkel
                     scan_rotate_time = np.deg2rad(scan_angle) / abs(W_CALIB)
