@@ -467,7 +467,7 @@ try:
     # drive_state = "SCAN"
     # last_time = timer()
     
-    scan_direction = 1
+    scan_direction = 1 #Om vi drejer til højre eller venstre når vi scanner.
     scan_timer = 0.0
 
     import random
@@ -664,9 +664,10 @@ try:
                     last_mcl_velocity = 0.0
                     last_mcl_angular_velocity = 0.0
 
-            # else:
+            else:
 
-            #     last_mcl_velocity, last_mcl_angular_velocity =execute_robot_command(robot_controller, command)
+                robot_controller.go_diff_calibrated(1, 1) 
+                cv2.imwrite("mcl_world_going.png", world)
 
         #if showGUI:
             #draw_world(est_pose, particles, world)
