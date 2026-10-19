@@ -137,7 +137,7 @@ def update_particle_weights(particles, objectIDs, dists, angles):
     particle_weights =[]
     
     #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
-    #sigma_dist = 2.0 #cm
+    sigma_dist = 1.0 #cm
     sigma_angle=0.10
     
     for p in particles:
