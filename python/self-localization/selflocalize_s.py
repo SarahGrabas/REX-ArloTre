@@ -468,6 +468,9 @@ try:
         # Beskyt mod mærkelige tidsværdier
         delta_t = max(0.0, min(delta_t, 0.5))
 
+        objectIDs = []
+        dists = []
+        angles = []
         # Hent kamerabillede og detekter ArUco-mærker (giver z_t)
         colour = cam.get_next_frame()
         detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
@@ -476,37 +479,89 @@ try:
             for i in range(len(detected_objectIDs)):
                 print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
         
-        objectIDs=[]    
-        dists=[]
-        angles=[]    
-                    
-        if detected_objectIDs is not None:   
+        # Nulstil MCL-observationer for hvert loop
+    
+
+        if detected_objectIDs is not None:
+
             VALID_IDS = {2, 4}
-            observations={}
-                #hvis vi har dubletter af samme id, vælger vi tætteste distance
-            for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
-                    
+            observations = {}
+
+            for ID, dist, angle in zip(
+                detected_objectIDs,
+                detected_dists,
+                detected_angles
+            ):
+
                 if ID not in VALID_IDS:
-                        continue
-                    
+                    continue
+
+                # Hvis samme ID ses flere gange,
+                # vælg den korteste distance
                 if ID not in observations or dist < observations[ID][0]:
-                        observations[ID] = (dist, angle)
-                        print("observations:", observations)
+                    observations[ID] = (dist, angle)
+
+            print("observations:", observations)
+
+            # Lav MCL-arrays ud fra observations
+            for ID, (measured_dist, measured_angle) in observations.items():
+
+                objectIDs.append(ID)
+                dists.append(measured_dist)
+                angles.append(measured_angle)
+
+                seen_landmarks.add(ID)
+
+
+        print("MCL objects:", objectIDs)
+        print("MCL dists:", dists)
+        print("MCL angles:", angles)
+
+        # MCL
+        u_t = (
+            last_mcl_velocity,
+            last_mcl_angular_velocity
+        )
+
+        z_t = (objectIDs, dists, angles)
+
+        particles = mcl_step(
+            particles,
+            u_t,
+            z_t,
+            delta_t
+        )
+        # objectIDs=[]    
+        # dists=[]
+        # angles=[]    
+                    
+        # if detected_objectIDs is not None:   
+        #     VALID_IDS = {2, 4}
+        #     observations={}
+        #         #hvis vi har dubletter af samme id, vælger vi tætteste distance
+        #     for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
+                    
+        #         if ID not in VALID_IDS:
+        #                 continue
+                    
+        #         if ID not in observations or dist < observations[ID][0]:
+        #                 observations[ID] = (dist, angle)
+        #                 print("observations:", observations)
 
             
-            for ID, (measured_dist, measured_angle) in observations.items():
-                    objectIDs.append(ID)
-                    dists.append(measured_dist)
-                    angles.append(measured_angle)
+        #     for ID, (measured_dist, measured_angle) in observations.items():
+        #             objectIDs.append(ID)
+        #             dists.append(measured_dist)
+        #             angles.append(measured_angle)
                     
-                    seen_landmarks.add(ID)
+        #             seen_landmarks.add(ID)
                 
 
-        # MCL-KALD
-        u_t = (last_mcl_velocity, last_mcl_angular_velocity) #vi bruger last velocity så det kun er bevægelse i det loop der svarer til delta t tiden.
-                                                            #så når der ikke er nogle bvægelse kaldes motion model ikke.
-        z_t = (objectIDs, dists, angles)
-        particles = mcl_step(particles, u_t, z_t, delta_t)
+        # # MCL-KALD
+        # u_t = (last_mcl_velocity, last_mcl_angular_velocity) #vi bruger last velocity så det kun er bevægelse i det loop der svarer til delta t tiden.
+        #                                                     #så når der ikke er nogle bvægelse kaldes motion model ikke.
+        # z_t = (objectIDs, dists, angles)
+        # particles = mcl_step(particles, u_t, z_t, delta_t)
         
         
 
