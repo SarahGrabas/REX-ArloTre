@@ -552,8 +552,6 @@ try:
 
                     scan_timer = 0.0
 
-                    scan_direction *= -1
-
                     robot_controller.stop()
 
                     last_mcl_velocity = 0.0
