@@ -10,12 +10,12 @@ def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
     # a5 = 0.01  # Ekstra slutrotationsstøj fra translation
     # a6 = 0.01  # Ekstra slutrotationsstøj fra rotation
     
-    a1 = 0.40
-    a2 = 0.10
-    a3 = 0.10
-    a4 = 0.40
-    a5 = 0.10
-    a6 = 0.10
+    a1 = 0.90
+    a2 = 0.20
+    a3 = 0.20
+    a4 = 0.80
+    a5 = 0.20
+    a6 = 0.20
 
     for p in particles:
 
