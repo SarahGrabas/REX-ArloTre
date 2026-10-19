@@ -277,7 +277,8 @@ def mcl_step(particles, u_t, z_t, delta_t):
         )
         
         if len(objectIDs) >= 2:
-                particles = resample_particles(particles)
+            print("objects when resampling", objectIDs)
+            particles = resample_particles(particles)
 
 
     return particles
@@ -403,7 +404,7 @@ try:
 
 
     # Initialize particles
-    num_particles = 1000
+    num_particles = 1500
     particles = initialize_particles(num_particles)
 
     est_pose = particle.estimate_pose(particles) # The estimate of the robots current pose
