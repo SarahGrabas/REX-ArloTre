@@ -491,6 +491,7 @@ try:
                     
                 if ID not in observations or dist < observations[ID][0]:
                         observations[ID] = (dist, angle)
+                        print("observations:", observations)
 
             
             for ID, (measured_dist, measured_angle) in observations.items():
@@ -506,7 +507,7 @@ try:
                                                             #så når der ikke er nogle bvægelse kaldes motion model ikke.
         z_t = (objectIDs, dists, angles)
         particles = mcl_step(particles, u_t, z_t, delta_t)
-        print("observations:", observations)
+        
         
 
         # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
