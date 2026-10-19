@@ -48,7 +48,7 @@ CBLACK = (0, 0, 0)
 # The robot knows the position of 2 landmarks. Their coordinates are in the unit centimeters [cm].
 # XXX: MÅL afstanden mellem jeres to markers på gulvet og skriv den her. ID 1 skal stå i origo.
 LANDMARK_DIST = 100.0  # [cm] afstand mellem landmark 1 og landmark 11
-landmarkIDs = [1, 11]
+landmarkIDs = [2, 4]
 landmarks = {
     1: (0.0, 0.0),  # Coordinates for landmark 1
     11: (LANDMARK_DIST, 0.0)  # Coordinates for landmark 2
