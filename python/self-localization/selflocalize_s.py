@@ -416,12 +416,12 @@ try:
     # drive_state = "SCAN"
     # last_time = timer()
     
-    # scan_direction = 1
-    # scan_timer = 0.0
+    scan_direction = 1
+    scan_timer = 0.0
 
     import random
 
-    SCAN_ROTATE_TIME = random.uniform(1.0, 2.3) #Når vi er i scan mode vælger vi tilfældig vinkel at dreje 
+    SCAN_ROTATE_TIME = random.uniform(0.0, 2.3) #Når vi er i scan mode vælger vi tilfældig vinkel at dreje 
     SCAN_PAUSE_TIME = 0.50
     
     seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
@@ -501,27 +501,29 @@ try:
         print("objects", detected_objectIDs, detected_dists, detected_angles)
         print("velocity", last_mcl_velocity)
         print("ang velocity", last_mcl_angular_velocity)
-        print("robot pose", est_pose.getX, est_pose.getY)
+        print("robot pose", round(est_pose.getY(),3),
+            round(est_pose.getTheta(),2))
         
         if isRunningOnArlo():
 
             if command == "SCAN":
-                print("SCAN timer:", scan_timer)
-                print("SCAN rotate time:", SCAN_ROTATE_TIME)
-                print("SCAN direction:", scan_direction)
+
+                # Ny rotation starter
+                if scan_timer == 0.0:
+
+                    scan_angle = random.uniform(5, 90)
+
+                    # Tid der kræves for den valgte vinkel
+                    scan_rotate_time = np.deg2rad(scan_angle) / abs(W_CALIB)
+
+                    print("SCAN angle:", round(scan_angle, 2))
+                    print("SCAN rotate time:", round(scan_rotate_time, 2))
+                    print("SCAN direction:", scan_direction)
 
                 scan_timer += delta_t
 
-                print(
-                    "SCAN timer:",
-                    round(scan_timer, 2),
-                    "direction:",
-                    scan_direction,
-                    "seen:",
-                    seen_landmarks
-                )
-
-                if scan_timer < SCAN_ROTATE_TIME:
+                #Rotate
+                if scan_timer < scan_rotate_time:
 
                     if scan_direction > 0:
 
@@ -537,16 +539,19 @@ try:
                         last_mcl_velocity = 0.0
                         last_mcl_angular_velocity = -W_CALIB
 
-                elif scan_timer < SCAN_ROTATE_TIME + SCAN_PAUSE_TIME:
+                #Pause
+                elif scan_timer < scan_rotate_time + SCAN_PAUSE_TIME:
 
                     robot_controller.stop()
 
                     last_mcl_velocity = 0.0
                     last_mcl_angular_velocity = 0.0
 
+                #Ny rotation
                 else:
 
                     scan_timer = 0.0
+
                     scan_direction *= -1
 
                     robot_controller.stop()
@@ -556,7 +561,7 @@ try:
 
             else:
 
-                last_mcl_velocity, last_mcl_angular_velocity = execute_robot_command(robot_controller, command)
+                last_mcl_velocity, last_mcl_angular_velocity =execute_robot_command(robot_controller, command)
 
         #if showGUI:
             #draw_world(est_pose, particles, world)
