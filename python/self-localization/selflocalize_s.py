@@ -175,8 +175,8 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             theta_particle = np.arccos(dot_product)     
             
             #Vi skal finde ud af om theta_p er negativ eller positiv, dvs om den ligger på højre eller venstre side af enheds theta
-            enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
-            #enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])
+            #enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
+            enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])
             
             
             
@@ -215,7 +215,18 @@ def resample_particles(particles):
     weights = np.asarray(
         [p.getWeight() for p in particles],
         dtype=float
-    )
+    ).flatten()
+
+    # Sørg for at weights summerer til 1
+    total = np.sum(weights)
+
+    if total <= 0 or not np.isfinite(total):
+        weights = np.ones(len(particles)) / len(particles)
+    else:
+        weights = weights / total
+
+    print("weights shape:", weights.shape)
+    print("weights sum:", np.sum(weights))
 
     selected = np.random.choice(
         len(particles),
