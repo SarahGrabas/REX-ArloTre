@@ -666,7 +666,7 @@ try:
 
             else:
                 start=timer()
-                while start<1:
+                while timer() - start<1:
                     robot_controller.go_diff_calibrated(1, 1) 
                 
                 robot_controller.stop()
