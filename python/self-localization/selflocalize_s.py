@@ -665,9 +665,12 @@ try:
                     last_mcl_angular_velocity = 0.0
 
             else:
-
-                robot_controller.go_diff_calibrated(1, 1) 
-                robot_controller.sleep(1)
+                start=time.time()
+                while start<1:
+                    robot_controller.go_diff_calibrated(1, 1) 
+                
+                robot_controller.stop()
+                
                 
                 cv2.imwrite("mcl_world_going.png", world)
 
