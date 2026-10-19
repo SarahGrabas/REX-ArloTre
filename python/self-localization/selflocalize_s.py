@@ -48,8 +48,8 @@ CBLACK = (0, 0, 0)
 # The robot knows the position of 2 landmarks. Their coordinates are in the unit centimeters [cm].
 landmarkIDs = [2, 4]
 landmarks = {
-    1: (0.0, 0.0),  # Coordinates for landmark 1
-    11: (100.0, 0.0)  # Coordinates for landmark 2
+    2: (0.0, 0.0),  # Coordinates for landmark 1
+    4: (100.0, 0.0)  # Coordinates for landmark 2
 }
 landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
 target_x, target_y = 50.0, 0.0 #MÅL: midten mellem landmarks
