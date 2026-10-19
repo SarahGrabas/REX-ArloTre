@@ -499,7 +499,7 @@ try:
         angles=[]    
                     
         if detected_objectIDs is not None:   
-            VALID_IDS = {1, 11}
+            VALID_IDS = {2, 4}
             observations={}
                 #hvis vi har dubletter af samme id, vælger vi tætteste distance
             for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
