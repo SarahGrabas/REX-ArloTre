@@ -50,8 +50,8 @@ CBLACK = (0, 0, 0)
 LANDMARK_DIST = 100.0  # [cm] afstand mellem landmark 1 og landmark 11
 landmarkIDs = [2, 4]
 landmarks = {
-    1: (0.0, 0.0),  # Coordinates for landmark 1
-    11: (LANDMARK_DIST, 0.0)  # Coordinates for landmark 2
+    2: (0.0, 0.0),  # Coordinates for landmark 1
+    4: (LANDMARK_DIST, 0.0)  # Coordinates for landmark 2
 }
 landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
 target_x, target_y = LANDMARK_DIST / 2.0, 0.0 #MÅL: midten mellem landmarks
