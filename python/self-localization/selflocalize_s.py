@@ -205,22 +205,50 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             p.setWeight(p_weight)
 
 
-
 def resample_particles(particles):
-    """We use current weight for particles given in the update particle function.
-    We randomly select same number of particles as the set we sample from.
-    We update the particle list by replacing previous particles with new particles, and we set the weight for each particle to be equal"""
-    weights = np.asarray([p.getWeight() for p in particles], dtype=float)
-    selected = np.random.choice(len(particles), size=len(particles), replace=True, p=weights)
-    return [
-        particle.Particle(
+
+    weights = np.asarray(
+        [p.getWeight() for p in particles],
+        dtype=float
+    )
+
+    selected = np.random.choice(
+        len(particles),
+        size=len(particles),
+        replace=True,
+        p=weights
+    )
+
+    new_particles = []
+
+    for index in selected:
+
+        new_particle = particle.Particle(
             particles[index].getX(),
             particles[index].getY(),
             particles[index].getTheta(),
-            particles[index].setWeight(1.0 / len(particles)),
+            1.0 / len(particles)
         )
-        for index in selected
-    ]
+
+        new_particles.append(new_particle)
+
+    return new_particles
+
+# def resample_particles(particles):
+#     """We use current weight for particles given in the update particle function.
+#     We randomly select same number of particles as the set we sample from.
+#     We update the particle list by replacing previous particles with new particles, and we set the weight for each particle to be equal"""
+#     weights = np.asarray([p.getWeight() for p in particles], dtype=float)
+#     selected = np.random.choice(len(particles), size=len(particles), replace=True, p=weights)
+#     return [
+#         particle.Particle(
+#             particles[index].getX(),
+#             particles[index].getY(),
+#             particles[index].getTheta(),
+#             particles[index].setWeight(1.0 / len(particles)),
+#         )
+#         for index in selected
+#     ]
     
 def mcl_step(particles, u_t, z_t, delta_t):
     """
@@ -247,8 +275,10 @@ def mcl_step(particles, u_t, z_t, delta_t):
             dists,
             angles
         )
+        
+        if len(objectIDs) >= 2:
+                particles = resample_particles(particles)
 
-        particles = resample_particles(particles)
 
     return particles
 
@@ -440,6 +470,9 @@ try:
         # Beskyt mod mærkelige tidsværdier
         delta_t = max(0.0, min(delta_t, 0.5))
 
+        objectIDs = []
+        dists = []
+        angles = []
         # Hent kamerabillede og detekter ArUco-mærker (giver z_t)
         colour = cam.get_next_frame()
         detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
@@ -448,36 +481,90 @@ try:
             for i in range(len(detected_objectIDs)):
                 print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
         
-        objectIDs=[]    
-        dists=[]
-        angles=[]    
-                    
-        if detected_objectIDs is not None:   
+        # Nulstil MCL-observationer for hvert loop
+    
+
+        if detected_objectIDs is not None:
+
             VALID_IDS = {2, 4}
-            observations={}
-                #hvis vi har dubletter af samme id, vælger vi tætteste distance
-            for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
-                    
+            observations = {}
+
+            for ID, dist, angle in zip(
+                detected_objectIDs,
+                detected_dists,
+                detected_angles
+            ):
+
                 if ID not in VALID_IDS:
-                        continue
-                    
+                    continue
+
+                # Hvis samme ID ses flere gange,
+                # vælg den korteste distance
                 if ID not in observations or dist < observations[ID][0]:
-                        observations[ID] = (dist, angle)
+                    observations[ID] = (dist, angle)
+
+            print("observations:", observations)
+
+            # Lav MCL-arrays ud fra observations
+            for ID, (measured_dist, measured_angle) in observations.items():
+
+                objectIDs.append(ID)
+                dists.append(measured_dist)
+                angles.append(measured_angle)
+
+                seen_landmarks.add(ID)
+
+
+        print("MCL objects:", objectIDs)
+        print("MCL dists:", dists)
+        print("MCL angles:", angles)
+
+        # MCL
+        u_t = (
+            last_mcl_velocity,
+            last_mcl_angular_velocity
+        )
+
+        z_t = (objectIDs, dists, angles)
+
+        particles = mcl_step(
+            particles,
+            u_t,
+            z_t,
+            delta_t
+        )
+        # objectIDs=[]    
+        # dists=[]
+        # angles=[]    
+                    
+        # if detected_objectIDs is not None:   
+        #     VALID_IDS = {2, 4}
+        #     observations={}
+        #         #hvis vi har dubletter af samme id, vælger vi tætteste distance
+        #     for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
+                    
+        #         if ID not in VALID_IDS:
+        #                 continue
+                    
+        #         if ID not in observations or dist < observations[ID][0]:
+        #                 observations[ID] = (dist, angle)
+        #                 print("observations:", observations)
 
             
-            for ID, (measured_dist, measured_angle) in observations.items():
-                    objectIDs.append(ID)
-                    dists.append(measured_dist)
-                    angles.append(measured_angle)
+        #     for ID, (measured_dist, measured_angle) in observations.items():
+        #             objectIDs.append(ID)
+        #             dists.append(measured_dist)
+        #             angles.append(measured_angle)
                     
-                    seen_landmarks.add(ID)
+        #             seen_landmarks.add(ID)
                 
 
-        # MCL-KALD
-        u_t = (last_mcl_velocity, last_mcl_angular_velocity) #vi bruger last velocity så det kun er bevægelse i det loop der svarer til delta t tiden.
-                                                            #så når der ikke er nogle bvægelse kaldes motion model ikke.
-        z_t = (objectIDs, dists, angles)
-        particles = mcl_step(particles, u_t, z_t, delta_t)
+        # # MCL-KALD
+        # u_t = (last_mcl_velocity, last_mcl_angular_velocity) #vi bruger last velocity så det kun er bevægelse i det loop der svarer til delta t tiden.
+        #                                                     #så når der ikke er nogle bvægelse kaldes motion model ikke.
+        # z_t = (objectIDs, dists, angles)
+        # particles = mcl_step(particles, u_t, z_t, delta_t)
+        
         
 
         # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
@@ -501,8 +588,7 @@ try:
         print("objects", detected_objectIDs, detected_dists, detected_angles)
         print("velocity", last_mcl_velocity)
         print("ang velocity", last_mcl_angular_velocity)
-        print("robot pose", round(est_pose.getY(),3),
-            round(est_pose.getTheta(),2))
+        print("robot pose", round(est_pose.getX(),3), round(est_pose.getY(),2),round(est_pose.getTheta(),2))
         
         if isRunningOnArlo():
 
