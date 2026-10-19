@@ -581,7 +581,7 @@ try:
         est_pose = particle.estimate_pose(particles)
         
         draw_world(est_pose, particles, world)
-        cv2.imwrite("mcl_world.png", world)
+        cv2.imwrite(f"mcl_world{current_time}.png", world)
     
         command, drive_state = autonomous_controller(
                 drive_state,
