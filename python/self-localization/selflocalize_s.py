@@ -275,8 +275,10 @@ def mcl_step(particles, u_t, z_t, delta_t):
             dists,
             angles
         )
+        
+        if len(objectIDs) >= 2:
+                particles = resample_particles(particles)
 
-        particles = resample_particles(particles)
 
     return particles
 
