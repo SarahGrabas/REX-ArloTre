@@ -530,10 +530,6 @@ try:
                 seen_landmarks.add(ID)
 
 
-        print("MCL objects:", objectIDs)
-        print("MCL dists:", dists)
-        print("MCL angles:", angles)
-
         # MCL
         u_t = (
             last_mcl_velocity,
@@ -542,12 +538,7 @@ try:
 
         z_t = (objectIDs, dists, angles)
 
-        particles = mcl_step(
-            particles,
-            u_t,
-            z_t,
-            delta_t
-        )
+        #particles = mcl_step( particles,u_t,z_t,delta_t)
         # objectIDs=[]    
         # dists=[]
         # angles=[]    
