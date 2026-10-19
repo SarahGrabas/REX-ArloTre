@@ -529,8 +529,8 @@ try:
         print("objects", detected_objectIDs, detected_dists, detected_angles)
         print("velocity", last_mcl_velocity)
         print("ang velocity", last_mcl_angular_velocity)
-        print("robot pose", round(est_pose.getY(),3),
-            round(est_pose.getTheta(),2))
+        print("robot pose", round(est_pose.getX(),3),
+            round(est_pose.getY(),2))
         
         if isRunningOnArlo():
 
