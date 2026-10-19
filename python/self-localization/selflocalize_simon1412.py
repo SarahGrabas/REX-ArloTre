@@ -44,26 +44,18 @@ CMAGENTA = (255, 0, 255)
 CWHITE = (255, 255, 255)
 CBLACK = (0, 0, 0)
 
-# Landmarks.
-# The robot knows the position of 2 landmarks. Their coordinates are in the unit centimeters [cm].
-# XXX: MÅL afstanden mellem jeres to markers på gulvet og skriv den her. ID 1 skal stå i origo.
-LANDMARK_DIST = 100.0  # [cm] afstand mellem landmark 1 og landmark 11
+LANDMARK_DIST = 100.0
 landmarkIDs = [2, 4]
 landmarks = {
-    2: (0.0, 0.0),  # Coordinates for landmark 1
-    4: (LANDMARK_DIST, 0.0)  # Coordinates for landmark 2
+    2: (0.0, 0.0),
+    4: (LANDMARK_DIST, 0.0)
 }
-landmark_colors = [CRED, CGREEN] # Colors used when drawing the landmarks
-target_x, target_y = LANDMARK_DIST / 2.0, 0.0 #MÅL: midten mellem landmarks
+landmark_colors = [CRED, CGREEN] 
+target_x, target_y = LANDMARK_DIST / 2.0, 0.0
 
-# Motorkraft til go_diff (skal være 0 eller i [40;127])
 DRIVE_POWER = 64
 TURN_POWER = 64
 
-# XXX: V_CALIB og W_CALIB SKAL MÅLES med DRIVE_POWER/TURN_POWER ovenfor:
-#  - kør ligeud i fx 3 s og mål afstanden -> V_CALIB = afstand / tid  [cm/s]
-#  - drej i fx 3 s og mål vinklen        -> W_CALIB = vinkel / tid   [rad/s]
-# Værdierne herunder er gamle beregnede værdier (ca. 31 cm/s og 90 grader/s) og passer næppe.
 WHEEL_2_WHEEL_DIST = 0.381
 
 meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
@@ -72,13 +64,10 @@ degrees_pr_second = 360 / 4
 V_CALIB = meters_pr_sec * 100
 W_CALIB = np.deg2rad(degrees_pr_second)
 
-# Konvergens: partikelskyen skal være så samlet, før vi stoler på estimatet og kører mod målet
-POS_STD_THRESHOLD = 15.0     # cm (standardafvigelse i x og y)
-HEADING_CONCENTRATION = 0.9  # længde af middel-retningsvektoren (1 = alle peger samme vej)
+POS_STD_THRESHOLD = 15.0
 
-# Støj der tilføjes efter resampling, så partiklerne ikke kollapser til få kopier
-RESAMPLE_POS_NOISE = 2.0     # cm
-RESAMPLE_ANGLE_NOISE = 0.02  # rad
+RESAMPLE_POS_NOISE = 2.0
+RESAMPLE_ANGLE_NOISE = 0.02
 
 def jet(x):
     """Colour map for drawing particles. This function determines the colour of 
@@ -93,21 +82,17 @@ def draw_world(est_pose, particles, world):
     """Visualization.
     This functions draws robots position in the world coordinate system."""
 
-    # Fix the origin of the coordinate system
     offsetX = 100
     offsetY = 250
 
-    # Constant needed for transforming from world coordinates to screen coordinates (flip the y-axis)
     ymax = world.shape[0]
 
-    world[:] = CWHITE # Clear background to white
+    world[:] = CWHITE
 
-    # Find largest weight
     max_weight = 0
     for particle in particles:
         max_weight = max(max_weight, particle.getWeight())
 
-    # Draw particles
     for particle in particles:
         x = int(particle.getX() + offsetX)
         y = ymax - (int(particle.getY() + offsetY))
@@ -123,7 +108,6 @@ def draw_world(est_pose, particles, world):
         lm = (int(landmarks[ID][0] + offsetX), int(ymax - (landmarks[ID][1] + offsetY)))
         cv2.circle(world, lm, 5, landmark_colors[i], 2)
 
-    # Draw estimated robot pose
     a = (int(est_pose.getX())+offsetX, ymax-(int(est_pose.getY())+offsetY))
     b = (int(est_pose.getX() + 15.0*np.cos(est_pose.getTheta()))+offsetX, 
          ymax-(int(est_pose.getY() + 15.0*np.sin(est_pose.getTheta()))+offsetY))
@@ -141,7 +125,6 @@ def initialize_particles(num_particles):
 
     return particles
 
-# Simon, funktioner til vægte og resampling af partikler
 def wrap_angle(angle):
     return (angle + np.pi) % (2.0 * np.pi) - np.pi
 
@@ -285,8 +268,8 @@ def mcl_step(particles, u_t, z_t, delta_t):
 
     return particles
 
-TARGET_TOLERANCE = 15.0   # cm
-ANGLE_TOLERANCE = 0.15    # rad ≈ 8.6°
+TARGET_TOLERANCE = 15.0
+ANGLE_TOLERANCE = 0.15
 
 def autonomous_controller(
     drive_state,
@@ -313,8 +296,6 @@ def autonomous_controller(
         np.cos(target_angle - theta)
     )
 
-    #Vi scanner indtil begge landmarks er blevet set OG partiklerne har konvergeret.
-    #Før det er estimatet bare gennemsnittet af en spredt sky og kan ikke bruges.
     if drive_state == "SCAN":
 
         if len(seen_landmarks) >= 2 and converged:
@@ -322,7 +303,6 @@ def autonomous_controller(
 
         return "SCAN", "SCAN"
 
-    #Hvis vi er indenfor mål tolerancen, dvs. meget tæt på målet stopper vi
     if distance < TARGET_TOLERANCE:
         return "STOP", "STOP"
 
@@ -340,8 +320,6 @@ def autonomous_controller(
 
     if drive_state == "DRIVE_TO_TARGET":
 
-        # Hvis vi begynder at pege for meget forkert,
-        # så stop fremdriften og korrigér.
         if abs(angle_error) > ANGLE_TOLERANCE:
 
             if angle_error > 0:
@@ -394,7 +372,6 @@ def execute_robot_command(robot, command):
 
         return 0.0, -W_CALIB
 
-    # STOP og ukendte kommandoer
     if last_sent_command != "STOP":
         robot.stop()
     last_sent_command = "STOP"
@@ -402,7 +379,7 @@ def execute_robot_command(robot, command):
     return 0.0, 0.0
 
 
-# Main program #
+# Main
 cam = None
 robot_controller = None
 try:
@@ -436,7 +413,7 @@ try:
     scan_direction = 1
     scan_timer = 0.0
 
-    # Initialize the robot (XXX: You do this)
+    # Initialize the robot
     robot_controller = robot_module.Robot() if isRunningOnArlo() else None
 
     # Allocate space for world map
