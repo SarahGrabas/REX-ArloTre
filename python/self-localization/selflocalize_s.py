@@ -90,7 +90,12 @@ def draw_world(est_pose, particles, world):
     # Find largest weight
     max_weight = 0
     for particle in particles:
-        max_weight = max(max_weight, round(particle.getWeight(),3))
+        weight = particle.getWeight()
+
+        if weight is None:
+            weight = 0.0
+            
+        max_weight = max(max_weight, weight)
 
     # Draw particles
     for particle in particles:
