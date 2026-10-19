@@ -665,7 +665,7 @@ try:
                     last_mcl_angular_velocity = 0.0
 
             else:
-                start=time.time()
+                start=timer()
                 while start<1:
                     robot_controller.go_diff_calibrated(1, 1) 
                 
