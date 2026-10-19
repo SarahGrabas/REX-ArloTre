@@ -506,6 +506,7 @@ try:
                                                             #så når der ikke er nogle bvægelse kaldes motion model ikke.
         z_t = (objectIDs, dists, angles)
         particles = mcl_step(particles, u_t, z_t, delta_t)
+        print("observations:", observations)
         
 
         # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
@@ -529,8 +530,7 @@ try:
         print("objects", detected_objectIDs, detected_dists, detected_angles)
         print("velocity", last_mcl_velocity)
         print("ang velocity", last_mcl_angular_velocity)
-        print("robot pose", round(est_pose.getX(),3),
-            round(est_pose.getY(),2))
+        print("robot pose", round(est_pose.getX(),3), round(est_pose.getY(),2),round(est_pose.getTheta(),2))
         
         if isRunningOnArlo():
 
