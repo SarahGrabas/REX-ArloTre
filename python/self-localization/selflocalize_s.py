@@ -210,61 +210,61 @@ def update_particle_weights(particles, objectIDs, dists, angles):
     
 
 
-def resample_particles(particles):
-
-    weights = np.asarray(
-        [p.getWeight() for p in particles],
-        dtype=float
-    ).flatten()
-
-    # Sørg for at weights summerer til 1
-    total = np.sum(weights)
-
-    if total <= 0 or not np.isfinite(total):
-        weights = np.ones(len(particles)) / len(particles)
-    else:
-        weights = weights / total
-
-    print("weights shape:", weights.shape)
-    print("weights sum:", np.sum(weights))
-
-    selected = np.random.choice(
-        len(particles),
-        size=len(particles),
-        replace=True,
-        p=weights
-    )
-
-    new_particles = []
-
-    for index in selected:
-
-        new_particle = particle.Particle(
-            particles[index].getX(),
-            particles[index].getY(),
-            particles[index].getTheta(),
-            1.0 / len(particles)
-        )
-
-        new_particles.append(new_particle)
-
-    return new_particles
-
 # def resample_particles(particles):
-#     """We use current weight for particles given in the update particle function.
-#     We randomly select same number of particles as the set we sample from.
-#     We update the particle list by replacing previous particles with new particles, and we set the weight for each particle to be equal"""
-#     weights = np.asarray([p.getWeight() for p in particles], dtype=float)
-#     selected = np.random.choice(len(particles), size=len(particles), replace=True, p=weights)
-#     return [
-#         particle.Particle(
+
+#     weights = np.asarray(
+#         [p.getWeight() for p in particles],
+#         dtype=float
+#     ).flatten()
+
+#     # Sørg for at weights summerer til 1
+#     total = np.sum(weights)
+
+#     if total <= 0 or not np.isfinite(total):
+#         weights = np.ones(len(particles)) / len(particles)
+#     else:
+#         weights = weights / total
+
+#     print("weights shape:", weights.shape)
+#     print("weights sum:", np.sum(weights))
+
+#     selected = np.random.choice(
+#         len(particles),
+#         size=len(particles),
+#         replace=True,
+#         p=weights
+#     )
+
+#     new_particles = []
+
+#     for index in selected:
+
+#         new_particle = particle.Particle(
 #             particles[index].getX(),
 #             particles[index].getY(),
 #             particles[index].getTheta(),
-#             particles[index].setWeight(1.0 / len(particles)),
+#             1.0 / len(particles)
 #         )
-#         for index in selected
-#     ]
+
+#         new_particles.append(new_particle)
+
+#     return new_particles
+
+def resample_particles(particles):
+    """We use current weight for particles given in the update particle function.
+    We randomly select same number of particles as the set we sample from.
+    We update the particle list by replacing previous particles with new particles, and we set the weight for each particle to be equal"""
+    weights = np.asarray([p.getWeight() for p in particles], dtype=float)
+    selected = np.random.choice(len(particles), size=len(particles), replace=True, p=weights)
+    return [
+        particle.Particle(
+            particles[index].getX(),
+            particles[index].getY(),
+            particles[index].getTheta(),
+            particles[index].setWeight(1.0 / len(particles)),
+        )
+        for index in selected
+    ]
     
 def mcl_step(particles, u_t, z_t, delta_t):
     """
@@ -538,7 +538,7 @@ try:
 
         z_t = (objectIDs, dists, angles)
 
-        #particles = mcl_step( particles,u_t,z_t,delta_t)
+        particles = mcl_step( particles,u_t,z_t,delta_t)
         # objectIDs=[]    
         # dists=[]
         # angles=[]    
