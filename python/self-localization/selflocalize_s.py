@@ -667,6 +667,8 @@ try:
             else:
 
                 robot_controller.go_diff_calibrated(1, 1) 
+                robot_controller.sleep(1)
+                
                 cv2.imwrite("mcl_world_going.png", world)
 
         #if showGUI:
