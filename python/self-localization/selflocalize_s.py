@@ -594,7 +594,7 @@ try:
         print("Particles with None weight:", none_weights)
         
         draw_world(est_pose, particles, world)
-        cv2.imwrite(f"mcl_world{current_time}.png", world)
+        cv2.imwrite("mcl_world.png", world)
     
         command, drive_state = autonomous_controller(
                 drive_state,
