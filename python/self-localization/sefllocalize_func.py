@@ -28,9 +28,19 @@ cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
 
 robot_controller = robot_module.Robot()
 
+CRED = (0, 0, 255)
+CGREEN = (0, 255, 0)
+CBLUE = (255, 0, 0)
+CCYAN = (255, 255, 0)
+CYELLOW = (0, 255, 255)
+CMAGENTA = (255, 0, 255)
+CWHITE = (255, 255, 255)
+CBLACK = (0, 0, 0)
+
 # Landmarks.
 # The robot knows the position of the 4 landmarks. Their coordinates are in the unit centimeters [cm].
 landmarkIDs = [2,4]
+landmark_colors = [CRED, CGREEN]
 #Coordinates for each landmark
 landmarks = {
     2: (0.0, 0.0),
