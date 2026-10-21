@@ -58,12 +58,12 @@ if VERBOSITY:
         return f"{minutes:02}:{seconds:02}:{milliseconds:03}"
 
     # defines the debug print function
-    def debug(*values: object, verbosity:int=9999):
+    def debug(*values: object, verbosity:int=9):
         """A debug print function used for printing formatted debug information to out, if verbosity is true.\\
         The higher `verbosity` is set (at least 1), the higher the value, the more important the debug info is."""
         if verbosity >= VERBOSITY:
             print(
-                f"[{_elapsed_time()}] ",
+                f"[{_elapsed_time()}] ({verbosity}) ",
                 *values,
                 file = None 
             )
@@ -334,6 +334,14 @@ class Camera:
         if wait: sleep(1) #wait for camera to start
         return cam
 
+    def close(self):
+        """Stop camera and release its resources."""
+        if self.cam is not None:
+            self.cam.stop()
+            self.cam.close()
+            self.cam = None
+            debug("Camera closed!", verbosity=1)
+
     def capture(self) -> NDArray:
         """
         Takes picture in RBG format and return array of shape (hight, width, rbg).\\
@@ -449,14 +457,31 @@ class Robot:
         
         debug("Robot initilized!")
 
-    def __del__(self):
-        debug("Stopping and terminating robot initialization ...")
-        
-        sleep(0.05)
-        self.moters.stop()
-        sleep(0.1)
-                
-        cmd='k\n'
-        self.port.send_command(cmd)
-        self.port.serialRead.close()
+    def __enter__(self): # for with statement
+        return self
 
+    def __exit__(self, exc_type, exc_value, traceback): # for with statement
+        self.close()
+        return False
+
+    def close(self):
+        """Stop robot and release all resources."""
+        debug("Stopping and terminating robot initialization ...")
+
+        try: # stops moters
+            sleep(0.05)
+            self.moters.stop()
+            sleep(0.1)
+        finally:
+            try:
+                self.camera.close()
+            finally:
+                try:
+                    self.port.send_command("k\n")
+                finally:
+                    self.port.serialRead.close()
+
+        debug("Robot terminated!", verbosity=1)
+
+with Robot() as arlo:
+    pass
