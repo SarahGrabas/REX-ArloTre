@@ -8,7 +8,7 @@ from math import pi as PI
 import time
 import robot
 import robot as robot_module
-
+from selflocalize_s import draw_world
 import random
 
 meters_pr_sec = 2 * PI * robot.WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
@@ -405,8 +405,8 @@ def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks:
     print("Estimate Robot Pose:",state["est_pose"].getX(), state["est_pose"].getY() )
     
     #Tegner og gemmer billed af world
-    #draw_world(state["est_pose"], state["particles"], state["world"])
-    #cv2.imwrite("mcl_world.png", state["world"])
+    draw_world(state["est_pose"], state["particles"], state["world"])
+    cv2.imwrite("mcl_world.png", state["world"])
 
     return  delta_t
 
