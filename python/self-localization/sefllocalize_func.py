@@ -1,13 +1,13 @@
 import cv2
 import particle
-import camera
+#import camera
 import numpy as np
 from timeit import default_timer as timer
 import sys
 from math import pi as PI
 import time
-import robot
-import robot as robot_module
+#import robot
+#import robot as robot_module
 from selflocalize_s import draw_world
 import random
 import random_numbers as rn
@@ -364,21 +364,21 @@ def scan_function(state,robot_controller, delta_t):
     # ROTATION
     if state["scan_timer"] < state["scan_rotate_time"]:
         state["in_pause"] = False
-        robot_controller.motor.move(-1, 1)
+        robot_controller.moters.move(-1, 1)
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = W_CALIB
 
     # PAUSE
     elif state["scan_timer"] < state["scan_rotate_time"] + SCAN_PAUSE_TIME:
         state["in_pause"] = True
-        robot_controller.motor.stop()
+        robot_controller.moters.stop()
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = 0.0
 
     # NY SCAN
     else:
         state["in_pause"] = False
-        robot_controller.motor.stop()
+        robot_controller.moters.stop()
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = 0.0
         state["scan_timer"] = 0.0
