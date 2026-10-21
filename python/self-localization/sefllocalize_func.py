@@ -24,6 +24,7 @@ W_CALIB = np.deg2rad(degrees_pr_second)
 
 SCAN_PAUSE_TIME = 0.30
 
+cam = None
 print("Opening and initializing camera")
 cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
 

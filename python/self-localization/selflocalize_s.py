@@ -167,30 +167,28 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             
             
         #Nu gør vi med vinklerne 
-            # enheds_theta=np.array([np.cos(theta), np.sin(theta)])
-            # enheds_particle=np.array([diff_x, diff_y])/np.linalg.norm(np.array([diff_x, diff_y]))
+            enheds_theta=np.array([np.cos(theta), np.sin(theta)])
+            enheds_particle=np.array([diff_x, diff_y])/np.linalg.norm(np.array([diff_x, diff_y]))
             
-            # dot_product = np.dot(enheds_theta, enheds_particle)
-            # dot_product = np.clip(dot_product, -1.0, 1.0)
+            dot_product = np.dot(enheds_theta, enheds_particle)
+            dot_product = np.clip(dot_product, -1.0, 1.0)
 
-            # theta_particle = np.arccos(dot_product)     
+            theta_particle = np.arccos(dot_product)     
             
             #Vi skal finde ud af om theta_p er negativ eller positiv, dvs om den ligger på højre eller venstre side af enheds theta
             #enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta))
-            # enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])
+            enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])
             
             
             
-            # final_theta_particle=np.sign(np.dot(enheds_particle, enheds_theta_hat))*theta_particle
+            final_theta_particle=np.sign(np.dot(enheds_particle, enheds_theta_hat))*theta_particle
             
       
-            # land_angle = (
-            #     1 / (np.sqrt(2 * np.pi) * sigma_angle)) * np.exp(-0.5 * ((final_theta_particle - angles[i]) / sigma_angle)**2)
+            land_angle = (
+                1 / (np.sqrt(2 * np.pi) * sigma_angle)) * np.exp(-0.5 * ((final_theta_particle - angles[i]) / sigma_angle)**2)
             
-            land_weight=land_dist
-            # *land_angle
-            
-
+            land_weight=land_dist*land_angle
+        
 
         #Hvis der er flere landmarks, ganges deres sandsynligheder sammen
             weight *= land_weight
