@@ -463,6 +463,9 @@ class Robot:
     def __exit__(self, exc_type, exc_value, traceback): # for with statement
         self.close()
         return False
+    
+    def __del__(self):
+        self.close()
 
     def close(self):
         """Stop robot and release all resources."""
