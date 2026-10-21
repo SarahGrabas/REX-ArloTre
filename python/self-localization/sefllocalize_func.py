@@ -7,13 +7,13 @@ import sys
 from motion_model import sample_motion_model_velocity
 from math import pi as PI
 import time
+import robot
 import robot as robot_module
 from selflocalize_s import draw_world, jet
 import random
 
-WHEEL_2_WHEEL_DIST = 0.381
 
-meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
+meters_pr_sec = 2 * PI * robot.WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
 degrees_pr_second = 360 / 4
 
 #V_CALIB = 40.0   # Den kører 40 cm pr. sekund ca. Fremadrettet hastighed ved go_diff_calibrated(1, 1)
@@ -22,7 +22,7 @@ degrees_pr_second = 360 / 4
 V_CALIB = meters_pr_sec * 100
 W_CALIB = np.deg2rad(degrees_pr_second)
 
-SCAN_PAUSE_TIME = 0.50
+SCAN_PAUSE_TIME = 0.30
 
 print("Opening and initializing camera")
 cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
@@ -40,6 +40,67 @@ landmarks = {
     4: (100.0, 0.0)  # Coordinates for landmark 2
 }
 
+#Motion model, opdatere partikler ud fra motion kun
+def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t):
+
+    # a1: Hvor meget usikkerhed der kommer på translationshastigheden,
+    #     når robotten kører fremad. Større a1 betyder større variation
+    #     i hvor langt hver particle bevæger sig.
+    #
+    # a2: Hvor meget robotrotation bidrager til usikkerhed i
+    #     translationshastigheden. Hvis robotten både kører og drejer,
+    #     kan rotationen derfor give ekstra usikkerhed i positionen.
+    #
+    # a3: Hvor meget robotternes translation bidrager til usikkerhed
+    #     i rotationshastigheden. Større a3 giver mere variation
+    #     i hvor meget robotten drejer, når den kører.
+    #
+    # a4: Hvor meget selve rotationen bidrager til usikkerhed i
+    #     rotationshastigheden. Større a4 betyder større variation
+    #     i den estimerede drejevinkel ved rotation.
+    #
+    # a5: Ekstra støj på den endelige orientering, som afhænger af
+    #     robotternes translationshastighed. Bruges til at modellere,
+    #     at kørsel også kan påvirke robotens orientering.
+    #
+    # a6: Ekstra støj på den endelige orientering, som afhænger af
+    #     robotternes rotationshastighed. Større a6 giver mere usikkerhed
+    #     i orienteringen efter en rotation.
+    
+    a1 = 0.40
+    a2 = 0.20
+    a3 = 0.20
+    a4 = 0.20
+    a5 = 0.10
+    a6 = 0.20
+
+    for p in particles:
+
+        # Hvis robotten roterer på stedet, skal translationshastigheden være 0
+        if abs(velocity) < 1e-6:
+            v_hat = 0.0
+
+        else:
+
+            v_hat = velocity + np.random.normal(0,np.sqrt(a1 * velocity**2 +a2 * angular_velocity**2))
+
+        w_hat = angular_velocity + np.random.normal(0,np.sqrt(a3 * velocity**2 +a4 * angular_velocity**2))
+
+        gamma_hat = np.random.normal(0,np.sqrt(a5 * velocity**2 +a6 * angular_velocity**2))
+
+        x = p.getX()
+        y = p.getY()
+        theta = p.getTheta()
+
+        x_new = x + v_hat * delta_t * np.cos(theta)
+        y_new = y + v_hat * delta_t * np.sin(theta)
+
+        theta_new = np.mod(theta + w_hat * delta_t + gamma_hat * delta_t,2.0 * np.pi)
+
+        p.setX(x_new)
+        p.setY(y_new)
+        p.setTheta(theta_new)
+
 def initialize_particles(num_particles):
     particles = []
     for i in range(num_particles):
@@ -49,9 +110,8 @@ def initialize_particles(num_particles):
 
     return particles
 
-
 #This is our observation model
-def update_particle_weights(particles, objectIDs, dists, angles):
+def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
     #Vi beregn weight ved distance og vinkler
     particle_weights =[]
     #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
@@ -120,7 +180,6 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             p.setWeight(p_weight)
             
 def resample_particles(particles):
-
     weights = np.asarray(
         [p.getWeight() for p in particles],
         dtype=float
@@ -159,7 +218,22 @@ def resample_particles(particles):
 
     return new_particles
 
-def mcl_step(particles, u_t, z_t, delta_t):
+def weight_based_cam(particles, objectIDs, dists, angles,landmarks):
+    """Funktion at opdaterer weights baseret på objekts og resample."""
+    if objectIDs:
+        update_particle_weights(
+            particles,
+            objectIDs,
+            dists,
+            angles,landmarks
+        )
+    
+        particles = resample_particles(particles)
+        
+    return particles
+    
+    
+def mcl_step(particles, u_t, z_t, delta_t,landmarks):
     """
     Funktion der udfører MCL-skridt: Prediction, Correction og Resampling.
     Vi beregner particles movement ud fra velocity og angular verlocity som burde afspejle robottens bevægelse.
@@ -182,7 +256,7 @@ def mcl_step(particles, u_t, z_t, delta_t):
             particles,
             objectIDs,
             dists,
-            angles
+            angles,landmarks
         )
     
         particles = resample_particles(particles)
@@ -190,98 +264,14 @@ def mcl_step(particles, u_t, z_t, delta_t):
 
     return particles
 
-#Funktion til at initialisere inden vi har kørt, her resetter man altså partiklerne og estimatet
-def initialize_mcl(num_particles=1500):
-    particles = initialize_particles(num_particles)
-
-    est_pose = particle.estimate_pose(particles)
-
-    state = {
-        "particles": particles,
-        "est_pose": est_pose,
-
-        "last_time": time.time(),
-
-        "last_mcl_velocity": 0.0,
-        "last_mcl_angular_velocity": 0.0,
-
-        "drive_state": "SCAN",
-
-        "scan_direction": 1,
-        "scan_timer": 0.0,
-
-        "seen_landmarks": set(),
-        
-        #Kan udkommenteres hvis vi ikke vil gemme billed
-        "world": np.zeros((500, 500, 3), dtype=np.uint8),
-    }
+def object_filtering(objects_from_frame, VALID_IDS): #Valid IDs er de ID vi ønsker at selflocalize ud fra
     
-
-    return state
-
-
-def scan_function(state,robot_controller, delta_t):
-    if state["drive_state"] == "SCAN":
-
-        # Ny rotation starter
-        if scan_timer == 0.0:
-
-            scan_angle = random.uniform(5, 60)
-
-            # Tid der kræves for den valgte vinkel
-            scan_rotate_time = np.deg2rad(scan_angle) / abs(W_CALIB)
-
-            scan_timer += delta_t
-
-            #Rotate hvis vi er inden for en rotations tid
-            if scan_timer < scan_rotate_time:
-                
-                #Vi drejer kun til venstre     
-                robot_controller.go_diff_calibrated(-1, 1)
-
-                last_mcl_velocity = 0.0
-                last_mcl_angular_velocity = W_CALIB
-
-
-            #Pause
-            elif scan_timer < scan_rotate_time + SCAN_PAUSE_TIME:
-
-                robot_controller.stop()
-
-                last_mcl_velocity = 0.0
-                last_mcl_angular_velocity = 0.0
-
-            #Ny rotation
-            else:
-
-                scan_timer = 0.0
-
-                robot_controller.stop()
-
-                last_mcl_velocity = 0.0
-                last_mcl_angular_velocity = 0.0
-                
-            return last_mcl_velocity, last_mcl_angular_velocity
-
-
-#Udfører én mcl update, ligesom vore while-loop fra før
-def mcl_update(state, cam):
-    current_time = time.time()
-
-    delta_t = current_time - state["last_time"]
-    state["last_time"] = current_time
-
-    # Beskyt mod mærkelige tidsværdier
-    delta_t = max(0.0, min(delta_t, 0.5))
-
-   #Detect objects
-    colour = cam.get_next_frame()
-
-    detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
-    if not isinstance(detected_objectIDs, type(None)):
-            # List detected objects
-            for i in range(len(detected_objectIDs)):
-                print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
+    detected_objectIDs, detected_dists, detected_angles=objects_from_frame
+    
+    # if not isinstance(detected_objectIDs, type(None)):
+    #         # List detected objects
+    #         for i in range(len(detected_objectIDs)):
+    #             print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
 
     objectIDs = []
     dists = []
@@ -290,7 +280,6 @@ def mcl_update(state, cam):
     #Observationer 
     if detected_objectIDs is not None:
 
-        VALID_IDS = {i for i in landmarkIDs}
         observations = {}
 
         for ID, dist, angle in zip(
@@ -312,38 +301,128 @@ def mcl_update(state, cam):
             dists.append(measured_dist)
             angles.append(measured_angle)
 
-            state["seen_landmarks"].add(ID)
+    return objectIDs, dists, angles
+            
+#Funktion til at initialisere inden vi har kørt, her resetter man altså partiklerne og estimatet
+def initialize_mcl(num_particles=1500):
+    particles = initialize_particles(num_particles)
 
+    est_pose = particle.estimate_pose(particles)
+
+    state = {
+        
+        "particles": particles,
+        "est_pose": est_pose,
+
+        "last_time": time.time(),
+
+        "last_mcl_velocity": 0.0,
+        "last_mcl_angular_velocity": 0.0,
+        
+        "scan_timer": 0.0,
+        "scan_rotate_time": 0.0,
+
+        #Kan udkommenteres hvis vi ikke vil gemme billed
+        "world": np.zeros((500, 500, 3), dtype=np.uint8),
+    }
+    
+
+    return state
+
+
+def scan_function(state,robot_controller, delta_t):
+
+    
+    # Start en ny rotation
+    if state["scan_timer"] == 0.0:
+
+        scan_angle = random.uniform(5, 60)
+
+        state["scan_rotate_time"] = (np.deg2rad(scan_angle) / abs(W_CALIB))
+
+        print("Ny scan:", scan_angle, "grader")
+
+    # Opdater timer
+    state["scan_timer"] += delta_t
+
+    # ROTATION
+    if state["scan_timer"] < state["scan_rotate_time"]:
+
+        robot_controller.go_diff_calibrated(-1, 1)
+
+        state["last_mcl_velocity"] = 0.0
+        state["last_mcl_angular_velocity"] = W_CALIB
+
+    # PAUSE
+    elif state["scan_timer"] < (
+        state["scan_rotate_time"] + SCAN_PAUSE_TIME
+    ):
+
+        robot_controller.stop()
+
+        state["last_mcl_velocity"] = 0.0
+        state["last_mcl_angular_velocity"] = 0.0
+
+    # NY SCAN
+    else:
+
+        robot_controller.stop()
+
+        state["last_mcl_velocity"] = 0.0
+        state["last_mcl_angular_velocity"] = 0.0
+
+        state["scan_timer"] = 0.0
+            
+
+
+
+#Udfører én mcl update ud fra de objecter der detectes i frame og de objecter der ønskes localisering ud fra.
+def mcl_update(state, cam, detected_obj, VALID_IDS,landmarks):
+    current_time = time.time()
+
+    delta_t = current_time - state["last_time"]
+    state["last_time"] = current_time
+
+    # Beskyt mod mærkelige tidsværdier
+    delta_t = max(0.0, min(delta_t, 0.5))
+    
     #MCL step
     u_t = (state["last_mcl_velocity"],state["last_mcl_angular_velocity"])
-    z_t = (objectIDs, dists,angles)
-    state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t)
+    z_t = object_filtering(detected_obj,VALID_IDS)
     
-    # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
-    if objectIDs:
-        cam.draw_aruco_objects(colour)
+    state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
+    
 
     #Estimate for robot position
-    state["est_pose"] = particle.estimate_pose(
-        state["particles"]
-    )
+    state["est_pose"] = particle.estimate_pose(state["particles"])
+    print("Estimate Robot Pose:",state["est_pose"])
     
     #Tegner og gemmer billed af world
     draw_world(state["est_pose"], state["particles"], state["world"])
     cv2.imwrite("mcl_world.png", state["world"])
 
-    return {
-        "colour": colour,
-        "objectIDs": objectIDs,
-        "dists": dists,
-        "angles": angles,
-        "delta_t": delta_t,
-        "est_pose": state["est_pose"],
-    }
+    return  delta_t
+
+
 
 current_state=initialize_mcl(num_particles=1500)
 
 while True:
     
-    current_state = mcl_update(current_state, cam)
-    
+    colour = cam.get_next_frame()
+    detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
+    detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+
+    delta_t = mcl_update(
+        current_state,
+        cam,
+        detected_obj,
+        landmarkIDs,landmarks
+    )
+
+    # 3. Scan bestemmer bevægelsen for NÆSTE loop
+    scan_function(
+        current_state,
+        robot_controller,
+        delta_t
+    )
