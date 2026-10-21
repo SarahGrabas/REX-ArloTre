@@ -395,7 +395,7 @@ def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks:
 
     #Estimate for robot position
     state["est_pose"] = particle.estimate_pose(state["particles"])
-    print("Estimate Robot Pose:",state["est_pose"])
+    print("Estimate Robot Pose:",state["est_pose"].getX(), state["est_pose"].getY() )
     
     #Tegner og gemmer billed af world
     # draw_world(state["est_pose"], state["particles"], state["world"])
