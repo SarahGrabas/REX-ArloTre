@@ -316,6 +316,9 @@ class Camera:
 
     @staticmethod
     def _init_camera(wait=False):
+        from os import environ
+        environ["LIBCAMERA_LOG_LEVELS"] = "*:WARN"
+
         debug("Initializing camera ...", verbosity=1)
         import picamera2 # type: ignore
 
