@@ -407,292 +407,293 @@ def execute_robot_command(robot, command):
 
 
 # Main program #
-cam = None
-try:
-    if showGUI:
-        # Open windows
-        WIN_RF1 = "Robot view"
-        cv2.namedWindow(WIN_RF1)
-        cv2.moveWindow(WIN_RF1, 50, 50)
+if __name__ == "__main__":
+    cam = None
+    try:
+        if showGUI:
+            # Open windows
+            WIN_RF1 = "Robot view"
+            cv2.namedWindow(WIN_RF1)
+            cv2.moveWindow(WIN_RF1, 50, 50)
 
-        WIN_World = "World view"
-        cv2.namedWindow(WIN_World)
-        cv2.moveWindow(WIN_World, 500, 50)
-
-
-    # Initialize particles
-    num_particles = 1500
-    
-    particles = initialize_particles(num_particles)
-    print("INITIAL WEIGHT:", particles[0].getWeight())
-    print("INITIAL X:", particles[0].getX())
-    print("INITIAL Y:", particles[0].getY())
-    print("INITIAL THETA:", particles[0].getTheta())
-
-    est_pose = particle.estimate_pose(particles) # The estimate of the robots current pose
-
-    # Driving parameters
-    velocity = 0.0
-    angular_velocity = 0.0
-    drive_state = "SCAN"
-
-    # Den kommando robotten faktisk kørte med
-    last_mcl_velocity = 0.0
-    last_mcl_angular_velocity = 0.0
-
-    last_time = time.time()
-
-    # Scan state
-    scan_direction = 1
-    scan_timer = 0.0
-
-    # Initialize the robot (XXX: You do this)
-    robot_controller = robot_module.Robot() if isRunningOnArlo() else None
-
-    # Allocate space for world map
-    world = np.zeros((500,500,3), dtype=np.uint8)
-
-    # Draw map
-    #draw_world(est_pose, particles, world)
-
-    print("Opening and initializing camera")
-    if isRunningOnArlo():
-        #cam = camera.Camera(0, robottype='arlo', useCaptureThread=True)
-        cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
-    else:
-        cam = camera.Camera(0, robottype='macbookpro', useCaptureThread=True)
-        #cam = camera.Camera(1, robottype='macbookpro', useCaptureThread=False)
+            WIN_World = "World view"
+            cv2.namedWindow(WIN_World)
+            cv2.moveWindow(WIN_World, 500, 50)
 
 
-    # velocity = 0.0
-    # angular_velocity = 0.0
-    # drive_state = "SCAN"
-    # last_time = timer()
-    
-    scan_direction = 1 #Om vi drejer til højre eller venstre når vi scanner.
-    scan_timer = 0.0
-
-    import random
-
-    SCAN_ROTATE_TIME = random.uniform(0.0, 2.3) #Når vi er i scan mode vælger vi tilfældig vinkel at dreje 
-    SCAN_PAUSE_TIME = 0.50
-    
-    seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
-
-    
-    while True:
-
-        #action = cv2.waitKey(10)
-        #if action == ord('q'): # Quit
-            #break
-
-        current_time = time.time()
-        delta_t = current_time - last_time #hvor lang tid der er gået siden sidste MCL opdatering og ikke køretiden
-        last_time = current_time
-
-        # Beskyt mod mærkelige tidsværdier
-        delta_t = max(0.0, min(delta_t, 0.5))
-
-        objectIDs = []
-        dists = []
-        angles = []
-        # Hent kamerabillede og detekter ArUco-mærker (giver z_t)
-        colour = cam.get_next_frame()
-        detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
-        if not isinstance(detected_objectIDs, type(None)):
-            # List detected objects
-            for i in range(len(detected_objectIDs)):
-                print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
+        # Initialize particles
+        num_particles = 1500
         
-        # Nulstil MCL-observationer for hvert loop
-    
+        particles = initialize_particles(num_particles)
+        print("INITIAL WEIGHT:", particles[0].getWeight())
+        print("INITIAL X:", particles[0].getX())
+        print("INITIAL Y:", particles[0].getY())
+        print("INITIAL THETA:", particles[0].getTheta())
 
-        if detected_objectIDs is not None:
+        est_pose = particle.estimate_pose(particles) # The estimate of the robots current pose
 
-            VALID_IDS = {2, 4}
-            observations = {}
+        # Driving parameters
+        velocity = 0.0
+        angular_velocity = 0.0
+        drive_state = "SCAN"
 
-            for ID, dist, angle in zip(
-                detected_objectIDs,
-                detected_dists,
-                detected_angles
-            ):
+        # Den kommando robotten faktisk kørte med
+        last_mcl_velocity = 0.0
+        last_mcl_angular_velocity = 0.0
 
-                if ID not in VALID_IDS:
-                    continue
+        last_time = time.time()
 
-                # Hvis samme ID ses flere gange,
-                # vælg den korteste distance
-                if ID not in observations or dist < observations[ID][0]:
-                    observations[ID] = (dist, angle)
+        # Scan state
+        scan_direction = 1
+        scan_timer = 0.0
 
-            print("observations:", observations)
+        # Initialize the robot (XXX: You do this)
+        robot_controller = robot_module.Robot() if isRunningOnArlo() else None
 
-            # Lav MCL-arrays ud fra observations
-            for ID, (measured_dist, measured_angle) in observations.items():
+        # Allocate space for world map
+        world = np.zeros((500,500,3), dtype=np.uint8)
 
-                objectIDs.append(ID)
-                dists.append(measured_dist)
-                angles.append(measured_angle)
+        # Draw map
+        #draw_world(est_pose, particles, world)
 
-                seen_landmarks.add(ID)
-
-
-        # MCL
-        u_t = (
-            last_mcl_velocity,
-            last_mcl_angular_velocity
-        )
-
-        z_t = (objectIDs, dists, angles)
-
-        particles = mcl_step( particles,u_t,z_t,delta_t)
-        # objectIDs=[]    
-        # dists=[]
-        # angles=[]    
-                    
-        # if detected_objectIDs is not None:   
-        #     VALID_IDS = {2, 4}
-        #     observations={}
-        #         #hvis vi har dubletter af samme id, vælger vi tætteste distance
-        #     for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
-                    
-        #         if ID not in VALID_IDS:
-        #                 continue
-                    
-        #         if ID not in observations or dist < observations[ID][0]:
-        #                 observations[ID] = (dist, angle)
-        #                 print("observations:", observations)
-
-            
-        #     for ID, (measured_dist, measured_angle) in observations.items():
-        #             objectIDs.append(ID)
-        #             dists.append(measured_dist)
-        #             angles.append(measured_angle)
-                    
-        #             seen_landmarks.add(ID)
-                
-
-        # # MCL-KALD
-        # u_t = (last_mcl_velocity, last_mcl_angular_velocity) #vi bruger last velocity så det kun er bevægelse i det loop der svarer til delta t tiden.
-        #                                                     #så når der ikke er nogle bvægelse kaldes motion model ikke.
-        # z_t = (objectIDs, dists, angles)
-        # particles = mcl_step(particles, u_t, z_t, delta_t)
-        
-        
-
-        # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
-        if objectIDs:
-            cam.draw_aruco_objects(colour)
-
-        # Beregn robottens estimerede position efter MCL-opdateringen
-        est_pose = particle.estimate_pose(particles)
-        none_weights = 0
-
-        for i, p in enumerate(particles):
-            if p.getWeight() is None:
-                none_weights += 1
-
-        print("Particles with None weight:", none_weights)
-        
-        draw_world(est_pose, particles, world)
-        cv2.imwrite("mcl_world.png", world)
-    
-        command, drive_state = autonomous_controller(
-                drive_state,
-                est_pose,
-                (target_x, target_y),
-                seen_landmarks
-            )
-        
-        print("seen objects", seen_landmarks)
-        
-        print("drive state", drive_state)
-        print("objects", detected_objectIDs, detected_dists, detected_angles)
-        print("velocity", last_mcl_velocity)
-        print("ang velocity", last_mcl_angular_velocity)
-        print("robot pose", round(est_pose.getX(),3), round(est_pose.getY(),2),round(est_pose.getTheta(),2))
-        
+        print("Opening and initializing camera")
         if isRunningOnArlo():
+            #cam = camera.Camera(0, robottype='arlo', useCaptureThread=True)
+            cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
+        else:
+            cam = camera.Camera(0, robottype='macbookpro', useCaptureThread=True)
+            #cam = camera.Camera(1, robottype='macbookpro', useCaptureThread=False)
 
-            if command == "SCAN":
 
-                # Ny rotation starter
-                if scan_timer == 0.0:
+        # velocity = 0.0
+        # angular_velocity = 0.0
+        # drive_state = "SCAN"
+        # last_time = timer()
+        
+        scan_direction = 1 #Om vi drejer til højre eller venstre når vi scanner.
+        scan_timer = 0.0
 
-                    scan_angle = random.uniform(5, 60)
+        import random
 
-                    # Tid der kræves for den valgte vinkel
-                    scan_rotate_time = np.deg2rad(scan_angle) / abs(W_CALIB)
+        SCAN_ROTATE_TIME = random.uniform(0.0, 2.3) #Når vi er i scan mode vælger vi tilfældig vinkel at dreje 
+        SCAN_PAUSE_TIME = 0.50
+        
+        seen_landmarks = set()#Vi gemmer vores observationer her, men altid den tætteste dublet den ser.
 
-                    print("SCAN angle:", round(scan_angle, 2))
-                    print("SCAN rotate time:", round(scan_rotate_time, 2))
-                    print("SCAN direction:", scan_direction)
+        
+        while True:
 
-                scan_timer += delta_t
+            #action = cv2.waitKey(10)
+            #if action == ord('q'): # Quit
+                #break
 
-                #Rotate
-                if scan_timer < scan_rotate_time:
+            current_time = time.time()
+            delta_t = current_time - last_time #hvor lang tid der er gået siden sidste MCL opdatering og ikke køretiden
+            last_time = current_time
 
-                    if scan_direction > 0:
+            # Beskyt mod mærkelige tidsværdier
+            delta_t = max(0.0, min(delta_t, 0.5))
 
-                        robot_controller.go_diff_calibrated(-1, 1)
+            objectIDs = []
+            dists = []
+            angles = []
+            # Hent kamerabillede og detekter ArUco-mærker (giver z_t)
+            colour = cam.get_next_frame()
+            detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
+            if not isinstance(detected_objectIDs, type(None)):
+                # List detected objects
+                for i in range(len(detected_objectIDs)):
+                    print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
+            
+            # Nulstil MCL-observationer for hvert loop
+        
+
+            if detected_objectIDs is not None:
+
+                VALID_IDS = {2, 4}
+                observations = {}
+
+                for ID, dist, angle in zip(
+                    detected_objectIDs,
+                    detected_dists,
+                    detected_angles
+                ):
+
+                    if ID not in VALID_IDS:
+                        continue
+
+                    # Hvis samme ID ses flere gange,
+                    # vælg den korteste distance
+                    if ID not in observations or dist < observations[ID][0]:
+                        observations[ID] = (dist, angle)
+
+                print("observations:", observations)
+
+                # Lav MCL-arrays ud fra observations
+                for ID, (measured_dist, measured_angle) in observations.items():
+
+                    objectIDs.append(ID)
+                    dists.append(measured_dist)
+                    angles.append(measured_angle)
+
+                    seen_landmarks.add(ID)
+
+
+            # MCL
+            u_t = (
+                last_mcl_velocity,
+                last_mcl_angular_velocity
+            )
+
+            z_t = (objectIDs, dists, angles)
+
+            particles = mcl_step( particles,u_t,z_t,delta_t)
+            # objectIDs=[]    
+            # dists=[]
+            # angles=[]    
+                        
+            # if detected_objectIDs is not None:   
+            #     VALID_IDS = {2, 4}
+            #     observations={}
+            #         #hvis vi har dubletter af samme id, vælger vi tætteste distance
+            #     for ID, dist, angle in zip(detected_objectIDs, detected_dists, detected_angles):
+                        
+            #         if ID not in VALID_IDS:
+            #                 continue
+                        
+            #         if ID not in observations or dist < observations[ID][0]:
+            #                 observations[ID] = (dist, angle)
+            #                 print("observations:", observations)
+
+                
+            #     for ID, (measured_dist, measured_angle) in observations.items():
+            #             objectIDs.append(ID)
+            #             dists.append(measured_dist)
+            #             angles.append(measured_angle)
+                        
+            #             seen_landmarks.add(ID)
+                    
+
+            # # MCL-KALD
+            # u_t = (last_mcl_velocity, last_mcl_angular_velocity) #vi bruger last velocity så det kun er bevægelse i det loop der svarer til delta t tiden.
+            #                                                     #så når der ikke er nogle bvægelse kaldes motion model ikke.
+            # z_t = (objectIDs, dists, angles)
+            # particles = mcl_step(particles, u_t, z_t, delta_t)
+            
+            
+
+            # Tegn detekterede ArUco-mærker på kamerabilledet hvis fundet
+            if objectIDs:
+                cam.draw_aruco_objects(colour)
+
+            # Beregn robottens estimerede position efter MCL-opdateringen
+            est_pose = particle.estimate_pose(particles)
+            none_weights = 0
+
+            for i, p in enumerate(particles):
+                if p.getWeight() is None:
+                    none_weights += 1
+
+            print("Particles with None weight:", none_weights)
+            
+            draw_world(est_pose, particles, world)
+            cv2.imwrite("mcl_world.png", world)
+        
+            command, drive_state = autonomous_controller(
+                    drive_state,
+                    est_pose,
+                    (target_x, target_y),
+                    seen_landmarks
+                )
+            
+            print("seen objects", seen_landmarks)
+            
+            print("drive state", drive_state)
+            print("objects", detected_objectIDs, detected_dists, detected_angles)
+            print("velocity", last_mcl_velocity)
+            print("ang velocity", last_mcl_angular_velocity)
+            print("robot pose", round(est_pose.getX(),3), round(est_pose.getY(),2),round(est_pose.getTheta(),2))
+            
+            if isRunningOnArlo():
+
+                if command == "SCAN":
+
+                    # Ny rotation starter
+                    if scan_timer == 0.0:
+
+                        scan_angle = random.uniform(5, 60)
+
+                        # Tid der kræves for den valgte vinkel
+                        scan_rotate_time = np.deg2rad(scan_angle) / abs(W_CALIB)
+
+                        print("SCAN angle:", round(scan_angle, 2))
+                        print("SCAN rotate time:", round(scan_rotate_time, 2))
+                        print("SCAN direction:", scan_direction)
+
+                    scan_timer += delta_t
+
+                    #Rotate
+                    if scan_timer < scan_rotate_time:
+
+                        if scan_direction > 0:
+
+                            robot_controller.go_diff_calibrated(-1, 1)
+
+                            last_mcl_velocity = 0.0
+                            last_mcl_angular_velocity = W_CALIB
+
+                        else:
+
+                            robot_controller.go_diff_calibrated(1, -1)
+
+                            last_mcl_velocity = 0.0
+                            last_mcl_angular_velocity = -W_CALIB
+
+                    #Pause
+                    elif scan_timer < scan_rotate_time + SCAN_PAUSE_TIME:
+
+                        robot_controller.stop()
 
                         last_mcl_velocity = 0.0
-                        last_mcl_angular_velocity = W_CALIB
+                        last_mcl_angular_velocity = 0.0
 
+                    #Ny rotation
                     else:
 
-                        robot_controller.go_diff_calibrated(1, -1)
+                        scan_timer = 0.0
+
+                        robot_controller.stop()
 
                         last_mcl_velocity = 0.0
-                        last_mcl_angular_velocity = -W_CALIB
+                        last_mcl_angular_velocity = 0.0
 
-                #Pause
-                elif scan_timer < scan_rotate_time + SCAN_PAUSE_TIME:
+                # else:
+                #     start=timer()
+                #     while timer() - start<1:
+                #         robot_controller.go_diff_calibrated(1, 1) 
+                    
+                #     robot_controller.stop()
+                    
+                    
+                #     cv2.imwrite("mcl_world_going.png", world)
 
-                    robot_controller.stop()
-
-                    last_mcl_velocity = 0.0
-                    last_mcl_angular_velocity = 0.0
-
-                #Ny rotation
-                else:
-
-                    scan_timer = 0.0
-
-                    robot_controller.stop()
-
-                    last_mcl_velocity = 0.0
-                    last_mcl_angular_velocity = 0.0
-
-            # else:
-            #     start=timer()
-            #     while timer() - start<1:
-            #         robot_controller.go_diff_calibrated(1, 1) 
-                
-            #     robot_controller.stop()
-                
-                
-            #     cv2.imwrite("mcl_world_going.png", world)
-
-        #if showGUI:
-            #draw_world(est_pose, particles, world)
-            #cv2.imshow(WIN_RF1, colour)
-            #cv2.imshow(WIN_World, world)
-        
-        #Vi stopper nå estimeret position for robotten er ved mål 
-        if np.hypot(est_pose.getX() - target_x,est_pose.getY() - target_y) < 10.0:
-            break
+            #if showGUI:
+                #draw_world(est_pose, particles, world)
+                #cv2.imshow(WIN_RF1, colour)
+                #cv2.imshow(WIN_World, world)
             
-  
-finally: 
-    # Make sure to clean up even if an exception occurred
+            #Vi stopper nå estimeret position for robotten er ved mål 
+            if np.hypot(est_pose.getX() - target_x,est_pose.getY() - target_y) < 10.0:
+                break
+                
     
-    # Close all windows
-    cv2.destroyAllWindows()
+    finally: 
+        # Make sure to clean up even if an exception occurred
+        
+        # Close all windows
+        cv2.destroyAllWindows()
 
-    # Clean-up capture thread
-    if cam is not None:
-        cam.terminateCaptureThread()
+        # Clean-up capture thread
+        if cam is not None:
+            cam.terminateCaptureThread()
 
