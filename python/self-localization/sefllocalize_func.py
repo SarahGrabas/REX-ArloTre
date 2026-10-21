@@ -32,13 +32,10 @@ robot_controller = robot_module.Robot()
 
 # Landmarks.
 # The robot knows the position of the 4 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [1,2,3,4]
+landmarkIDs = [2]
 #Coordinates for each landmark
 landmarks = {
-    1: (0.0, 0.0),
-    2: (0.0, 0.0),
-    3: (0.0, 0.0),  # Coordinates for landmark 1
-    4: (100.0, 0.0)  # Coordinates for landmark 2
+    2: (0.0, 0.0)
 }
 
 #Motion model, opdatere partikler ud fra motion kun
@@ -378,7 +375,7 @@ def scan_function(state,robot_controller, delta_t):
 
 
 #Udfører én mcl update ud fra de objecter der detectes i frame og de objecter der ønskes localisering ud fra.
-def mcl_update(state, cam, detected_obj, VALID_IDS,landmarks):
+def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks: dict):
     current_time = time.time()
 
     delta_t = current_time - state["last_time"]
