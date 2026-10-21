@@ -26,11 +26,11 @@ W_CALIB = np.deg2rad(degrees_pr_second)
 
 SCAN_PAUSE_TIME = 0.40
 
-cam = None
-print("Opening and initializing camera")
-cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
-
 robot_controller = rally.Robot()
+#cam = None
+#print("Opening and initializing camera")
+#cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
+
 #robot_module.Robot()
 
 CRED = (0, 0, 255)
@@ -428,7 +428,7 @@ def scan_function(state,robot_controller, delta_t):
 
 
 #Udfører én mcl update ud fra de objecter der detectes i frame og de objecter der ønskes localisering ud fra.
-def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks: dict):
+def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict):
     current_time = time.time()
 
     delta_t = current_time - state["last_time"]
@@ -469,7 +469,6 @@ while True:
 
     delta_t = mcl_update(
         current_state,
-        cam,
         detected_obj,
         landmarkIDs,landmarks
     )
