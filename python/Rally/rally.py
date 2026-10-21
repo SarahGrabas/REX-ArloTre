@@ -112,7 +112,7 @@ class Port(object):
 
 class Motor:
     def __init__(self, port:Port):
-        self.port = port
+        self._port = port
         debug("Initialized moters!", verbosity=1)
     
     @staticmethod
@@ -135,7 +135,7 @@ class Motor:
         assert self._power_checker(powerLeft) and self._power_checker(powerRight), "Error: Expected power in range {0, [40;127]}, but recieved "+f"{powerLeft, powerRight}"
 
         cmd = 'd' + str(int(powerLeft)) + ',' + str(int(powerRight)) + ',' + str(int(dirLeft)) + ',' + str(int(dirRight)) + '\n'
-        return self.port.send_command(cmd)
+        return self._port.send_command(cmd)
 
     def stop(self):
         """Send a stop command to stop motors. Sets the motor power on both wheels to zero.
@@ -143,7 +143,7 @@ class Motor:
            This does NOT use wheel encoders."""
         debug("stop()", verbosity=3)
         cmd = 's\n'
-        return self.port.send_command(cmd)
+        return self._port.send_command(cmd)
     
     def move(self, dirLeft:int, dirRight:int):
         """
@@ -185,7 +185,7 @@ class Motor:
         Negative rotation is right, positive rotation is left.
         Returns the seconds driven.
         """
-        debug(f"rotate({self}, {degrees}, {_sleep}, {stop_when_done})")
+        debug(f"rotate({self}, {degrees}, {_sleep}, {stop_when_done})", verbosity=3)
 
         degrees_pr_second = 360 / 4 # 4 instead of 8 is intentional
         correction_fraction_negative = 1.0
@@ -210,7 +210,7 @@ class Motor:
 
 class Sonar:
     def __init__(self, port:Port):
-        self.port = port
+        self._port = port
         debug("Initialized sensors!", verbosity=1)
 
     def _read_sensor(self, sensorid):
@@ -219,7 +219,7 @@ class Sonar:
         debug(f"_read_sensor({self}, {sensorid})", verbosity=1)
 
         cmd = str(sensorid) + '\n'
-        str_val = self.port.send_command(cmd)
+        str_val = self._port.send_command(cmd)
         debug(f"Sonar output (str_val) = {str_val}", verbosity=1)
         assert len(str_val) > 0, "Error: Unhandled edge case! Recieved empty string as sonar response."
 
@@ -450,9 +450,9 @@ class Camera:
 class Robot:
     def __init__(self):
         debug("Initializing robot ...")
-        self.port = Port()
-        self.moters = Motor(self.port)
-        self.sonars = Sonar(self.port)
+        self._port = Port()
+        self.moters = Motor(self._port)
+        self.sonars = Sonar(self._port)
         self.camera = Camera()
         
         debug("Robot initilized!")
@@ -477,11 +477,17 @@ class Robot:
                 self.camera.close()
             finally:
                 try:
-                    self.port.send_command("k\n")
+                    self._port.send_command("k\n")
                 finally:
-                    self.port.serialRead.close()
+                    self._port.serialRead.close()
 
         debug("Robot terminated!", verbosity=1)
 
+
+
+
+
 with Robot() as arlo:
-    pass
+    arlo.camera.detect_landmarks()
+    arlo.sonars.front()
+    arlo.moters.rotate(90)
