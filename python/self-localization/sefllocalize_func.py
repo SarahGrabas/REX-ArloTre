@@ -42,14 +42,14 @@ CBLACK = (0, 0, 0)
 
 # Landmarks.
 # The robot knows the position of the 4 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [2,4,7]
+landmarkIDs = [2,4,7,6]
 landmark_colors = [CRED, CGREEN]
 #Coordinates for each landmark
 landmarks = {
     2: (0.0, 0.0),
     4: (100.0, 0.0),
     7: (100.0,250.0),
-    #6: (0.0,250.0)
+    6: (0.0,250.0)
     
 }
 
@@ -442,26 +442,6 @@ def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks:
     state["particles"] = mcl_step(state, u_t, z_t, delta_t, landmarks)
     #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
     
-
-    #Estimate for robot position
-    best = max(state["particles"], key=lambda p: p.getWeight())
-
-    print(
-    "BEST:",
-    best.getX(),
-    best.getY(),
-    best.getTheta(),
-    best.getWeight()
-)
-
-    estimate = particle.estimate_pose(state["particles"])
-
-    print(
-    "MEAN:",
-    estimate.getX(),
-    estimate.getY(),
-    estimate.getTheta()
-)
     state["est_pose"] = particle.estimate_pose(state["particles"])
     print("Estimate Robot Pose:",state["est_pose"].getX(), state["est_pose"].getY() )
     
