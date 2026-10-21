@@ -127,8 +127,8 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
     #Vi beregn weight ved distance og vinkler
     particle_weights =[]
     #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
-    sigma_dist = 20.0 #cm
-    sigma_angle=0.20
+    sigma_dist = 15.0 #cm
+    sigma_angle=0.10
     print(objectIDs, dists)
     
     for p in particles:
@@ -226,7 +226,6 @@ def resample_particles(particles):
             particles[index].getX(),
             particles[index].getY(),
             particles[index].getTheta(),
-            1.0 / num_particles
         )
         new_particles.append(new_particle)
 
@@ -234,7 +233,12 @@ def resample_particles(particles):
     random_particles = initialize_particles(num_random)
     new_particles.extend(random_particles)
 
+    for p in new_particles:
+        p.setWeight(1.0 / num_particles)
+
     return new_particles
+
+    
 
 def weight_based_cam(particles, objectIDs, dists, angles,landmarks):
     """Funktion at opdaterer weights baseret på objekts og resample."""
@@ -314,7 +318,7 @@ def object_filtering(objects_from_frame, VALID_IDS): #Valid IDs er de ID vi øns
     return objectIDs, dists, angles
             
 #Funktion til at initialisere inden vi har kørt, her resetter man altså partiklerne og estimatet
-def initialize_mcl(num_particles=1500):
+def initialize_mcl(num_particles):
     particles = initialize_particles(num_particles)
 
     est_pose = particle.estimate_pose(particles)
@@ -466,7 +470,7 @@ def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks:
 
 
 
-current_state=initialize_mcl(num_particles=500)
+current_state=initialize_mcl(num_particles=1500)
 
 while True:
     
