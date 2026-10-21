@@ -445,7 +445,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
     
     state["est_pose"] = particle.estimate_pose(state["particles"])
-    print("Estimate Robot Pose:",state["est_pose"].getX(), state["est_pose"].getY() )
+    print("Estimate Robot Pose:", state["est_pose"].getX(), state["est_pose"].getY() )
     
     #Tegner og gemmer billed af world
     draw_world(state["est_pose"], state["particles"], state["world"])
@@ -463,7 +463,7 @@ while True:
 
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
-    detected_angles    = [lm.angle for lm in landmarks_seen]
+    detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
 
     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
 
