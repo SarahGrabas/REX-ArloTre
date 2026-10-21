@@ -34,7 +34,7 @@ landmarkIDs = [2,4]
 #Coordinates for each landmark
 landmarks = {
     2: (0.0, 0.0),
-    4: (0.0,100.0),
+    4: (100.0, 0.0),
     #7: (100.0,250.0),
     #6: (0.0,250.0)
     
