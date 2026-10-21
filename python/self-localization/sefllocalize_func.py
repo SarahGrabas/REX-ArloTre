@@ -462,7 +462,7 @@ while True:
     landmarks_seen = robot_controller.camera.detect_landmarks()
 
     detected_objectIDs = [lm.id for lm in landmarks_seen]
-    detected_dists     = [lm.distance for lm in landmarks_seen]
+    detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
     detected_angles    = [lm.angle for lm in landmarks_seen]
 
     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
