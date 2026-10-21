@@ -71,8 +71,8 @@ def sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
     a2 = 0.20
     a3 = 0.20
     a4 = 0.20
-    a5 = 0.01
-    a6 = 0.01
+    a5 = 0.05
+    a6 = 0.05
 
     for p in particles:
 
