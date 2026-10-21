@@ -11,16 +11,6 @@ import robot as robot_module
 
 import random
 
-
-def initialize_particles(num_particles):
-    particles = []
-    for i in range(num_particles):
-        # Random starting points. 
-        p = particle.Particle(600.0*np.random.ranf() - 100.0, 600.0*np.random.ranf() - 250.0, np.mod(2.0*np.pi*np.random.ranf(), 2.0*np.pi), 1.0/num_particles)
-        particles.append(p)
-
-    return particles
-
 meters_pr_sec = 2 * PI * robot.WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
 degrees_pr_second = 360 / 4
 
@@ -40,12 +30,12 @@ robot_controller = robot_module.Robot()
 
 # Landmarks.
 # The robot knows the position of the 4 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [2,4,7]
+landmarkIDs = [2,4]
 #Coordinates for each landmark
 landmarks = {
     2: (0.0, 0.0),
     4: (0.0,100.0),
-    7: (100.0,250.0),
+    #7: (100.0,250.0),
     #6: (0.0,250.0)
     
 }
