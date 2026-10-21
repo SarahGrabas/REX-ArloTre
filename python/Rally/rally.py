@@ -1,6 +1,3 @@
-from time import sleep
-import numpy as np
-
 ##### TYPING #####
 
 from __future__ import annotations
@@ -8,6 +5,13 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+##### LIBARIES #####
+
+from time import sleep
+import numpy as np
+from math import sqrt
+
 
 ##### PROGRAM PARAMETERS #####
 
@@ -54,8 +58,6 @@ if VERBOSITY:
         return f"{minutes:02}:{seconds:02}:{milliseconds:03}"
 
     # defines the debug print function
-    from _typeshed import SupportsWrite
-
     def debug(*values: object, verbosity:int=9999):
         """A debug print function used for printing formatted debug information to out, if verbosity is true.\\
         The higher `verbosity` is set (at least 1), the higher the value, the more important the debug info is."""
@@ -81,7 +83,7 @@ class Port(object):
     Not thread safe, but can be run it a single thread.
     """
     def __init__(self, port = '/dev/ttyACM0'):
-        from serial import Serial
+        from serial import Serial # type: ignore
 
         debug("Waiting for serial port connection ...", verbosity=2)
 
@@ -114,10 +116,10 @@ class Motor:
         debug("Initialized moters!", verbosity=1)
     
     @staticmethod
-    def _power_checker(power):
+    def _power_checker(power:int) -> bool:
         """Checks if a power value is in the set {0, [40;127]}.
            This is an internal utility function."""
-        return  (power == 0) or (power >=40 and power <=127) 
+        return (power == 0) or (power >=40 and power <=127) 
 
     def _move(self, powerLeft, powerRight, dirLeft, dirRight):
         """Start left motor with motor power powerLeft (in {0, [40;127]} and the numbers must be integer) and direction dirLeft (0=reverse, 1=forward)
@@ -130,7 +132,7 @@ class Motor:
         debug(f"_move({self}, {powerLeft}, {powerRight}, {dirLeft}, {dirRight})", verbosity=1)
         
         # checks for legallity of requisted speed
-        assert (not self._power_checker(powerLeft)) or (not self._power_checker(powerRight)), "Error: Expected power in range {0, [40;127]}, but recieved "+f"{powerLeft, powerRight}"
+        assert self._power_checker(powerLeft) and self._power_checker(powerRight), "Error: Expected power in range {0, [40;127]}, but recieved "+f"{powerLeft, powerRight}"
 
         cmd = 'd' + str(int(powerLeft)) + ',' + str(int(powerRight)) + ',' + str(int(dirLeft)) + ',' + str(int(dirRight)) + '\n'
         return self.port.send_command(cmd)
@@ -166,6 +168,7 @@ class Motor:
         Returns the seconds driven.
         """
         debug(f"drive({self}, {meters}, {forward}, {_sleep}, {stop_when_done})", verbosity=3)
+        assert meters >= 0, f"Error: Expected positive distance, but recieved {meters}"
 
         meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8   * 3.14/3 # last factor is correction
         
@@ -217,11 +220,11 @@ class Sonar:
 
         cmd = str(sensorid) + '\n'
         str_val = self.port.send_command(cmd)
-        if len(str_val) > 0:
-            debug("Sonar distance [mm] = "+str_val, verbosity=3)
-            return int(str_val)
-        else:
-            return -1
+        debug(f"Sonar output (str_val) = {str_val}", verbosity=1)
+        assert len(str_val) > 0, "Error: Unhandled edge case! Recieved empty string as sonar response."
+
+        debug("Sonar distance [mm] = "+str_val, verbosity=3)
+        return int(str_val)
             
     def front(self):
         """Read the front sonar ping sensor and return the measured range in milimeters [mm]"""
@@ -245,6 +248,32 @@ class Sonar:
 
 
 
+class Landmark:
+    MAX_BOX_SIZES = {
+        1  : 0.28,
+        2  : 0.275,
+        3  : 0.28,
+        4  : 0.285,
+        5  : 0.275,
+        6  : 0.31,
+        7  : 0.37,
+        8  : 0.245,
+        9  : 0.245,
+        10 : 0.275,
+        11 : 0.305,
+    }
+
+    def __init__(self, id:int, center:NDArray, radius:float, normal:NDArray, distance:float, angle:float):
+        debug(f"Landmark({id}, {center}, {radius}, {normal}, {distance}, {angle})")
+        self.id = id
+        self.center = center
+        self.radius = radius
+        self.normal = normal
+        self.distance = distance
+        self.angle = angle
+
+
+
 class Camera:
     CX, CY = RESOLUTION[0]/2, RESOLUTION[1]/2 # Camera center in pixels
 
@@ -256,57 +285,154 @@ class Camera:
 
     DISTORTION_MATRIX = np.zeros((5, 1), dtype=np.float32) # Zero vector ; assumes no camera (lens) distortion
 
-    def __init__(self):
-        global cv2
-        import cv2
-        import picamera2
+    ROBOT_TO_CAMERA = np.array([
+        [1, 0, 0, 0],
+        [0, 0, -1, 0.208],
+        [0, 1, 0, -0.225],
+        [0, 0, 0, 1]
+    ])
 
-        self.cam = picamera2.Picamera2() #open camera
-        config = self.cam.create_video_configuration({ # define camera config suitable for recording video
+    CAMERA_TO_ROBOT = np.linalg.inv(ROBOT_TO_CAMERA)
+    
+    # ---------------------------------------------------------------------------
+    # Robot coords
+    # +X : Right
+    # +Y : Front
+    # +Z : Up 
+
+    # Camera coords
+    # +X : Right
+    # +Y : Down
+    # +Z : Front
+    # ---------------------------------------------------------------------------
+
+    def __init__(self):
+        # imports cv2 lib for later use
+        global cv2
+        import cv2 # type: ignore
+
+        self.cam = self._init_camera()
+        debug("Initialized camera!", verbosity=1)
+
+    @staticmethod
+    def _init_camera(wait=False):
+        debug("Initializing camera ...", verbosity=1)
+        import picamera2 # type: ignore
+
+        cam = picamera2.Picamera2() #open camera
+        config = cam.create_video_configuration({ # define camera config suitable for recording video
             "size": RESOLUTION, 
             "format": "RGB888"
         }) 
 
-        self.cam.configure(config) #use config
-        self.cam.start(show_preview=False) #start camera (turn on)
-        sleep(1) #wait for camera to start
+        cam.configure(config) #use config
+        cam.start(show_preview=False) #start camera (turn on)
 
-    def take_picture(self) -> NDArray:
-        """Takes image in RBG format and return array of shape (hight, width, rbg)
-        Returns (ids, rvecs, tvecs)"""
+        if wait: sleep(1) #wait for camera to start
+        return cam
+
+    def capture(self) -> NDArray:
+        """
+        Takes picture in RBG format and return array of shape (hight, width, rbg).\\
+        Returns (ids, rvecs, tvecs).
+        """
+        debug("Capturing image!", verbosity=2)
         return self.cam.capture_array("main") #the capture array function captures next image from the stream
     
     @staticmethod
     def _face_normal(rvec) -> NDArray:
         """Given an rotation vector, returns the unit length normal vector for the marker face."""
         R, _ = cv2.Rodrigues(np.asarray(rvec, dtype=float))
+        debug(f"Calculated normal vector = {R[:, 2]}")
         return R[:, 2]
 
-    def picDetectMarkersPose(self) -> tuple[NDArray, NDArray, NDArray, NDArray]:
+    def _detect_markers(self) -> tuple[NDArray, NDArray, NDArray, NDArray]:
         """
-        Takes picture, detects markers in image and estimates poses for detected markers. \\
-        Returns: ```(list[ids], list[tvecs], list[rvecs], list[face_norms])```
+        Returns (ids, tvecs, rvecs, face_normals) in camera coordinates.
         """
         dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 
-        frame = self.take_picture()  #hent frame fra PiCamera2, dette er array med shape: (height, width,rbg)
-        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) #laver billed om til gråbilled
+        frame = self.capture()
+        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
-        corners, ids, _ = cv2.aruco.detectMarkers(gray, dictionary) #tjekker om vi kan finde nogle Aruco markers fra vores dictionary i billedet corners er hvor markeren er
+        corners, ids, _ = cv2.aruco.detectMarkers(gray, dictionary)
+        debug(f"Detected ids = {ids}", verbosity=1)
 
-        rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(  #vi beregner translation og rotation
-            corners, #vi tager position fra den marker vi ønsker at kører til
-            MARKER_SIZE,  #size of marker
-            Camera.CAMERA_MATRIX, #camera calibration parametre
+        # No markers detected
+        if ids is None:
+            debug(f"Returning empty ids, tvecs, rvecs, face_normals", verbosity=1)
+            empty = np.empty((0, 3), dtype=np.float64)
+            return np.empty(0, dtype=int), empty, empty.copy(), empty.copy()
+
+        rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
+            corners,
+            MARKER_SIZE,
+            Camera.CAMERA_MATRIX,
             Camera.DISTORTION_MATRIX
         )
-        # fixing weird default shapes
+        
+        debug(f"cv2 calculated ids, rvecs, tvecs = {ids, rvecs, tvecs}", verbosity=1)
         ids = ids.flatten()
         rvecs = rvecs.reshape(-1, 3)
         tvecs = tvecs.reshape(-1, 3)
 
-        return ids, tvecs, rvecs, np.array([self._face_normal(rvec) for rvec in rvecs])
+        normals = np.array([self._face_normal(rvec) for rvec in rvecs])
 
+        return ids, tvecs, rvecs, normals
+
+    def detect_landmarks(self) -> tuple[Landmark, ...]:
+        """
+        Detects landmarks visible to the camera.\\
+        Returns a tuple of all visible landmarks, as ``Landmark`` objects
+        """
+        debug("Detecting landmarks!", verbosity=2)
+        ids, tvecs, rvecs, normals = self._detect_markers()
+        debug(f"Detected the following landmark ids = {ids}", verbosity=2)
+        debug(f"ids, tvecs, rvecs, normals (in camera coords) = {ids, tvecs, rvecs, normals}", verbosity=1)
+
+        # if no landmarks are found
+        if len(ids) == 0:
+            debug("No landmarks detected, returning empty tuple.", verbosity=1)
+            return tuple()
+
+        # Box centers in camera coordinates
+        max_box_size = max(Landmark.MAX_BOX_SIZES.values())
+        sizes = np.array([
+            Landmark.MAX_BOX_SIZES.get(int(id), max_box_size)
+            for id in ids
+        ])
+        debug(f"Landmark side lengths = {sizes}", verbosity=1)
+
+        R = Camera.CAMERA_TO_ROBOT[:3, :3]
+        t = Camera.CAMERA_TO_ROBOT[:3, 3]
+
+        tvecs @= R.T
+        normals @= R.T
+        debug(f"Landmark tvecs in robot coords = {tvecs}", verbosity=1)
+        debug(f"Landmark face normals in robot coords = {normals}", verbosity=1)
+
+        centers = tvecs - normals * (sizes[:, None] / 2) + t
+        debug(f"Landmark centers in robot coords = {centers}", verbosity=1)
+
+        radiuses = [
+            sqrt(Landmark.MAX_BOX_SIZES.get(int(id), max_box_size) ** 2 / 2)
+            for id in ids
+        ]
+        debug(f"Landmark radiuses = {radiuses}", verbosity=1)
+
+        # Distance from robot center to marker center
+        distances = np.linalg.norm(centers[:, :2], axis=1)
+
+        # Angle from robot center to marker center
+        angles = np.degrees(
+            np.arctan2(-centers[:, 0], centers[:, 1])
+        )
+        debug(f"Distance and angle from robot center to marker centers = {distances, angles}", verbosity=1)
+
+        return tuple(
+            Landmark(id, center, radius, normal, distance, angle)
+            for id, center, radius, normal, distance, angle in zip(ids, centers, radiuses, normals, distances, angles)
+        )
 
 
 
