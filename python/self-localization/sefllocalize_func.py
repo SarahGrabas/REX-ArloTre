@@ -127,8 +127,8 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
     #Vi beregn weight ved distance og vinkler
     particle_weights =[]
     #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
-    sigma_dist = 15.0 #cm
-    sigma_angle=0.10
+    sigma_dist = 20.0 #cm
+    sigma_angle=0.20
     print(objectIDs, dists)
     
     for p in particles:
@@ -442,7 +442,7 @@ def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks:
 
 
 
-current_state=initialize_mcl(num_particles=1500)
+current_state=initialize_mcl(num_particles=500)
 
 while True:
     
