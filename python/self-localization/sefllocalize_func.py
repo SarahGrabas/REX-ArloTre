@@ -117,6 +117,7 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
     #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
     sigma_dist = 15.0 #cm
     sigma_angle=0.10
+    print(objectIDs)
     
     for p in particles:
         x = p.getX()
@@ -273,10 +274,10 @@ def object_filtering(objects_from_frame, VALID_IDS): #Valid IDs er de ID vi øns
     
     detected_objectIDs, detected_dists, detected_angles=objects_from_frame
     
-    if not isinstance(detected_objectIDs, type(None)):
-            # List detected objects
-            for i in range(len(detected_objectIDs)):
-                print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
+    # if not isinstance(detected_objectIDs, type(None)):
+    #         # List detected objects
+    #         for i in range(len(detected_objectIDs)):
+    #             print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
 
     objectIDs = []
     dists = []
@@ -305,6 +306,7 @@ def object_filtering(objects_from_frame, VALID_IDS): #Valid IDs er de ID vi øns
             objectIDs.append(ID)
             dists.append(measured_dist)
             angles.append(measured_angle)
+            
 
     return objectIDs, dists, angles
             
