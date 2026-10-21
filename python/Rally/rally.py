@@ -417,8 +417,8 @@ class Camera:
         R = Camera.CAMERA_TO_ROBOT[:3, :3]
         t = Camera.CAMERA_TO_ROBOT[:3, 3]
 
-        tvecs @= R.T
-        normals @= R.T
+        tvecs = tvecs @ R.T
+        normals = normals @ R.T
         debug(f"Landmark tvecs in robot coords = {tvecs}", verbosity=1)
         debug(f"Landmark face normals in robot coords = {normals}", verbosity=1)
 
