@@ -268,10 +268,10 @@ def object_filtering(objects_from_frame, VALID_IDS): #Valid IDs er de ID vi øns
     
     detected_objectIDs, detected_dists, detected_angles=objects_from_frame
     
-    # if not isinstance(detected_objectIDs, type(None)):
-    #         # List detected objects
-    #         for i in range(len(detected_objectIDs)):
-    #             print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
+    if not isinstance(detected_objectIDs, type(None)):
+            # List detected objects
+            for i in range(len(detected_objectIDs)):
+                print("Object ID = ", detected_objectIDs[i], ", Distance = ", detected_dists[i], ", angle = ", detected_angles[i])
 
     objectIDs = []
     dists = []
