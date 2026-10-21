@@ -10,6 +10,7 @@ import robot
 import robot as robot_module
 #from selflocalize_s import draw_world, jet
 import random
+#Comment
 
 
 meters_pr_sec = 2 * PI * robot.WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
