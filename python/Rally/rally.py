@@ -223,7 +223,7 @@ class Sonar:
         debug(f"Sonar output (str_val) = {str_val}", verbosity=1)
         assert len(str_val) > 0, "Error: Unhandled edge case! Recieved empty string as sonar response."
 
-        debug("Sonar distance [mm] = "+int(str_val), verbosity=3)
+        debug(f"Sonar distance [mm] = {int(str_val)}", verbosity=3)
         return int(str_val)
             
     def front(self):
