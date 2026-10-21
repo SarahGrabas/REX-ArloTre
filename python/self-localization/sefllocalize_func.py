@@ -22,7 +22,7 @@ degrees_pr_second = 360 / 4
 V_CALIB = meters_pr_sec * 100
 W_CALIB = np.deg2rad(degrees_pr_second)
 
-SCAN_PAUSE_TIME = 0.30
+SCAN_PAUSE_TIME = 0.40
 
 cam = None
 print("Opening and initializing camera")
