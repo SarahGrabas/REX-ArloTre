@@ -117,7 +117,7 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
     #Hvis particle filtering ikke konvergerer kan vi ændre på sigma
     sigma_dist = 15.0 #cm
     sigma_angle=0.10
-    print(objectIDs)
+    print(objectIDs, dists)
     
     for p in particles:
         x = p.getX()
@@ -401,6 +401,24 @@ def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks:
     
 
     #Estimate for robot position
+    best = max(state["particles"], key=lambda p: p.getWeight())
+
+    print(
+    "BEST:",
+    best.getX(),
+    best.getY(),
+    best.getTheta(),
+    best.getWeight()
+)
+
+    estimate = particle.estimate_pose(state["particles"])
+
+    print(
+    "MEAN:",
+    estimate.getX(),
+    estimate.getY(),
+    estimate.getTheta()
+)
     state["est_pose"] = particle.estimate_pose(state["particles"])
     print("Estimate Robot Pose:",state["est_pose"].getX(), state["est_pose"].getY() )
     
