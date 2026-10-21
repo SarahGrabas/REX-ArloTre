@@ -32,10 +32,14 @@ robot_controller = robot_module.Robot()
 
 # Landmarks.
 # The robot knows the position of the 4 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [2]
+landmarkIDs = [2,4,7,6]
 #Coordinates for each landmark
 landmarks = {
-    2: (0.0, 0.0)
+    2: (0.0, 0.0),
+    4: (0.0,100.0),
+    7: (250.0,100.0),
+    6: (250.0,0.0)
+    
 }
 
 #Motion model, opdatere partikler ud fra motion kun
