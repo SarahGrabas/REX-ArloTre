@@ -210,8 +210,11 @@ def update_particle_weights(particles, objectIDs, dists, angles):
             
     
 
-
 def resample_particles(particles):
+    
+    num_particles = len(particles)
+    num_random = int(0.10 * num_particles)
+    num_resampled = num_particles - num_random
 
     weights = np.asarray(
         [p.getWeight() for p in particles],
@@ -222,16 +225,17 @@ def resample_particles(particles):
     total = np.sum(weights)
 
     if total <= 0 or not np.isfinite(total):
-        weights = np.ones(len(particles)) / len(particles)
+        weights = np.ones(num_particles) / num_particles
     else:
         weights = weights / total
 
-    print("weights shape:", weights.shape)
-    print("weights sum:", np.sum(weights))
+    # ----------------------------------------
+    # 90 % almindelig resampling
+    # ----------------------------------------
 
     selected = np.random.choice(
-        len(particles),
-        size=len(particles),
+        num_particles,
+        size=num_resampled,
         replace=True,
         p=weights
     )
@@ -244,7 +248,26 @@ def resample_particles(particles):
             particles[index].getX(),
             particles[index].getY(),
             particles[index].getTheta(),
-            1.0 / len(particles)
+            1.0 / num_particles
+        )
+
+        new_particles.append(new_particle)
+
+    # ----------------------------------------
+    # 10 % random particles
+    # ----------------------------------------
+
+    for _ in range(num_random):
+
+        x = np.random.uniform(0, 500)
+        y = np.random.uniform(0, 500)
+        theta = np.random.uniform(-np.pi, np.pi)
+
+        new_particle = particle.Particle(
+            x,
+            y,
+            theta,
+            1.0 / num_particles
         )
 
         new_particles.append(new_particle)
@@ -664,15 +687,15 @@ try:
                     last_mcl_velocity = 0.0
                     last_mcl_angular_velocity = 0.0
 
-            else:
-                start=timer()
-                while timer() - start<1:
-                    robot_controller.go_diff_calibrated(1, 1) 
+            # else:
+            #     start=timer()
+            #     while timer() - start<1:
+            #         robot_controller.go_diff_calibrated(1, 1) 
                 
-                robot_controller.stop()
+            #     robot_controller.stop()
                 
                 
-                cv2.imwrite("mcl_world_going.png", world)
+            #     cv2.imwrite("mcl_world_going.png", world)
 
         #if showGUI:
             #draw_world(est_pose, particles, world)
