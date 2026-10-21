@@ -11,6 +11,7 @@ import robot as robot_module
 from selflocalize_s import draw_world
 import random
 import random_numbers as rn
+import rally
 
 WHEEL_2_WHEEL_DIST= 0.381
 
@@ -29,7 +30,8 @@ cam = None
 print("Opening and initializing camera")
 cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
 
-robot_controller = robot_module.Robot()
+robot_controller = rally.Robot()
+#robot_module.Robot()
 
 CRED = (0, 0, 255)
 CGREEN = (0, 255, 0)
@@ -362,21 +364,21 @@ def scan_function(state,robot_controller, delta_t):
     # ROTATION
     if state["scan_timer"] < state["scan_rotate_time"]:
         state["in_pause"] = False
-        robot_controller.go_diff_calibrated(-1, 1)
+        robot_controller.motor.move(-1, 1)
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = W_CALIB
 
     # PAUSE
     elif state["scan_timer"] < state["scan_rotate_time"] + SCAN_PAUSE_TIME:
         state["in_pause"] = True
-        robot_controller.stop()
+        robot_controller.motor.stop()
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = 0.0
 
     # NY SCAN
     else:
         state["in_pause"] = False
-        robot_controller.stop()
+        robot_controller.motor.stop()
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = 0.0
         state["scan_timer"] = 0.0
@@ -457,8 +459,12 @@ current_state=initialize_mcl(num_particles=1500)
 
 while True:
     
-    colour = cam.get_next_frame()
-    detected_objectIDs, detected_dists, detected_angles = cam.detect_aruco_objects(colour)
+    landmarks_seen = robot_controller.camera.detect_landmarks()
+
+    detected_objectIDs = [lm.id for lm in landmarks_seen]
+    detected_dists     = [lm.distance for lm in landmarks_seen]
+    detected_angles    = [lm.angle for lm in landmarks_seen]
+
     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
 
     delta_t = mcl_update(
