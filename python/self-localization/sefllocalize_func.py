@@ -4,12 +4,11 @@ import camera
 import numpy as np
 from timeit import default_timer as timer
 import sys
-from motion_model import sample_motion_model_velocity
 from math import pi as PI
 import time
 import robot
 import robot as robot_module
-from selflocalize_s import draw_world, jet
+#from selflocalize_s import draw_world, jet
 import random
 
 
@@ -195,8 +194,6 @@ def resample_particles(particles):
     else:
         weights = weights / total
 
-    print("weights shape:", weights.shape)
-    print("weights sum:", np.sum(weights))
 
     selected = np.random.choice(
         len(particles),
@@ -400,8 +397,8 @@ def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks:
     print("Estimate Robot Pose:",state["est_pose"])
     
     #Tegner og gemmer billed af world
-    draw_world(state["est_pose"], state["particles"], state["world"])
-    cv2.imwrite("mcl_world.png", state["world"])
+    # draw_world(state["est_pose"], state["particles"], state["world"])
+    # cv2.imwrite("mcl_world.png", state["world"])
 
     return  delta_t
 
