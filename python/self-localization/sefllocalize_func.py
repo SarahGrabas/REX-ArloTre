@@ -341,27 +341,9 @@ def mcl_update(state, cam):
         "est_pose": state["est_pose"],
     }
 
-initialize_mcl(num_particles=1500)
+current_state=initialize_mcl(num_particles=1500)
 
 while True:
     
     current_state = mcl_update(current_state, cam)
     
-    while True:
-    
-
-    # 2. Beslut hvad robotten skal
-    command, state["drive_state"] = autonomous_controller(
-        state["drive_state"],
-        result["est_pose"],
-        (target_x, target_y),
-        state["seen_landmarks"]
-    )
-
-    # 3. Udfør kommandoen
-    update_robot_motion(
-        state,
-        command,
-        robot_controller,
-        result["delta_t"]
-    )
