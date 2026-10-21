@@ -11,7 +11,9 @@ import robot as robot_module
 from selflocalize_s import draw_world
 import random
 
-meters_pr_sec = 2 * PI * robot.WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
+WHEEL_2_WHEEL_DIST= 0.381
+
+meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
 degrees_pr_second = 360 / 4
 
 #V_CALIB = 40.0   # Den kører 40 cm pr. sekund ca. Fremadrettet hastighed ved go_diff_calibrated(1, 1)
