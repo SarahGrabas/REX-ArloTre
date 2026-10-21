@@ -251,7 +251,7 @@ def weight_based_cam(particles, objectIDs, dists, angles,landmarks):
     return particles
     
     
-def mcl_step(particles, u_t, z_t, delta_t,landmarks):
+def mcl_step(state, u_t, z_t, delta_t,landmarks):
     """
     Funktion der udfører MCL-skridt: Prediction, Correction og Resampling.
     Vi beregner particles movement ud fra velocity og angular verlocity som burde afspejle robottens bevægelse.
@@ -260,24 +260,15 @@ def mcl_step(particles, u_t, z_t, delta_t,landmarks):
      """
     velocity, angular_velocity = u_t
     objectIDs, dists, angles = z_t
+    particles = state["particles"]
 
     if velocity != 0.0 or angular_velocity != 0.0:
-        sample_motion_model_velocity(
-            particles,
-            velocity,
-            angular_velocity,
-            delta_t
-        )
+        sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
 
-    if objectIDs:
-        update_particle_weights(
-            particles,
-            objectIDs,
-            dists,
-            angles,landmarks
-        )
-    
+    if objectIDs and state["in_pause"] and not state["measured_this_pause"]:
+        update_particle_weights(particles, objectIDs, dists, angles, landmarks)
         particles = resample_particles(particles)
+        state["measured_this_pause"] = True
 
 
     return particles
@@ -329,7 +320,8 @@ def initialize_mcl(num_particles=1500):
     est_pose = particle.estimate_pose(particles)
 
     state = {
-        
+        "in_pause": False,
+        "measured_this_pause": False,
         "particles": particles,
         "est_pose": est_pose,
 
@@ -350,47 +342,78 @@ def initialize_mcl(num_particles=1500):
 
 
 def scan_function(state,robot_controller, delta_t):
-
-    
     # Start en ny rotation
     if state["scan_timer"] == 0.0:
-
         scan_angle = random.uniform(5, 60)
-
-        state["scan_rotate_time"] = (np.deg2rad(scan_angle) / abs(W_CALIB))
-
+        state["scan_rotate_time"] = np.deg2rad(scan_angle) / abs(W_CALIB)
+        state["in_pause"] = False
+        state["measured_this_pause"] = False
         print("Ny scan:", scan_angle, "grader")
 
-    # Opdater timer
     state["scan_timer"] += delta_t
 
     # ROTATION
     if state["scan_timer"] < state["scan_rotate_time"]:
-
+        state["in_pause"] = False
         robot_controller.go_diff_calibrated(-1, 1)
-
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = W_CALIB
 
     # PAUSE
-    elif state["scan_timer"] < (
-        state["scan_rotate_time"] + SCAN_PAUSE_TIME
-    ):
-
+    elif state["scan_timer"] < state["scan_rotate_time"] + SCAN_PAUSE_TIME:
+        state["in_pause"] = True
         robot_controller.stop()
-
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = 0.0
 
     # NY SCAN
     else:
-
+        state["in_pause"] = False
         robot_controller.stop()
-
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = 0.0
-
         state["scan_timer"] = 0.0
+        
+    # # Start en ny rotation
+    # if state["scan_timer"] == 0.0:
+    #     state["measured_this_pause"] = False
+
+    #     scan_angle = random.uniform(5, 60)
+
+    #     state["scan_rotate_time"] = (np.deg2rad(scan_angle) / abs(W_CALIB))
+
+    #     print("Ny scan:", scan_angle, "grader")
+
+    # # Opdater timer
+    # state["scan_timer"] += delta_t
+
+    # # ROTATION
+    # if state["scan_timer"] < state["scan_rotate_time"]:
+
+    #     robot_controller.go_diff_calibrated(-1, 1)
+
+    #     state["last_mcl_velocity"] = 0.0
+    #     state["last_mcl_angular_velocity"] = W_CALIB
+
+    # # PAUSE
+    # elif state["scan_timer"] < (
+    #     state["scan_rotate_time"] + SCAN_PAUSE_TIME
+    # ):
+
+    #     robot_controller.stop()
+
+    #     state["last_mcl_velocity"] = 0.0
+    #     state["last_mcl_angular_velocity"] = 0.0
+
+    # # NY SCAN
+    # else:
+
+    #     robot_controller.stop()
+
+    #     state["last_mcl_velocity"] = 0.0
+    #     state["last_mcl_angular_velocity"] = 0.0
+
+    #     state["scan_timer"] = 0.0
             
 
 
@@ -409,7 +432,8 @@ def mcl_update(state:dict, cam, detected_obj:tuple, VALID_IDS: list , landmarks:
     u_t = (state["last_mcl_velocity"],state["last_mcl_angular_velocity"])
     z_t = object_filtering(detected_obj,VALID_IDS)
     
-    state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
+    state["particles"] = mcl_step(state, u_t, z_t, delta_t, landmarks)
+    #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
     
 
     #Estimate for robot position
