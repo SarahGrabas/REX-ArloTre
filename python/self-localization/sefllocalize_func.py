@@ -182,39 +182,46 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
             p.setWeight(p_weight)
             
 def resample_particles(particles):
+
+    num_particles = len(particles)
+    num_random = int(0.10 * num_particles)
+    num_resampled = num_particles - num_random
+
     weights = np.asarray(
         [p.getWeight() for p in particles],
         dtype=float
-    ).flatten()
+    )
 
-    # Sørg for at weights summerer til 1
     total = np.sum(weights)
 
     if total <= 0 or not np.isfinite(total):
-        weights = np.ones(len(particles)) / len(particles)
+        weights = np.ones(num_particles) / num_particles
     else:
         weights = weights / total
 
-
+    # Vælg 90 % af partiklerne ud fra deres vægt
     selected = np.random.choice(
-        len(particles),
-        size=len(particles),
+        num_particles,
+        size=num_resampled,
         replace=True,
         p=weights
     )
 
     new_particles = []
 
+    # De 90 % resamples fra de eksisterende partikler
     for index in selected:
-
         new_particle = particle.Particle(
             particles[index].getX(),
             particles[index].getY(),
             particles[index].getTheta(),
-            1.0 / len(particles)
+            1.0 / num_particles
         )
-
         new_particles.append(new_particle)
+
+    # De sidste 10 % bliver helt nye random partikler
+    random_particles = initialize_particles(num_random)
+    new_particles.extend(random_particles)
 
     return new_particles
 
