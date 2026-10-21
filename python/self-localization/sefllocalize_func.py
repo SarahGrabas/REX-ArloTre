@@ -10,6 +10,7 @@ import robot
 import robot as robot_module
 from selflocalize_s import draw_world
 import random
+import random_numbers as rn
 
 WHEEL_2_WHEEL_DIST= 0.381
 
@@ -235,6 +236,8 @@ def resample_particles(particles):
 
     for p in new_particles:
         p.setWeight(1.0 / num_particles)
+        
+    particle.add_uncertainty(new_particles, 3.0, 0.05)
 
     return new_particles
 
