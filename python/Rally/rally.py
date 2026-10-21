@@ -223,8 +223,9 @@ class Sonar:
         debug(f"Sonar output (str_val) = {str_val}", verbosity=1)
         assert len(str_val) > 0, "Error: Unhandled edge case! Recieved empty string as sonar response."
 
-        debug(f"Sonar distance [mm] = {int(str_val)}", verbosity=3)
-        return int(str_val)
+        dist = int(str_val)/1000
+        debug(f"Sonar distance in meters = {dist}", verbosity=3)
+        return dist
             
     def front(self):
         """Read the front sonar ping sensor and return the measured range in milimeters [mm]"""
@@ -267,10 +268,15 @@ class Landmark:
         debug(f"Landmark({id}, {center}, {radius}, {normal}, {distance}, {angle})")
         self.id = id
         self.center = center
+        """3D numpy array in meters."""
         self.radius = radius
+        """In meters."""
         self.normal = normal
+        """3D numpy array in meters.\\ Normal vector for visible landmark face."""
         self.distance = distance
+        """Distance between robot center and landmark center in meters."""
         self.angle = angle
+        """Angle between robot heading (from center) and landmark center, in degrees."""
 
 
 
@@ -451,7 +457,7 @@ class Robot:
     def __init__(self):
         debug("Initializing robot ...")
         self._port = Port()
-        self.moters = Motor(self._port)
+        self.motors = Motor(self._port)
         self.sonars = Sonar(self._port)
         self.camera = Camera()
         
@@ -473,7 +479,7 @@ class Robot:
 
         try: # stops moters
             sleep(0.05)
-            self.moters.stop()
+            self.motors.stop()
             sleep(0.1)
         finally:
             try:
@@ -493,4 +499,4 @@ class Robot:
 with Robot() as arlo:
     arlo.camera.detect_landmarks()
     arlo.sonars.front()
-    arlo.moters.rotate(90)
+    arlo.motors.rotate(90)
