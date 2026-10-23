@@ -368,33 +368,19 @@ def initialize_mcl(num_particles):
 
 def scan_function(state,robot_controller, delta_t):
     # Start en ny rotation
-    print(
-    "SCAN DEBUG:",
-    "timer =", state["scan_timer"],
-    "rotate_time =", state["scan_rotate_time"],
-    "pause_end =", state["scan_rotate_time"] + SCAN_PAUSE_TIME,
-    "in_pause =", state["in_pause"]
-)
     if state["scan_timer"] == 0.0:
         scan_angle = random.uniform(5, 60)
         state["scan_rotate_time"] = np.deg2rad(scan_angle) / abs(W_CALIB)
         state["in_pause"] = False
-        print("SCAN: setting in_pause =", state["in_pause"])
         state["measured_this_pause"] = False
         print("Ny scan:", scan_angle, "grader")
 
     state["scan_timer"] += delta_t
-    print(
-    "SCAN TIMER:",
-    "timer =", state["scan_timer"],
-    "rotate_time =", state["scan_rotate_time"],
-    "pause_end =", state["scan_rotate_time"] + SCAN_PAUSE_TIME
-)
+
 
     # ROTATION
     if state["scan_timer"] < state["scan_rotate_time"]:
         state["in_pause"] = False
-        print("SCAN: setting in_pause =", state["in_pause"])
         robot_controller.moters.move(-1, 1)
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = W_CALIB
@@ -402,7 +388,6 @@ def scan_function(state,robot_controller, delta_t):
     # PAUSE
     elif state["scan_timer"] < state["scan_rotate_time"] + SCAN_PAUSE_TIME:
         state["in_pause"] = True
-        print("SCAN: setting in_pause =", state["in_pause"])
         robot_controller.moters.stop()
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = 0.0
@@ -410,7 +395,6 @@ def scan_function(state,robot_controller, delta_t):
     # NY SCAN
     else:
         state["in_pause"] = False
-        print("SCAN: setting in_pause =", state["in_pause"])
         robot_controller.moters.stop()
         state["last_mcl_velocity"] = 0.0
         state["last_mcl_angular_velocity"] = 0.0
