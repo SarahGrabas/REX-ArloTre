@@ -473,53 +473,63 @@ current_state=initialize_mcl(num_particles=1500)
         
 # for _ in range(50):
 
+# landmarks_seen = robot_controller.camera.detect_landmarks()
+
+# detected_objectIDs = [lm.id for lm in landmarks_seen]
+# detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+# detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+
+# detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+
+# #     delta_t = mcl_update(
+# #         current_state,
+# #         detected_obj,
+# #         landmarkIDs,landmarks
+# #     )
+
+# #     # 3. Scan bestemmer bevægelsen for NÆSTE loop
+# #     scan_function(
+# #         current_state,
+# #         robot_controller,
+# #         delta_t
+# #     )
+
+# robot_x = 55.0
+# robot_y = 50.0
+
+# for ID in landmarkIDs:
+#     lx, ly = landmarks[ID]
+
+#     expected_dist = np.sqrt(
+#         (lx - robot_x)**2 +
+#         (ly - robot_y)**2
+#     )
+
+#     # Find det tilsvarende landmark fra kameraet
+#     landmark = next(
+#         (lm for lm in landmarks_seen if lm.id == ID),
+#         None
+#     )
+
+#     if landmark is not None:
+#         center = landmark.center
+
+#         print(
+#             f"Landmark: {ID}"
+#             f" | Expected distance: {expected_dist:.2f} cm"
+#             f" | Measured distance: {landmark.distance * 100:.2f} cm"
+#             f" | Center: ({center[0]:.2f}, {center[1]:.2f}, {center[2]:.2f})"
+#         )
+        
+# while True:
+#     delta_t = mcl_update(current_state, detected_obj, landmarkIDs,landmarks)
+
 landmarks_seen = robot_controller.camera.detect_landmarks()
 
-detected_objectIDs = [lm.id for lm in landmarks_seen]
-detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
-detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
-
-detected_obj =(detected_objectIDs, detected_dists, detected_angles)
-
-#     delta_t = mcl_update(
-#         current_state,
-#         detected_obj,
-#         landmarkIDs,landmarks
-#     )
-
-#     # 3. Scan bestemmer bevægelsen for NÆSTE loop
-#     scan_function(
-#         current_state,
-#         robot_controller,
-#         delta_t
-#     )
-
-robot_x = 55.0
-robot_y = 50.0
-
-for ID in landmarkIDs:
-    lx, ly = landmarks[ID]
-
-    expected_dist = np.sqrt(
-        (lx - robot_x)**2 +
-        (ly - robot_y)**2
+for lm in landmarks_seen:
+    print(
+        f"ID {lm.id}: "
+        f"center=({lm.center[0]:.3f}, {lm.center[1]:.3f}, {lm.center[2]:.3f}) "
+        f"distance={lm.distance*100:.2f} cm "
+        f"angle={lm.angle:.2f}°"
     )
-
-    # Find det tilsvarende landmark fra kameraet
-    landmark = next(
-        (lm for lm in landmarks_seen if lm.id == ID),
-        None
-    )
-
-    if landmark is not None:
-        center = landmark.center
-
-        print(
-            f"Landmark: {ID}"
-            f" | Expected distance: {expected_dist:.2f} cm"
-            f" | Measured distance: {landmark.distance * 100:.2f} cm"
-            f" | Center: ({center[0]:.2f}, {center[1]:.2f}, {center[2]:.2f})"
-        )
-        
-while True:
-    delta_t = mcl_update(current_state, detected_obj, landmarkIDs,landmarks)
