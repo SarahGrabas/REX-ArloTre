@@ -492,52 +492,52 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
 
 current_state=initialize_mcl(num_particles=1500)
 
-# TEST AF PARTICLE WEIGHTS
-test_particles = [
-    particle.Particle(x=55, y=50, theta=np.deg2rad(90)),
-    particle.Particle(x=205, y=48, theta=np.deg2rad(44)),
-]
+# # TEST AF PARTICLE WEIGHTS
+# test_particles = [
+#     particle.Particle(x=55, y=50, theta=np.deg2rad(90)),
+#     particle.Particle(x=205, y=48, theta=np.deg2rad(44)),
+# ]
 
-update_particle_weights(
-    test_particles,
-    [6, 7],
-    [217.6, 219.1],
-    [np.deg2rad(14.3), np.deg2rad(-21.8)],
-    landmarks
-)
+# update_particle_weights(
+#     test_particles,
+#     [6, 7],
+#     [217.6, 219.1],
+#     [np.deg2rad(14.3), np.deg2rad(-21.8)],
+#     landmarks
+# )
 
-for p in test_particles:
-    print(
-        "TEST PARTICLE:",
-        "x =", p.getX(),
-        "y =", p.getY(),
-        "theta =", np.rad2deg(p.getTheta()),
-        "weight =", p.getWeight()
+# for p in test_particles:
+#     print(
+#         "TEST PARTICLE:",
+#         "x =", p.getX(),
+#         "y =", p.getY(),
+#         "theta =", np.rad2deg(p.getTheta()),
+#         "weight =", p.getWeight()
+#     )
+
+
+for _ in range(50):
+    
+    landmarks_seen = robot_controller.camera.detect_landmarks()
+
+    detected_objectIDs = [lm.id for lm in landmarks_seen]
+    detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+    detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+
+    detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+
+    delta_t = mcl_update(
+        current_state,
+        detected_obj,
+        landmarkIDs,landmarks
     )
 
-
-# for _ in range(50):
-    
-#     landmarks_seen = robot_controller.camera.detect_landmarks()
-
-#     detected_objectIDs = [lm.id for lm in landmarks_seen]
-#     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
-#     detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
-
-#     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
-
-#     delta_t = mcl_update(
-#         current_state,
-#         detected_obj,
-#         landmarkIDs,landmarks
-#     )
-
-#     # 3. Scan bestemmer bevægelsen for NÆSTE loop
-#     scan_function(
-#         current_state,
-#         robot_controller,
-#         delta_t
-#     )
+    # 3. Scan bestemmer bevægelsen for NÆSTE loop
+    scan_function(
+        current_state,
+        robot_controller,
+        delta_t
+    )
 
 
 # robot_controller.moters.drive(1)
@@ -546,64 +546,64 @@ for p in test_particles:
         
 # for _ in range(50):
 
-landmarks_seen = robot_controller.camera.detect_landmarks()
-
-detected_objectIDs = [lm.id for lm in landmarks_seen]
-detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
-detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
-
-detected_obj =(detected_objectIDs, detected_dists, detected_angles)
-
-# #     delta_t = mcl_update(
-# #         current_state,
-# #         detected_obj,
-# #         landmarkIDs,landmarks
-# #     )
-
-# #     # 3. Scan bestemmer bevægelsen for NÆSTE loop
-# #     scan_function(
-# #         current_state,
-# #         robot_controller,
-# #         delta_t
-# #     )
-
-# robot_x = 55.0
-# robot_y = 50.0
-
-# for ID in landmarkIDs:
-#     lx, ly = landmarks[ID]
-
-#     expected_dist = np.sqrt(
-#         (lx - robot_x)**2 +
-#         (ly - robot_y)**2
-#     )
-
-#     # Find det tilsvarende landmark fra kameraet
-#     landmark = next(
-#         (lm for lm in landmarks_seen if lm.id == ID),
-#         None
-#     )
-
-#     if landmark is not None:
-#         center = landmark.center
-
-#         print(
-#             f"Landmark: {ID}"
-#             f" | Expected distance: {expected_dist:.2f} cm"
-#             f" | Measured distance: {landmark.distance * 100:.2f} cm"
-#             f" | Center: ({center[0]:.2f}, {center[1]:.2f}, {center[2]:.2f})"
-#         )
-        
-while True:
-    delta_t = mcl_update(current_state, detected_obj, landmarkIDs,landmarks)
-
 # landmarks_seen = robot_controller.camera.detect_landmarks()
 
-# for lm in landmarks_seen:
-#     print(
-#         f"ID {lm.id}: "
-#         f"center=({lm.center[0]:.3f}, {lm.center[1]:.3f}, {lm.center[2]:.3f}) "
-#         f"distance={lm.distance*100:.2f} cm "
-#         f"angle={lm.angle:.2f}°"
-#     )
+# detected_objectIDs = [lm.id for lm in landmarks_seen]
+# detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+# detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+
+# detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+
+# # #     delta_t = mcl_update(
+# # #         current_state,
+# # #         detected_obj,
+# # #         landmarkIDs,landmarks
+# # #     )
+
+# # #     # 3. Scan bestemmer bevægelsen for NÆSTE loop
+# # #     scan_function(
+# # #         current_state,
+# # #         robot_controller,
+# # #         delta_t
+# # #     )
+
+# # robot_x = 55.0
+# # robot_y = 50.0
+
+# # for ID in landmarkIDs:
+# #     lx, ly = landmarks[ID]
+
+# #     expected_dist = np.sqrt(
+# #         (lx - robot_x)**2 +
+# #         (ly - robot_y)**2
+# #     )
+
+# #     # Find det tilsvarende landmark fra kameraet
+# #     landmark = next(
+# #         (lm for lm in landmarks_seen if lm.id == ID),
+# #         None
+# #     )
+
+# #     if landmark is not None:
+# #         center = landmark.center
+
+# #         print(
+# #             f"Landmark: {ID}"
+# #             f" | Expected distance: {expected_dist:.2f} cm"
+# #             f" | Measured distance: {landmark.distance * 100:.2f} cm"
+# #             f" | Center: ({center[0]:.2f}, {center[1]:.2f}, {center[2]:.2f})"
+# #         )
+        
+# while True:
+#     delta_t = mcl_update(current_state, detected_obj, landmarkIDs,landmarks)
+
+# # landmarks_seen = robot_controller.camera.detect_landmarks()
+
+# # for lm in landmarks_seen:
+# #     print(
+# #         f"ID {lm.id}: "
+# #         f"center=({lm.center[0]:.3f}, {lm.center[1]:.3f}, {lm.center[2]:.3f}) "
+# #         f"distance={lm.distance*100:.2f} cm "
+# #         f"angle={lm.angle:.2f}°"
+# #     )
 
