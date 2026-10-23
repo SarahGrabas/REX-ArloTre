@@ -440,7 +440,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
 
 
 
-# current_state=initialize_mcl(num_particles=1500)
+current_state=initialize_mcl(num_particles=1500)
 
 
 # for _ in range(50):
@@ -469,17 +469,17 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
 
 # robot_controller.moters.drive(1)
 
-# current_state["last_mcl_velocity"] = V_CALIB
+#current_state["last_mcl_velocity"] = V_CALIB
         
 # for _ in range(50):
 
 landmarks_seen = robot_controller.camera.detect_landmarks()
 
-#     detected_objectIDs = [lm.id for lm in landmarks_seen]
+detected_objectIDs = [lm.id for lm in landmarks_seen]
 detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
-#     detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
 
-#     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+detected_obj =(detected_objectIDs, detected_dists, detected_angles)
 
 #     delta_t = mcl_update(
 #         current_state,
@@ -520,3 +520,6 @@ for ID in landmarkIDs:
             f" | Measured distance: {landmark.distance * 100:.2f} cm"
             f" | Center: ({center[0]:.2f}, {center[1]:.2f}, {center[2]:.2f})"
         )
+        
+while True:
+    delta_t = mcl_update(current_state, detected_obj, landmarkIDs,landmarks)
