@@ -449,7 +449,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
 
 
 
-#current_state=initialize_mcl(num_particles=1500)
+current_state=initialize_mcl(num_particles=1500)
 
 # TEST AF PARTICLE WEIGHTS
 test_particles = [
