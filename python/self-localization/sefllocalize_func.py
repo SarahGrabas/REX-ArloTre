@@ -205,6 +205,14 @@ def resample_particles(particles):
         replace=True,
         p=weights
     )
+    print("RESAMPLING DEBUG:")
+    print("most selected index:", np.bincount(selected).argmax())
+    print("most selected count:", np.bincount(selected).max())
+
+    best_index = np.argmax(weights)
+    print("original best index:", best_index)
+    print("original best weight:", weights[best_index])
+    print("best selected count:", np.sum(selected == best_index))
 
     new_particles = []
 

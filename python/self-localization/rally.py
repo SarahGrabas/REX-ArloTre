@@ -425,16 +425,6 @@ class Camera:
         #centers = tvecs - normals * (sizes[:, None] / 2) + t
         centers = tvecs + t
         debug(f"Landmark centers in robot coords = {centers}", verbosity=1)
-        print("LANDMARK CENTERS:")
-        for i, c in enumerate(centers):
-            print(
-                "ID:", objectIDs[i],
-                "x:", c[0],
-                "y:", c[1],
-                "z:", c[2],
-                "distance:", np.linalg.norm(c[:2]),
-                "angle:", np.degrees(np.arctan2(-c[0], c[1]))
-            )
 
         radiuses = [
             sqrt(Landmark.MAX_BOX_SIZES.get(int(id), max_box_size) ** 2 / 2)
