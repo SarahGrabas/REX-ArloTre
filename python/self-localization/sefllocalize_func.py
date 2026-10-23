@@ -258,7 +258,10 @@ def mcl_step(state, u_t, z_t, delta_t,landmarks):
 
     if velocity != 0.0 or angular_velocity != 0.0:
         sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
-
+    print("MCL DEBUG:")
+    print("objectIDs:", objectIDs)
+    print("in_pause:", state["in_pause"])
+    print("measured_this_pause:", state["measured_this_pause"])
     if objectIDs and state["in_pause"] and not state["measured_this_pause"]:
         update_particle_weights(particles, objectIDs, dists, angles, landmarks)
         print("========== MCL WEIGHT UPDATE ==========")
