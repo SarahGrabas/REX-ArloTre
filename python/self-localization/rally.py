@@ -15,7 +15,7 @@ from math import sqrt
 
 ##### PROGRAM PARAMETERS #####
 
-VERBOSITY : int = 0 # 0 means no debug info, 1 means all, and higher values means less verbosity
+VERBOSITY : int = 1 # 0 means no debug info, 1 means all, and higher values means less verbosity
 
 
 
