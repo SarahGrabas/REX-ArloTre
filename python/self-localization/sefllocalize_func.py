@@ -291,7 +291,28 @@ def mcl_step(state, u_t, z_t, delta_t,landmarks):
 
         print("========== NOW RESAMPLING ==========")
         particles = resample_particles(particles)
-        print("========== AFTER RESAMPLING ==========")
+        xs = np.array([p.getX() for p in particles])
+        ys = np.array([p.getY() for p in particles])
+        thetas = np.array([p.getTheta() for p in particles])
+
+        print("========== AFTER RESAMPLING CLOUD ==========")
+        print("x mean:", np.mean(xs))
+        print("x median:", np.median(xs))
+        print("x std:", np.std(xs))
+
+        print("y mean:", np.mean(ys))
+        print("y median:", np.median(ys))
+        print("y std:", np.std(ys))
+
+        print(
+            "theta mean:",
+            np.rad2deg(
+                np.arctan2(
+                    np.mean(np.sin(thetas)),
+                    np.mean(np.cos(thetas))
+                )
+            )
+        )
         
         state["measured_this_pause"] = True
 
