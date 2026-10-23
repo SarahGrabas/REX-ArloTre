@@ -495,7 +495,7 @@ detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
 #     )
 
 robot_x = 40.0
-robot_y = 0.0
+robot_y = 50.0
 
 for ID in landmarkIDs:
     lx, ly = landmarks[ID]
