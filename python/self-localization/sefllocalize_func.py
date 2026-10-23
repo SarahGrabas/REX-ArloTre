@@ -529,27 +529,59 @@ current_state=initialize_mcl(num_particles=1500)
 #     )
 
 
-for _ in range(50):
+# for _ in range(50):
     
-    landmarks_seen = robot_controller.camera.detect_landmarks()
+#     landmarks_seen = robot_controller.camera.detect_landmarks()
 
-    detected_objectIDs = [lm.id for lm in landmarks_seen]
-    detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
-    detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+#     detected_objectIDs = [lm.id for lm in landmarks_seen]
+#     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+#     detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
 
-    detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+#     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
 
-    delta_t = mcl_update(
-        current_state,
-        detected_obj,
-        landmarkIDs,landmarks
+#     delta_t = mcl_update(
+#         current_state,
+#         detected_obj,
+#         landmarkIDs,landmarks
+#     )
+
+#     # 3. Scan bestemmer bevægelsen for NÆSTE loop
+#     scan_function(
+#         current_state,
+#         robot_controller,
+#         delta_t
+#     )
+
+x = 55.0
+y = 50.0
+theta = np.deg2rad(90)
+
+for lm_id in [6, 7]:
+    x_obj, y_obj = landmarks[lm_id]
+
+    dx = x_obj - x
+    dy = y_obj - y
+
+    distance = np.sqrt(dx**2 + dy**2)
+
+    heading = np.array([np.cos(theta), np.sin(theta)])
+    direction = np.array([dx, dy]) / distance
+
+    angle_unsigned = np.arccos(
+        np.clip(np.dot(heading, direction), -1.0, 1.0)
     )
 
-    # 3. Scan bestemmer bevægelsen for NÆSTE loop
-    scan_function(
-        current_state,
-        robot_controller,
-        delta_t
+    heading_left = np.array([-np.sin(theta), np.cos(theta)])
+
+    angle = (
+        np.sign(np.dot(direction, heading_left))
+        * angle_unsigned
+    )
+
+    print(
+        "ID", lm_id,
+        "expected distance:", distance,
+        "expected angle:", np.rad2deg(angle)
     )
 
 
