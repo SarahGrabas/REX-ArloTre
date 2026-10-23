@@ -503,85 +503,61 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
 
 
 
-#current_state=initialize_mcl(num_particles=1500)
-
-# # TEST AF PARTICLE WEIGHTS
-# test_particles = [
-#     particle.Particle(x=55, y=50, theta=np.deg2rad(90)),
-#     particle.Particle(x=205, y=48, theta=np.deg2rad(44)),
-# ]
-
-# update_particle_weights(
-#     test_particles,
-#     [6, 7],
-#     [217.6, 219.1],
-#     [np.deg2rad(14.3), np.deg2rad(-21.8)],
-#     landmarks
-# )
-
-# for p in test_particles:
-#     print(
-#         "TEST PARTICLE:",
-#         "x =", p.getX(),
-#         "y =", p.getY(),
-#         "theta =", np.rad2deg(p.getTheta()),
-#         "weight =", p.getWeight()
-#     )
+current_state=initialize_mcl(num_particles=1500)
 
 
-# for _ in range(50):
+for _ in range(50):
     
-landmarks_seen = robot_controller.camera.detect_landmarks()
+    landmarks_seen = robot_controller.camera.detect_landmarks()
 
-detected_objectIDs = [lm.id for lm in landmarks_seen]
-detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+    detected_objectIDs = [lm.id for lm in landmarks_seen]
+    detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
 
-detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+    detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
 
-detected_obj =(detected_objectIDs, detected_dists, detected_angles)
-print(detected_obj)
+    detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+    print(detected_obj)
 
-#     delta_t = mcl_update(
-#         current_state,
-#         detected_obj,
-#         landmarkIDs,landmarks
-#     )
+    delta_t = mcl_update(
+        current_state,
+        detected_obj,
+        landmarkIDs,landmarks
+    )
 
-#     # 3. Scan bestemmer bevægelsen for NÆSTE loop
-#     scan_function(
-#         current_state,
-#         robot_controller,
-#         delta_t
-#     )
+    # 3. Scan bestemmer bevægelsen for NÆSTE loop
+    scan_function(
+        current_state,
+        robot_controller,
+        delta_t
+    )
 
 
+robot_controller.moters.drive(1)
 
-# robot_controller.moters.drive(1)
-
-#current_state["last_mcl_velocity"] = V_CALIB
+current_state["last_mcl_velocity"] = V_CALIB
         
-# for _ in range(50):
+for _ in range(50):
 
-# landmarks_seen = robot_controller.camera.detect_landmarks()
+    landmarks_seen = robot_controller.camera.detect_landmarks()
 
-# detected_objectIDs = [lm.id for lm in landmarks_seen]
-# detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
-# detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+    detected_objectIDs = [lm.id for lm in landmarks_seen]
+    detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+    detected_angles    = [np.deg2rad(lm.angle) for lm in landmarks_seen]
 
-# detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+    detected_obj =(detected_objectIDs, detected_dists, detected_angles)
 
-# # #     delta_t = mcl_update(
-# # #         current_state,
-# # #         detected_obj,
-# # #         landmarkIDs,landmarks
-# # #     )
+    delta_t = mcl_update(
+        current_state,
+        detected_obj,
+        landmarkIDs,landmarks
+    )
 
-# # #     # 3. Scan bestemmer bevægelsen for NÆSTE loop
-# # #     scan_function(
-# # #         current_state,
-# # #         robot_controller,
-# # #         delta_t
-# # #     )
+    # 3. Scan bestemmer bevægelsen for NÆSTE loop
+    scan_function(
+        current_state,
+        robot_controller,
+        delta_t
+    )
 
 # # robot_x = 55.0
 # # robot_y = 50.0
