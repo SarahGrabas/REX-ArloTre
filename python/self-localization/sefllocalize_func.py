@@ -443,7 +443,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
 current_state=initialize_mcl(num_particles=1500)
 
 
-for _ in range(20):
+for _ in range(50):
     
     landmarks_seen = robot_controller.camera.detect_landmarks()
 
