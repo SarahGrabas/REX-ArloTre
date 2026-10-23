@@ -522,14 +522,23 @@ detected_obj =(detected_objectIDs, detected_dists, detected_angles)
 #         )
         
 while True:
-     delta_t = mcl_update(current_state, detected_obj, landmarkIDs,landmarks)
+    delta_t = mcl_update(current_state, detected_obj, landmarkIDs,landmarks)
 
-landmarks_seen = robot_controller.camera.detect_landmarks()
+# landmarks_seen = robot_controller.camera.detect_landmarks()
 
-for lm in landmarks_seen:
+# for lm in landmarks_seen:
+#     print(
+#         f"ID {lm.id}: "
+#         f"center=({lm.center[0]:.3f}, {lm.center[1]:.3f}, {lm.center[2]:.3f}) "
+#         f"distance={lm.distance*100:.2f} cm "
+#         f"angle={lm.angle:.2f}°"
+#     )
+
+    pose = particle.estimate_pose(current_state["particles"])
+
     print(
-        f"ID {lm.id}: "
-        f"center=({lm.center[0]:.3f}, {lm.center[1]:.3f}, {lm.center[2]:.3f}) "
-        f"distance={lm.distance*100:.2f} cm "
-        f"angle={lm.angle:.2f}°"
+        "Estimate:",
+        pose[0],
+        pose[1],
+        np.rad2deg(pose[2])
     )
