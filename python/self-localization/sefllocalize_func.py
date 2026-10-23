@@ -494,7 +494,7 @@ detected_obj =(detected_objectIDs, detected_dists, detected_angles)
 #         delta_t
 #     )
 
-robot_x = 40.0
+robot_x = 55.0
 robot_y = 50.0
 
 for ID in landmarkIDs:
