@@ -261,6 +261,21 @@ def mcl_step(state, u_t, z_t, delta_t,landmarks):
 
     if objectIDs and state["in_pause"] and not state["measured_this_pause"]:
         update_particle_weights(particles, objectIDs, dists, angles, landmarks)
+        weights = np.array([p.getWeight() for p in particles])
+
+        print("BEFORE RESAMPLING:")
+        print("max weight:", np.max(weights))
+        print("mean weight:", np.mean(weights))
+        print("nonzero weights:", np.count_nonzero(weights))
+
+        best = np.argmax(weights)
+        print(
+            "BEST PARTICLE:",
+            particles[best].getX(),
+            particles[best].getY(),
+            np.rad2deg(particles[best].getTheta()),
+            particles[best].getWeight()
+        )
         particles = resample_particles(particles)
         state["measured_this_pause"] = True
 
@@ -427,7 +442,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     z_t = object_filtering(detected_obj,VALID_IDS)
     
     
-    print("OBJECTs:", detected_obj)
+    print("OBJECTs:", z_t)
     state["particles"] = mcl_step(state, u_t, z_t, delta_t, landmarks)
     #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
     print("AFTER RESAMPLING:")
