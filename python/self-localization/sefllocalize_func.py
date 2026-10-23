@@ -505,8 +505,18 @@ for ID in landmarkIDs:
         (ly - robot_y)**2
     )
 
-    print(
-        "Landmark:", ID,
-        "Expected:", expected_dist,
-        "Measured:", detected_dists[landmarkIDs.index(ID)]
+    # Find det tilsvarende landmark fra kameraet
+    landmark = next(
+        (lm for lm in landmarks_seen if lm.id == ID),
+        None
     )
+
+    if landmark is not None:
+        center = landmark.center
+
+        print(
+            f"Landmark: {ID}"
+            f" | Expected distance: {expected_dist:.2f} cm"
+            f" | Measured distance: {landmark.distance * 100:.2f} cm"
+            f" | Center: ({center[0]:.2f}, {center[1]:.2f}, {center[2]:.2f})"
+        )
