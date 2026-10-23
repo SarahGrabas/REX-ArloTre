@@ -422,8 +422,8 @@ class Camera:
         debug(f"Landmark tvecs in robot coords = {tvecs}", verbosity=1)
         debug(f"Landmark face normals in robot coords = {normals}", verbosity=1)
 
-        #centers = tvecs - normals * (sizes[:, None] / 2) + t
-        centers = tvecs + t
+        centers = tvecs - normals * (sizes[:, None] / 2) + t
+        #centers = tvecs + t
         debug(f"Landmark centers in robot coords = {centers}", verbosity=1)
 
         radiuses = [
