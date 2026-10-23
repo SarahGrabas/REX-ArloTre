@@ -384,6 +384,12 @@ def scan_function(state,robot_controller, delta_t):
         print("Ny scan:", scan_angle, "grader")
 
     state["scan_timer"] += delta_t
+    print(
+    "SCAN TIMER:",
+    "timer =", state["scan_timer"],
+    "rotate_time =", state["scan_rotate_time"],
+    "pause_end =", state["scan_rotate_time"] + SCAN_PAUSE_TIME
+)
 
     # ROTATION
     if state["scan_timer"] < state["scan_rotate_time"]:
