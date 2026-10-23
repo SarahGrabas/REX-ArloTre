@@ -438,7 +438,7 @@ class Camera:
         # Angle from robot center to marker center
         angles = np.degrees(
             np.arctan2(-centers[:, 0], centers[:, 1])
-            ) + 90.0
+            ) 
         debug(f"Distance and angle from robot center to marker centers = {distances, angles}", verbosity=1)
 
         return tuple(

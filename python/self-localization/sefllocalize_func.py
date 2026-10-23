@@ -426,6 +426,8 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     u_t = (state["last_mcl_velocity"],state["last_mcl_angular_velocity"])
     z_t = object_filtering(detected_obj,VALID_IDS)
     
+    
+    print("OBJECTs:", detected_obj)
     state["particles"] = mcl_step(state, u_t, z_t, delta_t, landmarks)
     #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
     
@@ -440,7 +442,30 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
 
 
 
-current_state=initialize_mcl(num_particles=1500)
+#current_state=initialize_mcl(num_particles=1500)
+
+# TEST AF PARTICLE WEIGHTS
+test_particles = [
+    particle.Particle(x=55, y=50, theta=np.deg2rad(90)),
+    particle.Particle(x=205, y=48, theta=np.deg2rad(44)),
+]
+
+update_particle_weights(
+    test_particles,
+    [6, 7],
+    [217.6, 219.1],
+    [np.deg2rad(14.3), np.deg2rad(-21.8)],
+    landmarks
+)
+
+for p in test_particles:
+    print(
+        "TEST PARTICLE:",
+        "x =", p.getX(),
+        "y =", p.getY(),
+        "theta =", np.rad2deg(p.getTheta()),
+        "weight =", p.getWeight()
+    )
 
 
 # for _ in range(50):
