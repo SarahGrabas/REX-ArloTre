@@ -261,22 +261,35 @@ def mcl_step(state, u_t, z_t, delta_t,landmarks):
 
     if objectIDs and state["in_pause"] and not state["measured_this_pause"]:
         update_particle_weights(particles, objectIDs, dists, angles, landmarks)
+        print("========== MCL WEIGHT UPDATE ==========")
+        print("objectIDs:", objectIDs)
+        print("dists:", dists)
+        print("angles:", angles)
+        print("number of particles:", len(particles))
+
+        update_particle_weights(particles, objectIDs, dists, angles, landmarks)
+
         weights = np.array([p.getWeight() for p in particles])
 
-        print("BEFORE RESAMPLING:")
+        print("========== AFTER WEIGHT UPDATE ==========")
         print("max weight:", np.max(weights))
         print("mean weight:", np.mean(weights))
-        print("nonzero weights:", np.count_nonzero(weights))
+        print("nonzero:", np.count_nonzero(weights))
 
         best = np.argmax(weights)
+
         print(
             "BEST PARTICLE:",
-            particles[best].getX(),
-            particles[best].getY(),
-            np.rad2deg(particles[best].getTheta()),
-            particles[best].getWeight()
+            "x =", particles[best].getX(),
+            "y =", particles[best].getY(),
+            "theta =", np.rad2deg(particles[best].getTheta()),
+            "weight =", particles[best].getWeight()
         )
+
+        print("========== NOW RESAMPLING ==========")
         particles = resample_particles(particles)
+        print("========== AFTER RESAMPLING ==========")
+        
         state["measured_this_pause"] = True
 
 
@@ -445,13 +458,6 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     print("OBJECTs:", z_t)
     state["particles"] = mcl_step(state, u_t, z_t, delta_t, landmarks)
     #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
-    print("AFTER RESAMPLING:")
-    print("mean x:", np.mean([p.getX() for p in state["particles"]]))
-    print("mean y:", np.mean([p.getY() for p in state["particles"]]))
-    print("mean theta:", np.rad2deg(np.arctan2(
-        np.mean([np.sin(p.getTheta()) for p in state["particles"]]),
-        np.mean([np.cos(p.getTheta()) for p in state["particles"]])
-    )))
     
     state["est_pose"] = particle.estimate_pose(state["particles"])
     print("Estimate Robot Pose:", state["est_pose"].getX(), state["est_pose"].getY(),state["est_pose"].getTheta() )
