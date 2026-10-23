@@ -27,25 +27,10 @@ W_CALIB = np.deg2rad(degrees_pr_second)
 SCAN_PAUSE_TIME = 0.40
 
 robot_controller = rally.Robot()
-#cam = None
-#print("Opening and initializing camera")
-#cam = camera.Camera(0, robottype='arlo', useCaptureThread=False)
-
-#robot_module.Robot()
-
-CRED = (0, 0, 255)
-CGREEN = (0, 255, 0)
-CBLUE = (255, 0, 0)
-CCYAN = (255, 255, 0)
-CYELLOW = (0, 255, 255)
-CMAGENTA = (255, 0, 255)
-CWHITE = (255, 255, 255)
-CBLACK = (0, 0, 0)
 
 # Landmarks.
 # The robot knows the position of the 4 landmarks. Their coordinates are in the unit centimeters [cm].
 landmarkIDs = [7,6]
-landmark_colors = [CRED, CGREEN]
 #Coordinates for each landmark
 landmarks = {
     #2: (0.0, 0.0),
@@ -457,6 +442,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
 
 current_state=initialize_mcl(num_particles=1500)
 
+i=1
 while True:
     
     landmarks_seen = robot_controller.camera.detect_landmarks()
@@ -479,3 +465,8 @@ while True:
         robot_controller,
         delta_t
     )
+    if i==20:
+        robot_controller.moters.move(1, 1)
+        state["last_mcl_velocity"] = 0.0
+    
+    i+=1
