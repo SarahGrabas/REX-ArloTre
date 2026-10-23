@@ -205,14 +205,6 @@ def resample_particles(particles):
         replace=True,
         p=weights
     )
-    print("RESAMPLING DEBUG:")
-    print("most selected index:", np.bincount(selected).argmax())
-    print("most selected count:", np.bincount(selected).max())
-
-    best_index = np.argmax(weights)
-    print("original best index:", best_index)
-    print("original best weight:", weights[best_index])
-    print("best selected count:", np.sum(selected == best_index))
 
     new_particles = []
 
@@ -266,61 +258,13 @@ def mcl_step(state, u_t, z_t, delta_t,landmarks):
 
     if velocity != 0.0 or angular_velocity != 0.0:
         sample_motion_model_velocity(particles, velocity, angular_velocity, delta_t)
-    print("MCL DEBUG:")
-    print("objectIDs:", objectIDs)
-    print("in_pause:", state["in_pause"])
-    print("measured_this_pause:", state["measured_this_pause"])
+ 
     if objectIDs and state["in_pause"] and not state["measured_this_pause"]:
-        update_particle_weights(particles, objectIDs, dists, angles, landmarks)
-        print("========== MCL WEIGHT UPDATE ==========")
-        print("objectIDs:", objectIDs)
-        print("dists:", dists)
-        print("angles:", angles)
-        print("number of particles:", len(particles))
-
+        
         update_particle_weights(particles, objectIDs, dists, angles, landmarks)
 
-        weights = np.array([p.getWeight() for p in particles])
-
-        print("========== AFTER WEIGHT UPDATE ==========")
-        print("max weight:", np.max(weights))
-        print("mean weight:", np.mean(weights))
-        print("nonzero:", np.count_nonzero(weights))
-
-        best = np.argmax(weights)
-
-        print(
-            "BEST PARTICLE:",
-            "x =", particles[best].getX(),
-            "y =", particles[best].getY(),
-            "theta =", np.rad2deg(particles[best].getTheta()),
-            "weight =", particles[best].getWeight()
-        )
-
-        print("========== NOW RESAMPLING ==========")
+    
         particles = resample_particles(particles)
-        xs = np.array([p.getX() for p in particles])
-        ys = np.array([p.getY() for p in particles])
-        thetas = np.array([p.getTheta() for p in particles])
-
-        print("========== AFTER RESAMPLING CLOUD ==========")
-        print("x mean:", np.mean(xs))
-        print("x median:", np.median(xs))
-        print("x std:", np.std(xs))
-
-        print("y mean:", np.mean(ys))
-        print("y median:", np.median(ys))
-        print("y std:", np.std(ys))
-
-        print(
-            "theta mean:",
-            np.rad2deg(
-                np.arctan2(
-                    np.mean(np.sin(thetas)),
-                    np.mean(np.cos(thetas))
-                )
-            )
-        )
         
         state["measured_this_pause"] = True
 
