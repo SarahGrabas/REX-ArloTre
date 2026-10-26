@@ -429,7 +429,7 @@ detected_radius = [lm.radius for lm in obstacles]
 
 detected_obj =[]
 for i in range(len(detected_objectIDs)):
-    if detected_objectIDs[i] is not 1:
+    if detected_objectIDs[i] != 1:
         detected_obj.append(detected_objectIDs[i], detected_center[i], detected_radius[i])
     
     if detected_objectIDs[i]== 1:
