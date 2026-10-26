@@ -430,21 +430,21 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
 obstacles = robot_controller.camera.detect_landmarks()
 
 detected_objectIDs = [lm.id for lm in obstacles]
-detected_center = [lm.center for lm in obstacles]
+detected_center = [lm.center[:2] for lm in obstacles]
 detected_radius = [lm.radius for lm in obstacles]
 
 detected_obj =[]
-GOAL=[]
+
 for i in range(len(detected_objectIDs)):
     if detected_objectIDs[i] != 1:
         detected_obj.append((detected_objectIDs[i], detected_center[i], detected_radius[i]))
     
-    if detected_objectIDs[i]== 1 and GOAL is not []:
-        GOAL.append((detected_center[i]))
+    if detected_objectIDs[i]== 1:
+        GOAL=detected_center[i]
 
 
 print(detected_objectIDs, detected_center)
 
-path=RRT_call(GOAL[:2], detected_obj,(130.45371611279808, -32.038433605733616))
+path=RRT_call(GOAL, detected_obj,(130.45371611279808, -32.038433605733616))
 print(path)
     
