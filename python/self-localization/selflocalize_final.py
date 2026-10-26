@@ -34,7 +34,7 @@ landmarkIDs = [1,3]
 landmarks = {
     #2: (0.0, 0.0),
     #4: (100.0, 0.0),
-    1: (167.0,0.0),
+    1: (-167.0,0.0),
     3: (0.0,0.0)
     
 }
@@ -306,7 +306,7 @@ def scan_function(state, robot_controller):
        Vi opdaterer movement i vores state dictionary, så det passer med faktisk rotation."""
     degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
     robot_controller.moters.rotate(degree)
-    time.sleep(2.0)
+    time.sleep(1.0)
     state["movement"]=(0,degree) #Update movement state
 
 
