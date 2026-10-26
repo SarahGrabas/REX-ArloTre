@@ -20,7 +20,6 @@ class Grid:
         self.number_of_celles= [int((x_max-x_min)//grid_cell_size), int((y_max-y_min)//grid_cell_size)] #Beregner hvor mange celler vi skal have for at ramme m og cellestørrelse
         
         self.grid_matrix = np.zeros((self.number_of_celles[0], self.number_of_celles[1]), dtype=bool) #lav matrix der svarer til grid størrelse med korrekt cellestørrlese, men kun med 0.
-        
     
     def obstacles(self, landmarks_list: Sequence[Landmark], robot_radius: float) -> None:
         """
@@ -36,6 +35,7 @@ class Grid:
         Hvis landmark er i cellen sætter vi 0 til 1 i vores grid.
         
         """
+        
          
         for i in range(self.number_of_celles[0]):
             for j in range(self.number_of_celles[1]):
@@ -51,3 +51,5 @@ class Grid:
                     
                     if np.linalg.norm(centroid - center) <= added_radius:
                         self.grid_matrix[i, j] = 1
+
+

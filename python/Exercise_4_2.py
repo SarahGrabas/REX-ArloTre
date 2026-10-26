@@ -90,50 +90,42 @@ import robot
 
 arlo_radius=robot.ARLO_RADIUS
 
-#Hent info fra json
-try:
-    with open('coordinates.json') as file:
-        data = json.load(file)
-        landmarks=data
-        landmarks_list=[]
-        for landmark in landmarks:
-            id=landmark["id"]
-            center=landmark["center"]
-            radius=landmark["radius"]
-            landmarks_list.append((id,center,radius))
-        print(landmarks_list)
-except:
-    with open('./python/coordinates.json') as file:
-        data = json.load(file)
-        landmarks=data
-        landmarks_list=[]
-        for landmark in landmarks:
-            id=landmark["id"]
-            center=landmark["center"]
-            radius=landmark["radius"]
-            landmarks_list.append((id,center,radius))
-        print(landmarks_list)
+# #Hent info fra json
+# try:
+#     with open('coordinates.json') as file:
+#         data = json.load(file)
+#         landmarks=data
+#         landmarks_list=[]
+#         for landmark in landmarks:
+#             id=landmark["id"]
+#             center=landmark["center"]
+#             radius=landmark["radius"]
+#             landmarks_list.append((id,center,radius))
+#         print(landmarks_list)
+# except:
+#     with open('./python/coordinates.json') as file:
+#         data = json.load(file)
+#         landmarks=data
+#         landmarks_list=[]
+#         for landmark in landmarks:
+#             id=landmark["id"]
+#             center=landmark["center"]
+#             radius=landmark["radius"]
+#             landmarks_list.append((id,center,radius))
+#         print(landmarks_list)
 
 
-
-if __name__ == '__main__':
-
-    START_POINT=[0, 0]
-    GOAL=[0, 3.61]
-
-    GRID_CELL_SIZE= 0.1
-    X_MIN=-0.7
-    X_MAX=0.7
-    Y_MIN=0
-    Y_MAX=4
+def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float]):
+    X_MIN= 0.0
+    X_MAX=
+    Y_MIN=
+    Y_MAX=
+    GRID_CELL_SIZE=0.1
+    map = grid.Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
+    map.obstacles(obstacles, robot_radius=arlo_radius)
     
-    
-    map = grid.Grid(X_MIN, X_MAX, Y_MIN, Y_MAX, GRID_CELL_SIZE)
-    map.obstacles(landmarks_list, robot_radius=arlo_radius) #generer vores landmarks som obstacles
-    
+    START_POINT=[estimate_robot_pose[0],estimate_robot_pose[1]]
     rrt = rrt_class.RRT(start=START_POINT,goal=GOAL,map=map,grid_cell_size=GRID_CELL_SIZE,)
-    
-    
     path = rrt.path_planning()
     
     if path is None:
@@ -143,27 +135,23 @@ if __name__ == '__main__':
         print(path)
         simpler_path=rrt.simpler_path(path)
         print(simpler_path)
-        execute_path=robot_path(arlo,simpler_path)
-        # execute_path=robot_path(arlo,path)
-        print(execute_path)
-        
-        
-        # fig, ax =plt.subplots()
-        # ex4_1.draw_landmarks(ax, landmarks_list, arlo_radius)
-        
-        # pathx = [p[0] for p in path]
-        # pathy = [p[1] for p in path]
-
-        # ax.plot(pathx,pathy,'-',linewidth=2,label="RRT path")
-        
-        # print(path)
-        # print(execute_path)
-        # executed_x = [p[0] for p in execute_path]
-        # executed_y = [p[1] for p in execute_path]
-
-        # ax.plot(executed_x,executed_y,'-',linewidth=2,label="Robot path")
-        # plt.grid(True)
-        # plt.pause(0.01)
-        # ax.scatter(GOAL[0],GOAL[1], color='green')
     
-        # plt.show()
+    
+    return simpler_path
+
+landmarks_seen = arlo.camera.detect_landmarks()
+
+    detected_objectIDs = [lm.id for lm in landmarks_seen]
+    detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+
+    detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+
+    detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+    print(detected_obj)
+RRT_call()
+    
+
+# execute_path=robot_path(arlo,simpler_path)
+# print(execute_path)
+
+
