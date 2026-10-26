@@ -358,7 +358,6 @@ import numpy as np
 from typing import Sequence, Union
 # import matplotlib.pyplot as plt
 
-import Exercise_1 as ex1
 import json
 
 import robot
