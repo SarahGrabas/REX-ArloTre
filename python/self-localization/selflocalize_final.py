@@ -29,7 +29,7 @@ robot_controller = rally.Robot()
 
 # Landmarks.
 # The robot knows the position of the 4 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [1,6]
+landmarkIDs = [1,3]
 #Coordinates for each landmark
 landmarks = {
     #2: (0.0, 0.0),
