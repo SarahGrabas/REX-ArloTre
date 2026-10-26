@@ -304,7 +304,7 @@ def scan_function(state, robot_controller):
        Bruges under scanning efter landmarks i selflocalization.
        Grader beregnes ud fra FOV, så vi ikke springer noget over når vi roterer. (Laver for store rotationer).
        Vi opdaterer movement i vores state dictionary, så det passer med faktisk rotation."""
-    degree=30 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
+    degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
     robot_controller.moters.rotate(degree)
     time.sleep(2.0)
     state["movement"]=(0,degree) #Update movement state
@@ -346,7 +346,7 @@ for i in range(50):
     mcl_update(current_state,detected_obj,landmarkIDs,landmarks)
 
     scan_function(current_state,robot_controller)
-    current_state["movement"] = (30,0)
+    current_state["movement"] = (0,50)
     
     if i == 5:
         draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
