@@ -233,7 +233,7 @@ def mcl_step(state: dict,z_t: tuple,landmarks: dict[int, tuple:float]):
 
     #Hvis vi enten har kørt eller drejet flytte partikler med
     if driven != 0.0 or degree != 0.0:
-        sample_motion_model(particles, state["particles"])
+        sample_motion_model(particles, state["movement"])
  
     if objectIDs: 
         
