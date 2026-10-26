@@ -440,6 +440,7 @@ for i in range(len(detected_objectIDs)):
         GOAL.append(detected_center[i])
 
 
-print(detected_obj)
-RRT_call(GOAL, detected_obj,current_state["est_pose"])
+print(detected_obj, detected_center)
+path=RRT_call(GOAL, detected_obj,current_state["est_pose"])
+print(path)
     
