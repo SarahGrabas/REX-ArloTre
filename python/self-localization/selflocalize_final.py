@@ -394,7 +394,7 @@ for i in range(10):
 
     detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
     
-    detected_center = [lm.center for lm in landmarks_seen]
+    detected_center = [(lm.center[0],lm.center[1]) for lm in landmarks_seen]
 
     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
     print(detected_obj)
@@ -427,7 +427,7 @@ for i in range(10):
 obstacles = robot_controller.camera.detect_landmarks()
 
 detected_objectIDs = [lm.id for lm in obstacles]
-detected_center = [lm.center  for lm in obstacles]
+detected_center = [(lm.center[0],lm.center[1])   for lm in obstacles]
 detected_radius = [lm.radius for lm in obstacles]
 
 detected_obj =[]
