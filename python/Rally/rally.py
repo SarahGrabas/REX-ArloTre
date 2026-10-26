@@ -11,13 +11,7 @@ if TYPE_CHECKING:
 from time import sleep
 import numpy as np
 from math import sqrt
-
-
-##### PROGRAM PARAMETERS #####
-
-VERBOSITY : int = 1 # 0 means no debug info, 1 means all, and higher values means less verbosity
-
-
+from debug import debug
 
 ##### CONSTANTS #####
 
@@ -37,43 +31,6 @@ RESOLUTION = (1640, 1232) # x, y in pixels
 
 
 ##### PROGRAM BODY #####
-
-# in case verbosity is false, we want debug calls to not throw an unknown expression error
-def debug(*args, **kwargs): pass
-
-# if verbosity is true, a debug function which prints to out in a standard way, is defined
-if VERBOSITY:
-    # defines elapsed_time function for getting time since program start, used by the debug print function
-    from time import perf_counter
-
-    _START_TIME = perf_counter()
-
-    def _elapsed_time():
-        elapsed_ms = int((perf_counter() - _START_TIME) * 1000)
-
-        minutes = elapsed_ms // 60_000
-        seconds = (elapsed_ms // 1_000) % 60
-        milliseconds = elapsed_ms % 1_000
-
-        return f"{minutes:02}:{seconds:02}:{milliseconds:03}"
-
-    # defines the debug print function
-    def debug(*values: object, verbosity:int=9):
-        """A debug print function used for printing formatted debug information to out, if verbosity is true.\\
-        The higher `verbosity` is set (at least 1), the higher the value, the more important the debug info is."""
-        if verbosity >= VERBOSITY:
-            print(
-                f"[{_elapsed_time()}] ({verbosity}) ",
-                *values,
-                file = None 
-            )
-        else:
-            assert verbosity >= 1, f"Error: Expected verbosity to be positive, but recieved {verbosity}"
-
-
-
-
-
 
 class Port(object):
     """
@@ -111,8 +68,13 @@ class Port(object):
 
 
 class Motor:
+    METERS_PR_SEC = 2 * PI * WHEEL_2_WHEEL_DIST / 8   * 3.14/3 # last factor is correction
+    DEGREES_PR_SEC = 360 / 4 # 4 instead of 8 is intentional
+
     def __init__(self, port:Port):
         self._port = port
+        self.meters_pr_sec = Motor.METERS_PR_SEC
+        self.degrees_pr_second = Motor.DEGREES_PR_SEC
         debug("Initialized moters!", verbosity=1)
     
     @staticmethod
@@ -169,13 +131,12 @@ class Motor:
         """
         debug(f"drive({self}, {meters}, {forward}, {_sleep}, {stop_when_done})", verbosity=3)
         assert meters >= 0, f"Error: Expected positive distance, but recieved {meters}"
-
-        meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8   * 3.14/3 # last factor is correction
         
         self.move(2 * forward - 1, 2 * forward - 1)
-        t = meters / meters_pr_sec
-        if _sleep: sleep(t)
-        if stop_when_done: self.stop()
+        t = meters / self.meters_pr_sec
+        if _sleep: 
+            sleep(t)
+            if stop_when_done: self.stop()
         debug(f"Expected time slept = {t} seconds", verbosity=2)
         return t
 
@@ -187,7 +148,6 @@ class Motor:
         """
         debug(f"rotate({self}, {degrees}, {_sleep}, {stop_when_done})", verbosity=3)
 
-        degrees_pr_second = 360 / 4 # 4 instead of 8 is intentional
         correction_fraction_negative = 1.0
         correction_fraction_positive = 1.0
     
@@ -199,16 +159,18 @@ class Motor:
             correction_fraction = correction_fraction_positive
         else:
             return
-        t = abs(degrees) / degrees_pr_second / correction_fraction
-        if _sleep: sleep(t)
-        if stop_when_done: self.stop()
+        t = abs(degrees) / self.degrees_pr_second / correction_fraction
+        if _sleep: 
+            sleep(t)
+            if stop_when_done: self.stop()
         debug(f"Expected time slept = {t} seconds", verbosity=2)
         return t
 
 
 
-
 class Sonar:
+    FOV = 19.94 # degrees ; FOV = field of view
+
     def __init__(self, port:Port):
         self._port = port
         debug("Initialized sensors!", verbosity=1)
@@ -281,6 +243,8 @@ class Landmark:
 
 
 class Camera:
+    FOV = 64.24 # degrees ; FOV = field of view
+
     CX, CY = RESOLUTION[0]/2, RESOLUTION[1]/2 # Camera center in pixels
 
     CAMERA_MATRIX = np.array([
@@ -397,10 +361,11 @@ class Camera:
 
         return ids, tvecs, rvecs, normals
 
-    def detect_landmarks(self) -> tuple[Landmark, ...]:
+    def detect_landmarks(self, unique=False) -> tuple[Landmark, ...]:
         """
         Detects landmarks visible to the camera.\\
-        Returns a tuple of all visible landmarks, as ``Landmark`` objects
+        Returns a tuple of all visible landmarks, as ``Landmark`` objects.\\
+        If ``unique=True``, landmarks of the same id will be avaraged together.
         """
         debug("Detecting landmarks!", verbosity=2)
         ids, tvecs, rvecs, normals = self._detect_markers()
@@ -446,10 +411,17 @@ class Camera:
         )
         debug(f"Distance and angle from robot center to marker centers = {distances, angles}", verbosity=1)
 
-        return tuple(
+        landmarks_all = tuple(
             Landmark(id, center, radius, normal, distance, angle)
             for id, center, radius, normal, distance, angle in zip(ids, centers, radiuses, normals, distances, angles)
         )
+
+        if unique:
+            ids_lms = {}
+            
+
+
+        return landmarks_all
 
 
 
@@ -492,6 +464,43 @@ class Robot:
 
         debug("Robot terminated!", verbosity=1)
 
+    @staticmethod
+    def _degrees_pr_sec(rads_pr_sec:float):
+        return rads_pr_sec * 180/PI
+    
+    def _meters_pr_sec(rads_pr_sec:float):
+        return rads_pr_sec * WHEEL_2_WHEEL_DIST/2
+
+    def calibrate_velocities(self):
+        """
+        Requires at least one detectable landmark to work.
+        """
+        landmarks = self.camera.detect_landmarks()
+        assert len(landmarks) > 0, "Error: Expected at least one detectable landmark, but detected 0!"
+        
+        # preparing datastructures
+        landmark_set = {lm.id for lm in landmarks}
+        landmark_dict = dict((lm.id, lm) for lm in landmarks)
+        # applying movement to be calibrated
+        angle_sum = 3*360
+        self.motors.rotate(angle_sum)
+        # detecting previously seen landmarks
+        _landmarks = self.camera.detect_landmarks()
+        degs = Camera.FOV * 2/3
+        while not landmark_set.intersection({lm.id for lm in _landmarks}):
+            angle_sum += degs
+            self.motors.rotate(degs)
+            _landmarks = self.camera.detect_landmarks()
+        # detecting visible reference points
+        intersection = landmark_set.intersection({lm.id for lm in _landmarks})
+        _landmark_dict = dict((lm.id, lm) for lm in _landmarks)
+        avg_degs_diff = np.mean(_landmark_dict[_id].angle - landmark_dict[_id].angle for _id in intersection)
+        # calculating velocities : velocity = distance / time
+        degrees_pr_sec = (angle_sum + avg_degs_diff) / (angle_sum / self.motors.degrees_pr_second)
+        rads_pr_sec = degrees_pr_sec * PI/180
+        # update velocities
+        self.motors.degrees_pr_second = degrees_pr_sec
+        self.motors.meters_pr_sec = self._meters_pr_sec(rads_pr_sec)
 
 
 
