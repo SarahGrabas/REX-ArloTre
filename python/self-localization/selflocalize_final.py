@@ -27,17 +27,9 @@ SCAN_PAUSE_TIME = 0.40
 
 robot_controller = rally.Robot()
 
-# Landmarks.
-# The robot knows the position of the 4 landmarks. Their coordinates are in the unit centimeters [cm].
-landmarkIDs = [1,3]
-#Coordinates for each landmark
-landmarks = {
-    #2: (0.0, 0.0),
-    #4: (100.0, 0.0),
-    1: (350.0,0.0),
-    3: (0.0,0.0)
+
     
-}
+
 
 #Motion model, opdatere partikler ud fra motion kun
 def sample_motion_model(particles, movement):
@@ -391,6 +383,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     
     return simpler_path
 
+
 current_state=initialize_mcl(num_particles=1500)
 
 for i in range(10):   
@@ -400,9 +393,19 @@ for i in range(10):
     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
 
     detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+    
+    detected_center = [lm.center for lm in landmarks_seen]
 
     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
     print(detected_obj)
+    
+    landmarkIDs=[]
+    landmarks={}
+    for i in detected_obj:
+        landmarkIDs.append(detected_objectIDs[i])
+        landmarks[detected_objectIDs[i]]= detected_center[i]
+        
+        
 
     mcl_update(current_state,detected_obj,landmarkIDs,landmarks)
 
