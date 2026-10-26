@@ -427,7 +427,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
 obstacles = robot_controller.camera.detect_landmarks()
 
 detected_objectIDs = [lm.id for lm in obstacles]
-detected_center = [(lm.center[0],lm.center[1])   for lm in obstacles]
+detected_center = [lm.center  for lm in obstacles]
 detected_radius = [lm.radius for lm in obstacles]
 
 detected_obj =[]
