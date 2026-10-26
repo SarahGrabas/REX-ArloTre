@@ -368,8 +368,6 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     map = grid.Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
     map.obstacles(obstacles, robot_radius=arlo_radius)
     
-    id, center, radius = obstacles
-    center=center[:2]
     
     START_POINT=[estimate_robot_pose[0],estimate_robot_pose[1]]
     rrt = rrt_class.RRT(start=START_POINT,goal=GOAL,map=map,grid_cell_size=GRID_CELL_SIZE,)
