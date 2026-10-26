@@ -299,12 +299,12 @@ def initialize_mcl(num_particles):
     return state
 
 
-def scan_function(state, robot_controller, FOV:float):
+def scan_function(state, robot_controller):
     """Funktion der rotere.
        Bruges under scanning efter landmarks i selflocalization.
        Grader beregnes ud fra FOV, så vi ikke springer noget over når vi roterer. (Laver for store rotationer).
        Vi opdaterer movement i vores state dictionary, så det passer med faktisk rotation."""
-    degree=FOV #...mangler...
+    degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
     robot_controller.moters.rotate(degree)
     
     state["movement"]=(0,degree) #Update movement state
@@ -324,15 +324,15 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     print("Estimate Robot Pose:", state["est_pose"].getX(), state["est_pose"].getY(),state["est_pose"].getTheta() )
     
     #Tegner og gemmer billed af world
-    draw_world(state["est_pose"], state["particles"], state["world"])
-    cv2.imwrite("mcl_world.png", state["world"])
+    # draw_world(state["est_pose"], state["particles"], state["world"])
+    # cv2.imwrite("mcl_world.png", state["world"])
     
     # Bevægelsen er nu blevet brugt så vi nulstiller movement
     state["movement"] = (0, 0)
 
 current_state=initialize_mcl(num_particles=1500)
 
-for _ in range(50):   
+for i in range(50):   
     landmarks_seen = robot_controller.camera.detect_landmarks()
 
     detected_objectIDs = [lm.id for lm in landmarks_seen]
@@ -345,24 +345,37 @@ for _ in range(50):
 
     mcl_update(current_state,detected_obj,landmarkIDs,landmarks)
 
-    scan_function(current_state,robot_controller,FOV=3.0)
+    scan_function(current_state,robot_controller)
+    current_state["movement"] = (30,0)
+    
+    if i == 5:
+        draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
+        cv2.imwrite("mcl_world_after5.png", current_state["world"])
+        
+    if i == 10:
+        draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
+        cv2.imwrite("mcl_world_after10.png", current_state["world"])
+        
+    if i == 20:
+        draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
+        cv2.imwrite("mcl_world_after20.png", current_state["world"])
 
-robot_controller.moters.drive(1) #Vi skal have implementeret at alle motor funktioner opdaterer state["movement"] inden mcl kaldes
-current_state["movement"] = (30,0)
+# robot_controller.moters.drive(1) #Vi skal have implementeret at alle motor funktioner opdaterer state["movement"] inden mcl kaldes
+# current_state["movement"] = (30,0)
 
-for _ in range(50):   
-    landmarks_seen = robot_controller.camera.detect_landmarks()
+# for _ in range(50):   
+#     landmarks_seen = robot_controller.camera.detect_landmarks()
 
-    detected_objectIDs = [lm.id for lm in landmarks_seen]
-    detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+#     detected_objectIDs = [lm.id for lm in landmarks_seen]
+#     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
 
-    detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+#     detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
 
-    detected_obj =(detected_objectIDs, detected_dists, detected_angles)
-    print(detected_obj)
+#     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+#     print(detected_obj)
 
-    mcl_update(current_state,detected_obj,landmarkIDs,landmarks)
+#     mcl_update(current_state,detected_obj,landmarkIDs,landmarks)
 
-    #Her behøver vi ikke nulstille movement, da scan opdaterer den
-    scan_function(current_state,robot_controller,FOV=3.0)
+#     #Her behøver vi ikke nulstille movement, da scan opdaterer den
+#     scan_function(current_state,robot_controller)
         
