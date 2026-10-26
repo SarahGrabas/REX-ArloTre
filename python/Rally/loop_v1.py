@@ -2,42 +2,65 @@ from debug import debug
 from rally import Robot, Landmark, ARLO_RADIUS, Camera
 import numpy as np
 
-# Looking for L1
-## try to self localize
-## 
 
-## detect landmarks
-###
 
-def get_landmark(landmarks:list[Landmark], id:int) -> Landmark:
-    """Assumes ``id`` is in ``landmarks``."""
-    return [lm for lm in landmarks if lm.id == id][0]
+def get_landmark(landmarks:list[Landmark], id:int) -> Landmark|None:
+    try:
+        return [lm for lm in landmarks if lm.id == id][0]
+    except IndexError:
+        None
 
-def scan_for_landmark(arlo:Robot, id:int) -> bool:
-    """Returns ``True`` iff can see ``id``."""
+def scan_for_landmark(arlo:Robot, id:int) -> Landmark|None:
+    """Returns the landmark iff can see landmark with ``id``."""
     angle = arlo.camera.FOV * 2/3
     total_angle = 0
-    while total_angle < 360 - angle:
-        landmarks = arlo.camera.detect_landmarks()
+    while total_angle <= 360:
+        lm = get_landmark(arlo.camera.detect_landmarks(True), id)
+        if lm is not None:
+            return lm
+        else:
+            if total_angle <= 360 - angle:
+                total_angle += angle
+                arlo.motors.rotate(angle)
+            else:
+                arlo.motors.rotate(360 - angle)
+                break
+    lm = get_landmark(arlo.camera.detect_landmarks(True), id)
+    if lm is not None:
+        return lm
+    return None
+
+def look_at_landmark(arlo:Robot, id:int) -> Landmark|None:
+    """Returns the landmark iff ``arlo`` is looking approximatly at landmark with ``id`` (returns ``None`` if cannot find landmark with ``id``)."""
+    while True:
+        lm = scan_for_landmark(arlo, id)
+        if lm is None: # if we could not find it, return None
+            return None
+        else: 
+            if lm.angle < 7: #degrees
+                return lm
+            else: # if we could find it, but not looking directly at it
+                arlo.motors.rotate(lm.angle)
 
 
 
 with Robot() as arlo:
-    # FACT : Can see L1
-    while True:
-        l1 = get_landmark(arlo.camera.detect_landmarks(), 1)
-        if l1.angle < 5: # degrees
-            break
-        arlo.motors.rotate(l1.angle)
-    # FACT : Looking approximatly at L1
-    landmarks = arlo.camera.detect_landmarks()
-    goal = get_landmark(landmarks, 1).center
-    goal -= (l1.radius + 0.4 + ARLO_RADIUS/2) * goal / np.linalg.norm # goal is the closest point on a circle around the L1
-    # RRT PROTOCOL : OBSTACLES = landmarks, GOAL = gloal
-    # FACT : Inside visit radius of L1
-    total_angle = 0
-    angle = Camera.FOV * 2/3
-    while total_angle <= 360:
-        total_angle += angle
-        arlo.motors.rotate(angle)
+    for target_id in (1, 2, 3, 4, 1):
+        while True:
+            target = look_at_landmark(arlo, target_id)
+            avoid = {i for i in (1, 2, 3, 4, 1) if i != target_id}
+            if target is None:
+                # GO RANDOM DIRECTION
+                # AVOID OBSTACLES
+                # AVOID OTHER TARGETS
+                pass
+            else:
+                obstacles = arlo.camera.detect_landmarks(True)
+                goal = target.center
+                goal -= (target.radius + 0.4 + ARLO_RADIUS/2) * goal / np.linalg.norm # goal is the closest point on a circle around the L1
+                # USE RRT TO PLAN PATH TO GOAL
+                # DRIVE PATH
+                # AVOID OBSTACLES
+                # AVOID OTHER TARGETS
+                break
 

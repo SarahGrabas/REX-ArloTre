@@ -417,9 +417,25 @@ class Camera:
         )
 
         if unique:
-            ids_lms = {}
-            
+            from collections import defaultdict
 
+            landmarks_dict : dict[int, list[Landmark]] = defaultdict(list)
+            ids_unique = set()
+            for lm in landmarks_all: # sorting landmarks into bins
+                ids_unique.add(lm.id)
+                landmarks_dict[lm.id].append(lm)
+
+            for id_ in ids_unique: # avaraging each bin
+                bin_ = landmarks_dict[id_]
+                n = len(bin_)
+                if n <= 1: continue
+                lm = bin_[0]
+                lm.center = np.mean(lm.center for lm in bin_)
+                lm.distance = np.mean(lm.distance for lm in bin_)
+                lm.angle = np.mean(lm.angle for lm in bin_)
+                landmarks_dict[id_] = [lm]
+
+                return tuple(lms[0] for _, lms in landmarks_dict.items())
 
         return landmarks_all
 
