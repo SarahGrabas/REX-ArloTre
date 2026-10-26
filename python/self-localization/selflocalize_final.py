@@ -440,7 +440,7 @@ for i in range(len(detected_objectIDs)):
         GOAL.append((detected_center[i]))
 
 
-print(detected_obj, detected_center)
+print(detected_objectIDs, detected_center)
 
 path=RRT_call(GOAL, detected_obj,(130.45371611279808, -32.038433605733616, 0.13671077654828923))
 print(path)
