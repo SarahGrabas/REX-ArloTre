@@ -348,15 +348,15 @@ for i in range(50):
     scan_function(current_state,robot_controller)
     current_state["movement"] = (0,50)
     
-    if i == 5:
+    if i == 2:
         draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
         cv2.imwrite("mcl_world_after5.png", current_state["world"])
         
-    if i == 10:
+    if i == 5:
         draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
         cv2.imwrite("mcl_world_after10.png", current_state["world"])
         
-    if i == 20:
+    if i == 10:
         draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
         cv2.imwrite("mcl_world_after20.png", current_state["world"])
 
