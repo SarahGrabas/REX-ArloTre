@@ -402,8 +402,9 @@ for i in range(10):
     landmarkIDs=[]
     landmarks={}
     for i in range(len(detected_objectIDs)):
-        landmarkIDs.append(detected_objectIDs[i])
-        landmarks[detected_objectIDs[i]]= detected_center[i]
+        if detected_objectIDs[i] not in landmarkIDs:
+            landmarkIDs.append(detected_objectIDs[i])
+            landmarks[detected_objectIDs[i]]= detected_center[i]
         
         
 
