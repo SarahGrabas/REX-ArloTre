@@ -434,10 +434,10 @@ detected_obj =[]
 GOAL=[]
 for i in range(len(detected_objectIDs)):
     if detected_objectIDs[i] != 1:
-        detected_obj.append(detected_objectIDs[i], detected_center[i], detected_radius[i])
+        detected_obj.append((detected_objectIDs[i], detected_center[i], detected_radius[i]))
     
     if detected_objectIDs[i]== 1 and GOAL is not []:
-        GOAL.append(detected_center[i])
+        GOAL.append((detected_center[i]))
 
 
 print(detected_obj, detected_center)
