@@ -443,6 +443,6 @@ for i in range(len(detected_objectIDs)):
 
 print(detected_objectIDs, detected_center)
 
-path=RRT_call(GOAL, detected_obj,current_state["est_pose"][:2])
+path=RRT_call(GOAL, detected_obj,(current_state["est_pose"].getX(), current_state["est_pose"].getY()))
 print(path)
     
