@@ -318,7 +318,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     # Bevægelsen er nu blevet brugt så vi nulstiller movement
     state["movement"] = (0, 0)
 
-def sorting_objects(valid_objects, landmarks_seen):
+def sorting_objects(valid_objects, landmarks_seen, valid_lm_seen):
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
 
@@ -331,7 +331,11 @@ def sorting_objects(valid_objects, landmarks_seen):
     
     landmarks={} #koordinater for de objecter vi vil selflocalize ud fra
     for i in range(len(detected_objectIDs)):
-        if detected_objectIDs[i] not in landmarks:
-            landmarks[detected_objectIDs[i]]= detected_center[i]
+        if detected_objectIDs[i] not in valid_lm_seen and detected_objectIDs[i] in valid_objects:
+            valid_lm_seen.append(detected_objectIDs[i])
+            
+        if detected_objectIDs[i] not in landmarks and detected_objectIDs[i] in valid_objects :
+                landmarks[detected_objectIDs[i]]= detected_center[i]
+        
     
     return detected_obj, landmarks
