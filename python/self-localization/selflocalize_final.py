@@ -304,9 +304,9 @@ def scan_function(state, robot_controller):
        Bruges under scanning efter landmarks i selflocalization.
        Grader beregnes ud fra FOV, så vi ikke springer noget over når vi roterer. (Laver for store rotationer).
        Vi opdaterer movement i vores state dictionary, så det passer med faktisk rotation."""
-    degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
+    degree=30 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
     robot_controller.moters.rotate(degree)
-    
+    time.sleep(0.5)
     state["movement"]=(0,degree) #Update movement state
 
 
