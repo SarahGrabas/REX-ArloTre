@@ -385,45 +385,45 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     return simpler_path
 
 
-# current_state=initialize_mcl(num_particles=1500)
+current_state=initialize_mcl(num_particles=1500)
 
-# for i in range(10):   
-#     landmarks_seen = robot_controller.camera.detect_landmarks()
+for i in range(5):   
+    landmarks_seen = robot_controller.camera.detect_landmarks()
 
-#     detected_objectIDs = [lm.id for lm in landmarks_seen]
-#     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
+    detected_objectIDs = [lm.id for lm in landmarks_seen]
+    detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
 
-#     detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
+    detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
     
-#     detected_center = [(lm.center[0],lm.center[1]) for lm in landmarks_seen]
+    detected_center = [(lm.center[0],lm.center[1]) for lm in landmarks_seen]
 
-#     detected_obj =(detected_objectIDs, detected_dists, detected_angles)
-#     print(detected_obj)
+    detected_obj =(detected_objectIDs, detected_dists, detected_angles)
+    print(detected_obj)
     
-#     landmarkIDs=[]
-#     landmarks={}
-#     for i in range(len(detected_objectIDs)):
-#         if detected_objectIDs[i] not in landmarkIDs:
-#             landmarkIDs.append(detected_objectIDs[i])
-#             landmarks[detected_objectIDs[i]]= detected_center[i]
+    landmarkIDs=[]
+    landmarks={}
+    for i in range(len(detected_objectIDs)):
+        if detected_objectIDs[i] not in landmarkIDs:
+            landmarkIDs.append(detected_objectIDs[i])
+            landmarks[detected_objectIDs[i]]= detected_center[i]
         
         
 
-#     mcl_update(current_state,detected_obj,landmarkIDs,landmarks)
+    mcl_update(current_state,detected_obj,landmarkIDs,landmarks)
 
-#     scan_function(current_state,robot_controller)
+    #scan_function(current_state,robot_controller)
     
-#     if i == 2:
-#         draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
-#         cv2.imwrite("mcl_world_after5.png", current_state["world"])
+    if i == 2:
+        draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
+        cv2.imwrite("mcl_world_after5.png", current_state["world"])
         
-#     if i == 5:
-#         draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
-#         cv2.imwrite("mcl_world_after10.png", current_state["world"])
+    if i == 5:
+        draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
+        cv2.imwrite("mcl_world_after10.png", current_state["world"])
         
-#     if i == 10:
-#         draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
-#         cv2.imwrite("mcl_world_after20.png", current_state["world"])
+    if i == 10:
+        draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
+        cv2.imwrite("mcl_world_after20.png", current_state["world"])
 
 obstacles = robot_controller.camera.detect_landmarks()
 
