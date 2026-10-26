@@ -306,7 +306,7 @@ def scan_function(state, robot_controller):
        Vi opdaterer movement i vores state dictionary, så det passer med faktisk rotation."""
     degree=30 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
     robot_controller.moters.rotate(degree)
-    time.sleep(0.5)
+    time.sleep(2.0)
     state["movement"]=(0,degree) #Update movement state
 
 
