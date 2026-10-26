@@ -362,11 +362,11 @@ import Exercise_1 as ex1
 import json
 
 import robot
-import rally_copy
+
 
 #robot_controller = rally_copy.Robot()
 
-arlo_radius=rally_copy.ARLO_RADIUS
+arlo_radius=rally.ARLO_RADIUS
 
 def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float]):
     X_MIN= 0.0
