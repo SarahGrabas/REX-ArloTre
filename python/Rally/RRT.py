@@ -240,7 +240,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     
     return simpler_path
 
-def robot_path(arlo,path: "Sequence[Union[Sequence[float], np.ndarray]]",number_nodes:int) -> "list[Union[Sequence[float], np.ndarray]]":
+def execute_robot_path(arlo,path: "Sequence[Union[Sequence[float], np.ndarray]]",number_nodes:int) -> "list[Union[Sequence[float], np.ndarray]]":
     """Funktion til at køre den simpler path
     Gridsize er længde på x og y akse i meter"""
 

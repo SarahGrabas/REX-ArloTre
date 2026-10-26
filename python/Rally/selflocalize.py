@@ -1,15 +1,15 @@
-import cv2
+#import cv2
 import selfloc_particle_class as particle
 import numpy as np
-from timeit import default_timer as timer
-import sys
-from math import pi as PI
+#from timeit import default_timer as timer
+#import sys
+#from math import pi as PI
 import time
 #import robot
 #import robot as robot_module
-import random
-import random_numbers as rn
-import rally
+#import random
+#import random_numbers as rn
+#import rally
 
 #WHEEL_2_WHEEL_DIST= 0.381
 

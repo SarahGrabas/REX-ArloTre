@@ -15,8 +15,8 @@ current_state=selflocalize.initialize_mcl(num_particles=1500)
 while True:   
     landmarks_seen = arlo.camera.detect_landmarks()
 
-        
     valid_objects =[] #dem vi vil selflocalize ud fra
+    
     all_obj_in_frame, valid_coords=selflocalize.sorting_objects(valid_objects,landmarks_seen)
     selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
 
@@ -29,7 +29,7 @@ while True:
         path=RRT.RRT_call(GOAL, obstacles , current_state["est_pose"], arlo_radius)
         
         number_nodes=len(path) #antal noder fra path vi ønsker at kører til
-        RRT.robot_path(arlo,path,number_nodes)
+        RRT.execute_robot_path(arlo,path,number_nodes)
         #Vi mangler at putte sensors på dette
         #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
