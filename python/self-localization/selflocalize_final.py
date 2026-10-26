@@ -323,6 +323,35 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     state["movement"] = (0, 0)
 
 
+def robot_to_global(position, robot_pose):
+    """
+    Konverterer en position fra robot-koordinater
+    til globale koordinater.
+
+    position:
+        (x_local, y_local)
+
+    robot_pose:
+        (x_robot, y_robot, theta)
+    """
+
+    x_local, y_local = position
+    x_robot, y_robot, theta = robot_pose
+
+    x_global = (
+        x_robot
+        + x_local * np.cos(theta)
+        - y_local * np.sin(theta)
+    )
+
+    y_global = (
+        y_robot
+        + x_local * np.sin(theta)
+        + y_local * np.cos(theta)
+    )
+
+    return (x_global, y_global)
+
 
 # robot_controller.moters.drive(1) #Vi skal have implementeret at alle motor funktioner opdaterer state["movement"] inden mcl kaldes
 # current_state["movement"] = (30,0)
@@ -431,18 +460,45 @@ detected_objectIDs = [lm.id for lm in obstacles]
 detected_center = [lm.center[:2] for lm in obstacles]
 detected_radius = [lm.radius for lm in obstacles]
 
-detected_obj =[]
+robot_pose = (
+    current_state["est_pose"].getX(),
+    current_state["est_pose"].getY(),
+    current_state["est_pose"].getTheta()
+)
+
+detected_obj = []
+GOAL = None
 
 for i in range(len(detected_objectIDs)):
+
+    global_center = robot_to_global(
+        detected_center[i],
+        robot_pose
+    )
+
     if detected_objectIDs[i] != 1:
-        detected_obj.append((detected_objectIDs[i], detected_center[i], detected_radius[i]))
-    
-    if detected_objectIDs[i]== 1:
-        GOAL=detected_center[i]
+        detected_obj.append(
+            (
+                detected_objectIDs[i],
+                global_center,
+                detected_radius[i]
+            )
+        )
+
+    elif detected_objectIDs[i] == 1:
+        GOAL = global_center
 
 
-print(detected_objectIDs, detected_center)
+print("Robot pose:", robot_pose)
+print("IDs:", detected_objectIDs)
+print("Lokale centre:", detected_center)
+print("Global GOAL:", GOAL)
+print("Globale obstacles:", detected_obj)
 
-path=RRT_call(GOAL, detected_obj,(current_state["est_pose"].getX(), current_state["est_pose"].getY()))
+path = RRT_call(
+    GOAL,
+    detected_obj,
+    (robot_pose[0], robot_pose[1])
+)
+
 print(path)
-    
