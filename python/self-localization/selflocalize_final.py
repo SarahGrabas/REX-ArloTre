@@ -401,7 +401,7 @@ for i in range(10):
     
     landmarkIDs=[]
     landmarks={}
-    for i in detected_obj:
+    for i in range(len(detected_objectIDs)):
         landmarkIDs.append(detected_objectIDs[i])
         landmarks[detected_objectIDs[i]]= detected_center[i]
         
