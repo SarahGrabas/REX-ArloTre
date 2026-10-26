@@ -346,7 +346,6 @@ for i in range(50):
     mcl_update(current_state,detected_obj,landmarkIDs,landmarks)
 
     scan_function(current_state,robot_controller)
-    current_state["movement"] = (0,50)
     
     if i == 2:
         draw_world(current_state["est_pose"], current_state["particles"], current_state["world"])
