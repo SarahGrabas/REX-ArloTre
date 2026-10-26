@@ -114,7 +114,7 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
     particle_weights =[]
     
     sigma_dist = 15.0 #cm
-    sigma_angle=0.10    #rad
+    sigma_angle=0.20    #rad
     
     for p in particles:
         x = p.getX()
