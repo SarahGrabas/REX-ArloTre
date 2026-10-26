@@ -322,41 +322,50 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     # Bevægelsen er nu blevet brugt så vi nulstiller movement
     state["movement"] = (0, 0)
 
+import numpy as np
+
 
 def robot_to_global(local_point, robot_pose):
     """
     local_point:
-        (x, y)
+        (x, y) i meter
         x = højre
         y = frem
 
     robot_pose:
-        (x_robot, y_robot, theta)
+        (x, y, theta)
+        x,y fra MCL er i centimeter
+        theta er i radianer
+
+    return:
+        (x, y) i meter
     """
 
     x_local, y_local = local_point
-    x_robot, y_robot, theta = robot_pose
 
-    # Robotens frem-retning i det globale koordinatsystem
-    forward = np.array([
-        np.cos(theta),
-        np.sin(theta)
-    ])
+    # MCL-position er i cm -> meter
+    x_robot = robot_pose[0] / 100.0
+    y_robot = robot_pose[1] / 100.0
+    theta = robot_pose[2]
 
-    # Robotens højre-retning i det globale koordinatsystem
-    right = np.array([
-        -np.sin(theta),
-        np.cos(theta)
-    ])
-
-    global_point = (
-        np.array([x_robot, y_robot])
-        + x_local * right
-        + y_local * forward
+    # Robot-koordinater:
+    # +X = højre
+    # +Y = frem
+    #
+    # Global transformation
+    x_global = (
+        x_robot
+        + x_local * np.cos(theta)
+        - y_local * np.sin(theta)
     )
 
-    return tuple(global_point)
+    y_global = (
+        y_robot
+        + x_local * np.sin(theta)
+        + y_local * np.cos(theta)
+    )
 
+    return (x_global, y_global)
 
 # robot_controller.moters.drive(1) #Vi skal have implementeret at alle motor funktioner opdaterer state["movement"] inden mcl kaldes
 # current_state["movement"] = (30,0)
