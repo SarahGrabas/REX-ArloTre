@@ -361,9 +361,9 @@ arlo_radius=rally.ARLO_RADIUS
 
 def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float]):
     X_MIN= 0.0
-    X_MAX=120+22+400+28+120
+    X_MAX = (120 + 22 + 400 + 28 + 120) / 100
     Y_MIN= 0.0
-    Y_MAX= 120+22+300+28+120
+    Y_MAX = (120 + 22 + 300 + 28 + 120) / 100
     GRID_CELL_SIZE=0.1
     map = grid.Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
     map.obstacles(obstacles, robot_radius=arlo_radius)
