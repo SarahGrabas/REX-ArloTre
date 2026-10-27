@@ -7,6 +7,15 @@ import numpy as np
 arlo = rally.Robot()
 arlo_radius =rally.ARLO_RADIUS
 
+valid_objects=[1,2,3,4]
+valid_coords={
+    1:
+    2:
+    3:
+    4:
+}
+
+
 phases=[1,2,3,4,1]
 current_goal_index=0
 
@@ -16,10 +25,8 @@ while True:
     valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
         landmarks_seen = arlo.camera.detect_landmarks()
-
-        valid_objects =[] #dem vi vil selflocalize ud fra
         
-        all_obj_in_frame, valid_coords, valid_lm_seen=selflocalize.sorting_objects(valid_objects,landmarks_seen, valid_lm_seen) #denne funktion assumer at dubletter er fjernet 
+        all_obj_in_frame=selflocalize.data_objects(landmarks_seen)  
         selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
 
         selflocalize.scan_function(current_state,arlo)
@@ -30,12 +37,18 @@ while True:
         GOAL_ID=phases[current_goal]
         
         GOAL,obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
+        
         path=RRT.RRT_call(GOAL, obstacles , current_state["est_pose"], arlo_radius)
         
-        number_nodes=len(path) #antal noder fra path vi ønsker at kører til
-        RRT.execute_robot_path(arlo,path,number_nodes)
-        #Vi mangler at putte sensors på dette
-        #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
+        if path: #ikke er none
+        
+            number_nodes=len(path) #antal noder fra path vi ønsker at kører til
+            RRT.execute_robot_path(arlo,path,number_nodes)
+            #Vi mangler at putte sensors på dette
+            #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
+        
+        elif path is None:
+            #skal vi køre lidt i en retning væk fra obstacles og scanner igen
         
     else: #roter så vi kan se current goal
         

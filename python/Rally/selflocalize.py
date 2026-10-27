@@ -69,12 +69,33 @@ def sample_motion_model(particles, movement):
 
             p.setTheta(theta_new)
 
+# def initialize_particles(num_particles):
+#     particles = []
+#     for i in range(num_particles):
+#         # Random starting points. 
+#         p = particle.Particle(600.0*np.random.ranf() - 100.0, 600.0*np.random.ranf() - 250.0, np.mod(2.0*np.pi*np.random.ranf(), 2.0*np.pi), 1.0/num_particles)
+#         particles.append(p)
+
+#Vi generer partikler der ligger inden for banen
 def initialize_particles(num_particles):
     particles = []
+
+    X_MIN = 0.0
+    X_MAX = 690.0
+    Y_MIN = 0.0
+    Y_MAX = 590.0
+
     for i in range(num_particles):
-        # Random starting points. 
-        p = particle.Particle(600.0*np.random.ranf() - 100.0, 600.0*np.random.ranf() - 250.0, np.mod(2.0*np.pi*np.random.ranf(), 2.0*np.pi), 1.0/num_particles)
+        x = np.random.uniform(X_MIN, X_MAX)
+        y = np.random.uniform(Y_MIN, Y_MAX)
+        theta = np.random.uniform(0, 2*np.pi)
+
+        p = particle.Particle(
+            x, y, theta, 1.0 / num_particles
+        )
         particles.append(p)
+
+    return particles
 
     return particles
 
@@ -303,7 +324,7 @@ def scan_function(state, robot_controller):
 def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict):
     #MCL step
     z_t = object_filtering(detected_obj,VALID_IDS)
-    print("OBJECTs:", z_t)
+    print("OBJECTs for selflocalizing:", z_t)
     
     state["particles"] = mcl_step(state, z_t, landmarks)
     #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
@@ -318,24 +339,14 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     # Bevægelsen er nu blevet brugt så vi nulstiller movement
     state["movement"] = (0, 0)
 
-def sorting_objects(valid_objects, landmarks_seen, valid_lm_seen):
+def data_objects(landmarks_seen): 
+    """Funktion til at trække de observations data vi skal bruge i selflocalization"""
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
 
     detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
-    
-    detected_center = [(lm.center[0],lm.center[1]) for lm in landmarks_seen]
 
     detected_obj =(detected_objectIDs, detected_dists, detected_angles) #alle objecter i frame
     print(detected_obj)
     
-    landmarks={} #koordinater for de objecter vi vil selflocalize ud fra
-    for i in range(len(detected_objectIDs)):
-        if detected_objectIDs[i] not in valid_lm_seen and detected_objectIDs[i] in valid_objects:
-            valid_lm_seen.append(detected_objectIDs[i])
-            
-        if detected_objectIDs[i] not in landmarks and detected_objectIDs[i] in valid_objects :
-                landmarks[detected_objectIDs[i]]= detected_center[i]
-        
-    
-    return detected_obj, landmarks
+    return detected_obj
