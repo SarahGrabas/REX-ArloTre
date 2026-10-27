@@ -7,6 +7,9 @@ import numpy as np
 arlo = rally.Robot()
 arlo_radius =rally.ARLO_RADIUS
 
+safe_distance_to_lm = 350 #mm
+safe_distance_to_obstacles = 300 #mm
+
 valid_objects=[1,2,3,4]
 valid_coords={
     1:
@@ -21,7 +24,8 @@ current_goal_index=0
 
 current_state=selflocalize.initialize_mcl(num_particles=1500)
 
-while True:   
+while True:  
+    
     valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
         landmarks_seen = arlo.camera.detect_landmarks()
@@ -48,9 +52,11 @@ while True:
             #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
         elif path is None:
+            #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
+            
             #skal vi køre lidt i en retning væk fra obstacles og scanner igen
         
-    else: #roter så vi kan se current goal
+    else: #roter så vi kan se current goal 
         
     
     if #sensorer registrere noget inden for 40 cm, så stop kørsel, selflocalize og forfra
@@ -59,3 +65,39 @@ while True:
     if :#betingelse for at robot har været ved current goal
         current_goal+=1
 
+#Vi skal have en funktion, der beslutter om vi er ved goal ved at bruge sensor og kamera
+
+def sensor_choose_way():
+    left = arlo.read_left_ping_sensor() < safe_distance_to_obstacles
+    front = arlo.read_front_ping_sensor() < safe_distance_to_obstacles
+    right = arlo.read_right_ping_sensor() < safe_distance_to_obstacles
+    
+    vals = (left, front, right)
+    print(vals)
+    
+    if vals == (0,0,0):
+        arlo.move() #20 cm maybe, hvor der stadig intet er
+        
+    elif vals==(0,0,1):
+        #E1.rotate_inplace(arlo,90,True)
+        
+    elif vals==(0,1,0):
+        #E1.rotate_inplace(arlo,90,True)
+        
+    elif vals==(0,1,1):
+        #E1.rotate_inplace(arlo,90,True)
+        
+    elif vals==(1,0,0):
+        #E1.rotate_inplace(arlo,90,False)
+        
+    elif vals==(1,0,1):
+        #E1.rotate_inplace(arlo,180,True)
+        
+    elif vals==(1,1,0):
+        #E1.rotate_inplace(arlo,90,False)
+        
+    elif vals==(1,1,1):
+        #E1.rotate_inplace(arlo,180,True)
+    
+    else:
+        #arlo.stop()
