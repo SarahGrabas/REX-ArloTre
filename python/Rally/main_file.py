@@ -18,6 +18,9 @@ valid_coords={
     11: (531 , 431)
 }
 
+phases=[8,9,10,11,8]
+current_goal_index=0
+
 #MAP
 # X_MIN= 0.0
 # X_MAX =  690 
@@ -141,7 +144,7 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
 
         distance = np.sqrt(dx**2 + dy**2)
 
-        desired_angle = np.degrees(np.arctan2(dx, dy))
+        desired_angle = np.degrees(np.arctan2(dx, dy)) #-np.degrees(np.arctan2(dx, dy))
 
         relative_angle = desired_angle - current_angle
         
@@ -199,7 +202,7 @@ while True:
         GOAL_ID=phases[current_goal_index]
         GOAL_COORDS=valid_coords[phases[current_goal_index]] 
         
-        if current_goal_index == len(phases):
+        if current_goal_index == len(phases)-1:
             break  # rally færdigt
         
     (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
