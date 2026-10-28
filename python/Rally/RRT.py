@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Sequence, Optional, Union
 
 import numpy as np
-import main_file
 
 if TYPE_CHECKING:
     from RRT_grid import Grid
@@ -276,44 +275,4 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     
     return simpler_path
 
-def execute_robot_path(current_state,arlo,path: "Sequence[Union[Sequence[float], np.ndarray]]",number_nodes:int) -> "list[Union[Sequence[float], np.ndarray]]":
-    """Funktion til at køre den simpler path
-    Gridsize er længde på x og y akse i cm"""
-
-    executed_path = [path[0]]
-    
-    path_length=len(path)
-    
-    if number_nodes > path_length: 
-        number_nodes=path_length
-
-    current_angle = 0  # Robotten starter med at pege ligeud
-    
-    for i in range(number_nodes - 1): #Vi kører kun til antal noder angivet
-
-        x1, y1 = path[i] #from node
-        x2, y2 = path[i + 1]# til node
-
-        dx = x2 - x1
-        dy = y2 - y1
-
-        distance = np.sqrt(dx**2 + dy**2)
-
-        desired_angle = -np.degrees(np.arctan2(dx, dy))
-
-        relative_angle = desired_angle - current_angle
-        
-        print("         desired_angle, relative_angle, distance",
-              desired_angle, relative_angle, distance)
-
-        arlo.motors.rotate(relative_angle)
-        current_state["movement"][1]+=relative_angle
-        main_file.drive_with_sonars(current_state,arlo,distance) #input i cm
-
-        current_angle = desired_angle
-        
-        executed_path.append([x2, y2])
-
-    arlo.stop()
-    return executed_path
 

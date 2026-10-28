@@ -71,9 +71,8 @@ def sonars_choose_direction(current_state,arlo):
 
     return direction
 
-    
-
 def drive_with_sonars(current_state,arlo,cm, forward=True):
+
     meters = cm / 100
 
     start = time.time()
@@ -115,6 +114,47 @@ def drive_with_sonars(current_state,arlo,cm, forward=True):
     current_state["movement"][0]+=meter_driven * 100
 
     return meter_driven * 100
+
+def execute_robot_path(current_state,arlo,path,number_nodes:int):
+    """Funktion til at køre den simpler path
+    Gridsize er længde på x og y akse i cm"""
+
+    executed_path = [path[0]]
+    
+    path_length=len(path)
+    
+    if number_nodes > path_length: 
+        number_nodes=path_length
+
+    current_angle = 0  # Robotten starter med at pege ligeud
+    
+    for i in range(number_nodes - 1): #Vi kører kun til antal noder angivet
+
+        x1, y1 = path[i] #from node
+        x2, y2 = path[i + 1]# til node
+
+        dx = x2 - x1
+        dy = y2 - y1
+
+        distance = np.sqrt(dx**2 + dy**2)
+
+        desired_angle = -np.degrees(np.arctan2(dx, dy))
+
+        relative_angle = desired_angle - current_angle
+        
+        print("         desired_angle, relative_angle, distance",
+              desired_angle, relative_angle, distance)
+
+        arlo.motors.rotate(relative_angle)
+        current_state["movement"][1]+=relative_angle
+        drive_with_sonars(current_state,arlo,distance) #input i cm
+
+        current_angle = desired_angle
+        
+        executed_path.append([x2, y2])
+
+    arlo.stop()
+    return executed_path
 
 
 phases=[8,9,10,11,8]
