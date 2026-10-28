@@ -64,7 +64,7 @@ def sonars_choose_direction(arlo):
     # Hvis front er bedst, skal vi ikke dreje
 
     # Kør 30 cm
-    drive_with_sonars(arlo,30, True)
+    drive_with_sonars(arlo,50, True)
 
     return direction
 
