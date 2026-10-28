@@ -7,8 +7,8 @@ import time
 arlo = rally.Robot()
 arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
 
-safe_distance_to_lm = 350 #mm
-safe_distance_to_obstacles = 30 #mm
+safe_distance_to_lm = 0.35 #m
+safe_distance_to_obstacles = 0.3 #m
 
 valid_objects=[8,9,10,11]
 valid_coords={
@@ -66,38 +66,38 @@ def drive_with_sonars(cm, forward=True):
 
     return meter_driven * 100
 
-# def drive_with_sonars(cm, forward=True):
-#     meters=cm/100
+def drive_with_sonars(cm, forward=True):
+    meters=cm/100
     
-#     start=time.time() 
-#     current_time = start
-#     drive_time= 10
+    start=time.time() 
+    current_time = start
+    drive_time= 10
     
-#     while current_time-start<drive_time:
-#         left = arlo.sonars.left() < safe_distance_to_obstacles
-#         front = arlo.sonars.front()< safe_distance_to_obstacles
-#         right = arlo.sonars.right() < safe_distance_to_obstacles
-#         #back = arlo.sonars.back() < safe_distance_to_obstacles
+    while current_time-start<drive_time:
+        left = arlo.sonars.left() < safe_distance_to_obstacles
+        front = arlo.sonars.front()< safe_distance_to_obstacles
+        right = arlo.sonars.right() < safe_distance_to_obstacles
+        #back = arlo.sonars.back() < safe_distance_to_obstacles
         
             
-#         if left==1 or front==1 or right==1:
-#             arlo.motors.stop()
-#             break
+        if left==1 or front==1 or right==1:
+            arlo.motors.stop()
+            break
         
-#         if forward: 
-#             drive_time=arlo.motors.drive(meters, True, False, False)
+        if forward: 
+            drive_time=arlo.motors.drive(meters, True, False, False)
 
-#         current_time=time.time() 
+        current_time=time.time() 
     
-#     if current_time-start < drive_time:
-#         total_driven_time= current_time-start
-#         meter_driven= arlo.motors.meters_pr_sec *total_driven_time
-#         print("Meters driven:",meter_driven *100)
+    if current_time-start < drive_time:
+        total_driven_time= current_time-start
+        meter_driven= arlo.motors.meters_pr_sec *total_driven_time
+        print("Meters driven:",meter_driven *100)
         
-#         return meter_driven *100 #vi returnere cm
-#     else:
-#         print("Meters driven:",meters *100)
-#         return meters*100 #vi returnere cm
+        return meter_driven *100 #vi returnere cm
+    else:
+        print("Meters driven:",meters *100)
+        return meters*100 #vi returnere cm
     
 
 phases=[1,2,3,4,1]
