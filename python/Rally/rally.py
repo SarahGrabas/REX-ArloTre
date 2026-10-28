@@ -513,9 +513,17 @@ class Robot:
         # detecting visible reference points
         intersection = landmark_set.intersection({lm.id for lm in _landmarks})
         _landmark_dict = dict((lm.id, lm) for lm in _landmarks)
-        avg_degs_diff = np.mean(_landmark_dict[_id].angle - landmark_dict[_id].angle for _id in intersection)
+        angle_diffs = [
+            (_landmark_dict[_id].angle - landmark_dict[_id].angle + 180) % 360 - 180
+            for _id in intersection
+        ]
+        avg_degs_diff = np.mean(angle_diffs)
         # calculating velocities : velocity = distance / time
-        degrees_pr_sec = (angle_sum + avg_degs_diff) / (angle_sum / self.motors.degrees_pr_second)
+        degrees_pr_sec = (
+            angle_sum - avg_degs_diff
+        ) / (
+            angle_sum / self.motors.degrees_pr_second
+        )
         rads_pr_sec = degrees_pr_sec * PI/180
         # update velocities
         self.motors.degrees_pr_second = degrees_pr_sec
