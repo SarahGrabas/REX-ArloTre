@@ -24,9 +24,6 @@ import time
 
 
 
-    
-
-
 #Motion model, opdatere partikler ud fra motion kun
 def sample_motion_model(particles, movement):
     """Motion model
@@ -314,7 +311,7 @@ def scan_function(state, robot_controller):
        Grader beregnes ud fra FOV, så vi ikke springer noget over når vi roterer. (Laver for store rotationer).
        Vi opdaterer movement i vores state dictionary, så det passer med faktisk rotation."""
     degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
-    robot_controller.moters.rotate(degree)
+    robot_controller.motors.rotate(degree)
     time.sleep(1.0)
     state["movement"]=(0,degree) #Update movement state
 
