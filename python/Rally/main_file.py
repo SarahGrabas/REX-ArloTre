@@ -153,7 +153,7 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
         
         executed_path.append([x2, y2])
 
-    arlo.stop()
+    arlo.motors.stop()
     return executed_path
 
 

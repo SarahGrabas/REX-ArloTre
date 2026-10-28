@@ -267,6 +267,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     
     if path is None:
             print("Cannot find path")
+            return None
     else:
         print("found path!!")
         print(path)
@@ -274,6 +275,6 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
         print(simpler_path)
     
     
-    return simpler_path
+        return simpler_path
 
 
