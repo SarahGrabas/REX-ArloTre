@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Sequence, Optional, Union
 
 import numpy as np
+import main_file
 
 if TYPE_CHECKING:
     from RRT_grid import Grid
@@ -275,7 +276,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     
     return simpler_path
 
-def execute_robot_path(arlo,path: "Sequence[Union[Sequence[float], np.ndarray]]",number_nodes:int) -> "list[Union[Sequence[float], np.ndarray]]":
+def execute_robot_path(current_state,arlo,path: "Sequence[Union[Sequence[float], np.ndarray]]",number_nodes:int) -> "list[Union[Sequence[float], np.ndarray]]":
     """Funktion til at køre den simpler path
     Gridsize er længde på x og y akse i cm"""
 
@@ -305,8 +306,9 @@ def execute_robot_path(arlo,path: "Sequence[Union[Sequence[float], np.ndarray]]"
         print("         desired_angle, relative_angle, distance",
               desired_angle, relative_angle, distance)
 
-        arlo.moters.rotate(relative_angle)
-        arlo.motors.drive(distance / 100.0) #drive tager input i meter
+        arlo.motors.rotate(relative_angle)
+        current_state["movement"][1]+=relative_angle
+        main_file.drive_with_sonars(current_state,arlo,distance) #input i cm
 
         current_angle = desired_angle
         

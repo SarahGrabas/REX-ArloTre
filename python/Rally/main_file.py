@@ -112,7 +112,7 @@ def drive_with_sonars(current_state,arlo,cm, forward=True):
     meter_driven = arlo.motors.meters_pr_sec * total_driven_time
 
     print("Centimeters driven:", meter_driven * 100)
-    current_state["movement"][0]=meter_driven * 100
+    current_state["movement"][0]+=meter_driven * 100
 
     return meter_driven * 100
 
@@ -152,7 +152,7 @@ while True:
     if path: #ikke er none
         
         number_nodes=len(path) #antal noder fra path vi ønsker at kører til
-        RRT.execute_robot_path(arlo,path,number_nodes)
+        RRT.execute_robot_path(current_state,arlo,path,number_nodes)
             #Vi mangler at putte sensors på dette
             #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
