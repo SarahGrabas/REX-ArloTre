@@ -18,7 +18,7 @@ valid_coords={
     11: (531 , 431)
 }
 
-phases=[8,9,10,11,8]
+phases=[8,9,10,11,8,8]
 current_goal_index=0
 
 #MAP
@@ -125,6 +125,7 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
     #Robottens orientering
     theta= current_state["est_pose"].getTheta()
     current_angle = np.degrees(theta)
+    print("robot current angle: ",current_angle )
 
     executed_path = [path[0]]
     
@@ -144,12 +145,12 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
 
         distance = np.sqrt(dx**2 + dy**2)
 
-        desired_angle = np.degrees(np.arctan2(dy, dx)) #-np.degrees(np.arctan2(dx, dy))
+        desired_angle =  -np.degrees(np.arctan2(dx, dy))#np.degrees(np.arctan2(dy, dx))
 
         relative_angle = desired_angle - current_angle
-        
-        print("         desired_angle, relative_angle, distance",
-              desired_angle, relative_angle, distance)
+        print("desired_angle: ", desired_angle)
+        print("relative_angle: ", relative_angle)
+        print("distance: ", distance)
 
         arlo.motors.rotate(relative_angle)
         current_state["movement"][1]+=relative_angle
@@ -163,14 +164,35 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
     return executed_path
 
 
-phases=[8,9,10,11,8]
-current_goal_index=0
+
+
+
 
 current_state=selflocalize.initialize_mcl(num_particles=1500)
 
 
 while True:  
     
+    GOAL_ID=phases[current_goal_index]
+    GOAL_COORDS=valid_coords[phases[current_goal_index]]
+    
+    #Check if we are at goal
+    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
+    reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
+
+    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
+
+    if dist_to_goal <= reach_dist:
+        print("Goal reached")
+        current_goal_index += 1
+        GOAL_ID=phases[current_goal_index]
+        GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        
+        if current_goal_index == len(phases)-1:
+            break  # rally færdigt
+    
+    
+    #Selflocalization
     valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
     scan_counter=1
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
@@ -187,30 +209,12 @@ while True:
         
         scan_counter+=1
 
-     
-    GOAL_ID=phases[current_goal_index]
-    GOAL_COORDS=valid_coords[phases[current_goal_index]] 
-    
-    
-    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
-    reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
-
-    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
-
-    if dist_to_goal <= reach_dist:
-        print("Goal reached")
-        current_goal_index += 1
-        GOAL_ID=phases[current_goal_index]
-        GOAL_COORDS=valid_coords[phases[current_goal_index]] 
-        
-        if current_goal_index == len(phases)-1:
-            break  # rally færdigt
-        
+    #Current estimated robot pose 
     (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
         
     obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
         
-    print(f"RRT TO {GOAL_ID}")
+    print(f"RRT TO ID: {GOAL_ID}")
     
     path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
         
