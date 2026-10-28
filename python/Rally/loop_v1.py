@@ -7,13 +7,13 @@ import random
 
 
 
-def get_landmark(landmarks:list[Landmark], id:int) -> Landmark|None:
+def get_landmark(landmarks:list[Landmark], id:int) -> Landmark:
     try:
         return [lm for lm in landmarks if lm.id == id][0]
     except IndexError:
         None
 
-def scan_for_landmark(arlo:Robot, id:int) -> Landmark|None:
+def scan_for_landmark(arlo:Robot, id:int) -> Landmark:
     """Returns the landmark iff can see landmark with ``id``."""
     angle = arlo.camera.FOV * 2/3
     total_angle = 0
@@ -33,7 +33,7 @@ def scan_for_landmark(arlo:Robot, id:int) -> Landmark|None:
         return lm
     return None
 
-def look_at_landmark(arlo:Robot, id:int) -> Landmark|None:
+def look_at_landmark(arlo:Robot, id:int) -> Landmark:
     """Returns the landmark iff ``arlo`` is looking approximatly at landmark with ``id`` (returns ``None`` if cannot find landmark with ``id``)."""
     while True:
         lm = scan_for_landmark(arlo, id)
