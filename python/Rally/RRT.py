@@ -128,6 +128,7 @@ class RRT:
         new_node.distance =path_distance
 
         new_node.node_path.append([new_x, new_y]) #tilføjer ny node til path
+        print("Node" , new_x, new_y)
         new_node.parent =old_node
         
         return new_node
