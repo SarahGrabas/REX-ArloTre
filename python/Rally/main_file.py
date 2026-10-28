@@ -25,37 +25,79 @@ valid_coords={
 # Y_MAX = 590
 
 def drive_with_sonars(cm, forward=True):
-    meters=cm/100
-    
-    start=time.time() 
-    current_time = start
-    drive_time= 10
-    
-    while current_time-start<drive_time:
+    meters = cm / 100
+
+    start = time.time()
+
+    # Beregn hvor lang tid det burde tage
+    drive_time = meters / arlo.motors.meters_pr_sec
+
+    # Start motorerne uden at vente
+    arlo.motors.drive(
+        meters,
+        forward,
+        _sleep=False,
+        stop_when_done=False
+    )
+
+    while True:
+        current_time = time.time()
+
         left = arlo.sonars.left() < safe_distance_to_obstacles
-        front = arlo.sonars.front()< safe_distance_to_obstacles
+        front = arlo.sonars.front() < safe_distance_to_obstacles
         right = arlo.sonars.right() < safe_distance_to_obstacles
-        #back = arlo.sonars.back() < safe_distance_to_obstacles
-        
-            
-        if left==1 or front==1 or right==1:
+
+        # Stop hvis der er en forhindring
+        if left or front or right:
             arlo.motors.stop()
             break
-        
-        if forward: 
-            drive_time=arlo.motors.drive(meters, True, False, False)
 
-        current_time=time.time() 
+        # Stop når den ønskede tid er gået
+        if current_time - start >= drive_time:
+            arlo.motors.stop()
+            break
+
+        time.sleep(0.01)
+
+    total_driven_time = time.time() - start
+    meter_driven = arlo.motors.meters_pr_sec * total_driven_time
+
+    print("Meters driven:", meter_driven * 100)
+
+    return meter_driven * 100
+
+# def drive_with_sonars(cm, forward=True):
+#     meters=cm/100
     
-    if current_time-start < drive_time:
-        total_driven_time= current_time-start
-        meter_driven= arlo.motors.meters_pr_sec *total_driven_time
-        print("Meters driven:",meter_driven *100)
+#     start=time.time() 
+#     current_time = start
+#     drive_time= 10
+    
+#     while current_time-start<drive_time:
+#         left = arlo.sonars.left() < safe_distance_to_obstacles
+#         front = arlo.sonars.front()< safe_distance_to_obstacles
+#         right = arlo.sonars.right() < safe_distance_to_obstacles
+#         #back = arlo.sonars.back() < safe_distance_to_obstacles
         
-        return meter_driven *100 #vi returnere cm
-    else:
-        print("Meters driven:",meters *100)
-        return meters*100 #vi returnere cm
+            
+#         if left==1 or front==1 or right==1:
+#             arlo.motors.stop()
+#             break
+        
+#         if forward: 
+#             drive_time=arlo.motors.drive(meters, True, False, False)
+
+#         current_time=time.time() 
+    
+#     if current_time-start < drive_time:
+#         total_driven_time= current_time-start
+#         meter_driven= arlo.motors.meters_pr_sec *total_driven_time
+#         print("Meters driven:",meter_driven *100)
+        
+#         return meter_driven *100 #vi returnere cm
+#     else:
+#         print("Meters driven:",meters *100)
+#         return meters*100 #vi returnere cm
     
 
 phases=[1,2,3,4,1]
