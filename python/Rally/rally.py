@@ -430,9 +430,9 @@ class Camera:
                 n = len(bin_)
                 if n <= 1: continue
                 lm = bin_[0]
-                lm.center = np.mean(lm.center for lm in bin_)
-                lm.distance = np.mean(lm.distance for lm in bin_)
-                lm.angle = np.mean(lm.angle for lm in bin_)
+                lm.center = np.mean(tuple(lm.center for lm in bin_))
+                lm.distance = np.mean(tuple(lm.distance for lm in bin_))
+                lm.angle = np.mean(tuple(lm.angle for lm in bin_))
                 landmarks_dict[id_] = [lm]
 
                 return tuple(lms[0] for _, lms in landmarks_dict.items())
