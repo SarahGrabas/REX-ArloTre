@@ -196,7 +196,9 @@ while True:
         if current_goal_index == len(phases):
             break  # rally færdigt
         
-    obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
+    (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
+        
+    obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
         
     print(f"RRT TO {GOAL_ID}")
     path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
