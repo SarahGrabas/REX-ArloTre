@@ -165,8 +165,11 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
 
 phases=[8,9,10,11,8]
 current_goal_index=0
+arlo.calibrate_velocities()
+
 
 current_state=selflocalize.initialize_mcl(num_particles=1500)
+
 
 while True:  
     
