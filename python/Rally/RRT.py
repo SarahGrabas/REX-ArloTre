@@ -45,8 +45,8 @@ class RRT:
                  start: Position, #start coords
                  goal: Position,  #goal coords
                  map: Grid,
-                 moving_dist_limit: float = 30, #cm #Hvad vi max bevæger os ved ny node
-                 grid_cell_size: float = 2.0, #2cm pr celle
+                 moving_dist_limit: float = 50, #cm #Hvad vi max bevæger os ved ny node
+                 grid_cell_size: float = 10.0, #2cm pr celle
                  goal_sample_rate: int = 5,    #Procentdel på hvor tit en random node skal være goal node
                  max_iter: int = 1000,          #Max forsøg på at finde path
                  ) -> None:
