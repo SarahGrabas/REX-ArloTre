@@ -1,22 +1,19 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from numpy.typing import NDArray
-    from typing import Sequence, Optional, Union
 
 import numpy as np
 
-_Landmark_ = tuple[int, Union[Sequence[float], NDArray], float]
-Position = Union[Sequence[float], NDArray]
-
+from typing import Sequence, Optional, Union
+_Landmark_ = tuple[int, Union[Sequence[float], np.ndarray], float]
+Position = Union[Sequence[float], np.ndarray]
 
 class Grid:
     x_limits: tuple[float, float]
     y_limits: tuple[float, float]
     grid_cell_size: float
     number_of_celles: list[int]
-    grid_matrix: NDArray
+    grid_matrix: np.ndarray
 
     def __init__(self, x_min: float, x_max: float, y_min: float, y_max: float, grid_cell_size: float) -> None:
         self.x_limits = (x_min, x_max)
