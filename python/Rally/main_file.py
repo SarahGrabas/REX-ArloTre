@@ -9,12 +9,12 @@ arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
 safe_distance_to_lm = 350 #mm
 safe_distance_to_obstacles = 300 #mm
 
-valid_objects=[1,2,3,6]
+valid_objects=[8,9,10,11]
 valid_coords={
-    1: (131, 131),
-    2: (131,431 ), #466
-    3: (531 , 131), #566
-    6: (531 , 431)
+    8: (131, 131),
+    9: (131,431 ), #466
+    10: (531 , 131), #566
+    11: (531 , 431)
 }
 
 #MAP
