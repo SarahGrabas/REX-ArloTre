@@ -241,18 +241,16 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
             # Rotate and translate.
             global_xy = local_xy @ rotation_matrix.T
             global_xy += np.array([x, y])
-            # convert to centimeters
-            global_xy *= 100
             
             center = (
             float(global_xy[0]),
             float(global_xy[1])
         )
 
-        radius = float(detected_radius[i])
+            radius = float(detected_radius[i])
 
         obstacles.append(
-            (detected_objectIDs, center, radius)
+            (detected_objectIDs[i], center, radius)
         )
 
     print("OBSTACLES:")
