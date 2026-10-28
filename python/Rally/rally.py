@@ -227,7 +227,7 @@ class Landmark:
     }
 
     def __init__(self, id:int, center:NDArray, radius:float, normal:NDArray, distance:float, angle:float):
-        debug(f"Landmark({id}, {center}, {radius}, {normal}, {distance}, {angle})")
+        debug(f"Landmark({id}, {center}, {radius}, {normal}, {distance}, {angle})", verbosity=2)
         self.id = id
         self.center = center
         """3D numpy array in meters."""
@@ -324,7 +324,7 @@ class Camera:
     def _face_normal(rvec) -> NDArray:
         """Given an rotation vector, returns the unit length normal vector for the marker face."""
         R, _ = cv2.Rodrigues(np.asarray(rvec, dtype=float))
-        debug(f"Calculated normal vector = {R[:, 2]}")
+        debug(f"Calculated normal vector = {R[:, 2]}", verbosity=1)
         return R[:, 2]
 
     def _detect_markers(self) -> tuple[NDArray, NDArray, NDArray, NDArray]:
