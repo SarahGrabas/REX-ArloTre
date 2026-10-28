@@ -105,7 +105,7 @@ with Robot() as arlo:
                 arlo.motors.rotate(random.randint(-180, 180))
                 drive_with_sensors(arlo, 1)
             else:
-                obstacles = arlo.camera.detect_landmarks(True)
+                obstacles = arlo.camera.detect_landmarks()
                 goal = target.center[:2]
                 goal -= (target.radius + 0.4 + ARLO_RADIUS/2) * goal / np.linalg.norm(goal) # goal is the closest point on a circle around the L1
                 instructions = None
