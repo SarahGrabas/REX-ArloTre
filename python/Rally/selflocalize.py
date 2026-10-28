@@ -46,6 +46,15 @@ def sample_motion_model(particles, movement):
             # Tilfældig fejl på movement
             driven_hat = driven + np.random.normal(0, sigma_driven)
             
+            print(
+                "Motion:",
+                "driven =", driven_hat,
+                "theta =", theta,
+                "theta_deg =", np.rad2deg(theta),
+                "dx =", driven_hat * np.cos(theta),
+                "dy =", driven_hat * np.sin(theta)
+            )
+            
             # Opdater position
             x_new = x + driven_hat * np.cos(theta)
             y_new = y + driven_hat * np.sin(theta)
