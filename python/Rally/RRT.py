@@ -211,22 +211,41 @@ class RRT:
 
         return simpler_path
 
-def convert_lm_center_to_global(landmarks_seen, GOAL_ID):
+def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_center = [lm.center for lm in landmarks_seen]
     detected_radius = [lm.radius for lm in landmarks_seen]
 
     for i in range(len(detected_objectIDs)):
         if detected_objectIDs[i]!=GOAL_ID:
-            None
-            #konverter til globale koordinater
-            
-            
-            #center coord skal være i cm
-            
-    
+            x, y, theta = pose
+
+            local_coords = np.asarray(local_coords)
+
+            # theta = 0 means facing global +X.
+            cos_theta = np.cos(theta)
+            sin_theta = np.sin(theta)
+
+            # Local +X points right.
+            # Local +Y points forward.
+            rotation_matrix = np.array([
+                [-sin_theta, cos_theta],
+                [ cos_theta, sin_theta]
+            ])
+
+            # Extract local X and Y.
+            local_xy = local_coords[..., :2]
+
+            # Rotate and translate.
+            global_xy = local_xy @ rotation_matrix.T
+            global_xy += np.array([x, y])
+            # convert to centimeters
+            global_xy *= 100
+
+            detected_center[i] = global_xy
+
     #radius skal være i cm
-    obstacles =(detected_objectIDs,detected_radius) 
+    obstacles =(detected_objectIDs, detected_center, detected_radius) 
     
     return obstacles #skal returnere mål og obstacles i global koordinater
 

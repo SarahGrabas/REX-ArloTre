@@ -521,7 +521,9 @@ class Robot:
 
 
 
-with Robot() as arlo:
-    arlo.camera.detect_landmarks()
-    arlo.sonars.front()
-    arlo.motors.rotate(90)
+
+if __name__ == "__main__":
+    with Robot() as arlo:
+        arlo.camera.detect_landmarks()
+        arlo.sonars.front()
+        arlo.motors.rotate(90)
