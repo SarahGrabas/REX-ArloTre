@@ -245,7 +245,7 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
             detected_center[i] = global_xy
 
     #radius skal være i cm
-    obstacles =(detected_objectIDs, detected_center, detected_radius) 
+    obstacles = tuple((id, center, radius) for id,center,radius in zip(detected_objectIDs, detected_center, detected_radius)) 
     
     return obstacles #skal returnere mål og obstacles i global koordinater
 
