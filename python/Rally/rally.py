@@ -509,6 +509,7 @@ class Robot:
         while not landmark_set.intersection({lm.id for lm in _landmarks}):
             angle_sum += degs
             self.motors.rotate(degs)
+            sleep(0.5)
             _landmarks = self.camera.detect_landmarks()
         # detecting visible reference points
         intersection = landmark_set.intersection({lm.id for lm in _landmarks})
