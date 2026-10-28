@@ -24,7 +24,53 @@ valid_coords={
 # Y_MIN= 0.0
 # Y_MAX = 590
 
-def drive_with_sonars(cm, forward=True):
+def sonars_choose_direction(arlo):
+    left = arlo.sonars.left()
+    front = arlo.sonars.front()
+    right = arlo.sonars.right()
+    back = arlo.sonars.back()
+    
+    
+
+    distances = {
+        "left": left,
+        "front": front,
+        "right": right,
+        "back": back
+    }
+
+    # Find retningen med størst fri afstand
+    direction = max(distances, key=distances.get)
+
+    print("Sonars:")
+    print("  Left: ", left)
+    print("  Front:", front)
+    print("  Right:", right)
+    print("  Back: ", back)
+    print("Choosing:", direction)
+
+    # Drej mod den valgte retning
+    if direction == "left":
+        arlo.motors.rotate(-90)
+
+    elif direction == "right":
+        arlo.motors.rotate(90)
+
+    elif direction == "back":
+        arlo.motors.rotate(180)
+        
+    
+
+    # Hvis front er bedst, skal vi ikke dreje
+
+    # Kør 30 cm
+    drive_with_sonars(30, True)
+
+    return direction
+
+    
+
+def drive_with_sonars(arlo,cm, forward=True):
     meters = cm / 100
 
     start = time.time()
@@ -62,43 +108,9 @@ def drive_with_sonars(cm, forward=True):
     total_driven_time = time.time() - start
     meter_driven = arlo.motors.meters_pr_sec * total_driven_time
 
-    print("Meters driven:", meter_driven * 100)
+    print("Centimeters driven:", meter_driven * 100)
 
     return meter_driven * 100
-
-def drive_with_sonars(cm, forward=True):
-    meters=cm/100
-    
-    start=time.time() 
-    current_time = start
-    drive_time= 10
-    
-    while current_time-start<drive_time:
-        left = arlo.sonars.left() < safe_distance_to_obstacles
-        front = arlo.sonars.front()< safe_distance_to_obstacles
-        right = arlo.sonars.right() < safe_distance_to_obstacles
-        #back = arlo.sonars.back() < safe_distance_to_obstacles
-        
-            
-        if left==1 or front==1 or right==1:
-            arlo.motors.stop()
-            break
-        
-        if forward: 
-            drive_time=arlo.motors.drive(meters, True, False, False)
-
-        current_time=time.time() 
-    
-    if current_time-start < drive_time:
-        total_driven_time= current_time-start
-        meter_driven= arlo.motors.meters_pr_sec *total_driven_time
-        print("Meters driven:",meter_driven *100)
-        
-        return meter_driven *100 #vi returnere cm
-    else:
-        print("Meters driven:",meters *100)
-        return meters*100 #vi returnere cm
-    
 
 phases=[1,2,3,4,1]
 current_goal_index=0
@@ -106,7 +118,7 @@ current_goal_index=0
 #current_state=selflocalize.initialize_mcl(num_particles=1500)
 
 #while True:  
-drive_with_sonars(200, forward=True) #tager input i cm
+sonars_choose_direction(arlo) #tager input i cm
     
     # valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
     # while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
