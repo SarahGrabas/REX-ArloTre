@@ -215,6 +215,8 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_center = [lm.center for lm in landmarks_seen]
     detected_radius = [lm.radius*100 for lm in landmarks_seen]
+    
+    obstacles = []
 
     for i in range(len(detected_objectIDs)):
         if detected_objectIDs[i]!=GOAL_ID:
@@ -241,14 +243,33 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
             global_xy += np.array([x, y])
             # convert to centimeters
             global_xy *= 100
+            
+            center = (
+            float(global_xy[0]),
+            float(global_xy[1])
+        )
 
-            detected_center[i] = (float(global_xy[0]), float(global_xy[1])) #global_xy
+        radius = float(detected_radius)
+
+        obstacles.append(
+            (detected_objectIDs, center, radius)
+        )
+
+    print("OBSTACLES:")
+    for obstacle in obstacles:
+        print(obstacle)
+        print("  CENTER:", obstacle[1])
+        print("  CENTER LENGTH:", len(obstacle[1]))
+
+    return tuple(obstacles)
+
+            # detected_center[i] = (float(global_xy[0]), float(global_xy[1])) #global_xy
         
 
-    #radius skal være i cm
-    obstacles = tuple((id, center, radius) for id,center,radius in zip(detected_objectIDs, detected_center, detected_radius)) 
+    # #radius skal være i cm
+    # obstacles = tuple((id, center, radius) for id,center,radius in zip(detected_objectIDs, detected_center, detected_radius)) 
     
-    return obstacles #skal returnere mål og obstacles i global koordinater
+    # return obstacles #skal returnere mål og obstacles i global koordinater
 
 def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float], arlo_radius):
     """Funktion til at lave kald til RRT"""
@@ -258,13 +279,6 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     Y_MAX = (120 + 22 + 300 + 28 + 120) 
     GRID_CELL_SIZE=2.0
     map = Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
-    print("OBSTACLES:")
-    for obstacle in obstacles:
-        print(obstacle)
-        print("  ID:", obstacle[0])
-        print("  CENTER:", obstacle[1])
-        print("  CENTER LENGTH:", len(obstacle[1]))
-        print("  RADIUS:", obstacle[2])
     map.obstacles(obstacles, robot_radius=arlo_radius)
     
     
