@@ -150,7 +150,6 @@ class Motor:
 
         correction_fraction_negative = 1.0
         correction_fraction_positive = 1.0
-        degrees +=360
     
         if degrees < 0:
             self.move(1, -1)
