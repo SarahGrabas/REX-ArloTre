@@ -8,7 +8,7 @@ arlo = rally.Robot()
 arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
 
 safe_distance_to_lm = 350 #mm
-safe_distance_to_obstacles = 300 #mm
+safe_distance_to_obstacles = 30 #mm
 
 valid_objects=[8,9,10,11]
 valid_coords={
