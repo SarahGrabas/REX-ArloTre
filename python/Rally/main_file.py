@@ -29,6 +29,7 @@ def drive_with_sonars(cm, forward=True):
     
     start=time.time() 
     current_time = start
+    drive_time= 10
     
     while current_time-start<drive_time:
         left = arlo.sonars.left() < safe_distance_to_obstacles
