@@ -97,10 +97,10 @@ def drive_with_sensors(arlo:Robot, meters:float):
 
 
 with Robot() as arlo:
-    for target_id in (1, 2, 3, 4, 1):
+    for target_id in (7+1, 7+2, 7+3, 7+4, 7+1):
         while True:
             target = look_at_landmark(arlo, target_id)
-            avoid = {i for i in (1, 2, 3, 4, 1) if i != target_id}
+            avoid = {i for i in (7+1, 7+2, 7+3, 7+4, 7+1) if i != target_id}
             if target is None:
                 arlo.motors.rotate(random.randint(-180, 180))
                 drive_with_sensors(arlo, 1)
