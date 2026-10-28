@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
-    from typing import Sequence, Optional, Union
 
 import numpy as np
 
+from typing import Sequence, Optional, Union
 _Landmark_ = tuple[int, Union[Sequence[float], NDArray], float]
 Position = Union[Sequence[float], NDArray]
 
