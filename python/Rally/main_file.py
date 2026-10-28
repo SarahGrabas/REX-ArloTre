@@ -39,6 +39,8 @@ while True:
         selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
 
         selflocalize.scan_function(current_state,arlo)
+        
+    arlo.motors.drive(1)
     
     
     
