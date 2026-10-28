@@ -193,6 +193,9 @@ while True:
     if dist_to_goal <= reach_dist:
         print("Goal reached")
         current_goal_index += 1
+        GOAL_ID=phases[current_goal_index]
+        GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        
         if current_goal_index == len(phases):
             break  # rally færdigt
         

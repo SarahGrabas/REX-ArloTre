@@ -261,7 +261,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     map.obstacles(obstacles, robot_radius=arlo_radius)
     
     
-    START_POINT=[estimate_robot_pose[0],estimate_robot_pose[1]]
+    START_POINT=[estimate_robot_pose.getX(),estimate_robot_pose.getY()]
     rrt = RRT(start=START_POINT,goal=GOAL,map=map,grid_cell_size=GRID_CELL_SIZE,)
     path = rrt.path_planning()
     
