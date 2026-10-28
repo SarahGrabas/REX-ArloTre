@@ -41,6 +41,7 @@ while True:
         selflocalize.scan_function(current_state,arlo)
         
     arlo.motors.drive(1)
+    print("Driving 1 meter")
     current_state["movement"]=(100.0,0)
     
     
