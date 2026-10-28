@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence, Optional, Union
+from typing import Sequence, Optional, Union
 
 import numpy as np
 from RRT_grid import Grid
 
-if TYPE_CHECKING:
-    from RRT_grid import Grid
+
 
 Position = Union[Sequence[float], np.ndarray]
 
