@@ -60,7 +60,7 @@ def sonars_choose_direction(current_state,arlo):
 
     elif direction == "back":
         arlo.motors.rotate(180)
-        current_state["movement"]=180
+        current_state["movement"][1]=180
         
     
 
