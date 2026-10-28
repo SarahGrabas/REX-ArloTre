@@ -339,7 +339,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     # Bevægelsen er nu blevet brugt så vi nulstiller movement
     state["movement"] = (0, 0)
 
-def data_objects(landmarks_seen): 
+def data_objects(landmarks_seen, valid_lm_seen: list, valid_objects:list): 
     """Funktion til at trække de observations data vi skal bruge i selflocalization"""
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
@@ -349,4 +349,8 @@ def data_objects(landmarks_seen):
     detected_obj =(detected_objectIDs, detected_dists, detected_angles) #alle objecter i frame
     print(detected_obj)
     
-    return detected_obj
+    for i in range(len(detected_objectIDs)):
+        if detected_objectIDs[i] in valid_objects and detected_objectIDs[i] not in valid_lm_seen:
+            valid_lm_seen.append(detected_objectIDs[i])
+    
+    return detected_obj, valid_lm_seen

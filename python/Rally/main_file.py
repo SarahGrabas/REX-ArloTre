@@ -9,14 +9,19 @@ arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
 safe_distance_to_lm = 350 #mm
 safe_distance_to_obstacles = 300 #mm
 
-valid_objects=[1,2,3,4]
+valid_objects=[1,2,3,6]
 valid_coords={
-    1:
-    2:
-    3:
-    4:
+    1: (131, 131),
+    2: (131,431 ), #466
+    3: (531 , 131), #566
+    6: (531 , 431)
 }
 
+#MAP
+# X_MIN= 0.0
+# X_MAX =  690 
+# Y_MIN= 0.0
+# Y_MAX = 590
 
 phases=[1,2,3,4,1]
 current_goal_index=0
@@ -30,7 +35,7 @@ while True:
         print("Selflocalizing")
         landmarks_seen = arlo.camera.detect_landmarks()
         
-        all_obj_in_frame=selflocalize.data_objects(landmarks_seen)  
+        all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
         selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
 
         selflocalize.scan_function(current_state,arlo)
