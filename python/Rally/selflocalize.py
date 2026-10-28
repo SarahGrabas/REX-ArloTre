@@ -28,7 +28,8 @@ import time
 def sample_motion_model(particles, movement):
     """Motion model
        Hvis der har været movement (forward eller bagud) flyttes partiklerne med denne movement (+ noise).
-       Hvis vi har roteret, opdateres partiklernes orientering med denne rotation (+ noise)"""
+       Hvis vi har roteret, opdateres partiklernes orientering med denne rotation (+ noise)
+       Det er vigtigt at hvis movement både indeholder driven og degree, at robotten så er drejet først og så kørt"""
     driven, degree =movement
 
     # Noise
@@ -40,18 +41,6 @@ def sample_motion_model(particles, movement):
         x = p.getX()
         y = p.getY()
         theta = p.getTheta()
-        
-        #Hvis vi har kørt, opdatere partikler efter hvor mange cm vi har kørt
-        if driven !=0:
-            # Tilfældig fejl på movement
-            driven_hat = driven + np.random.normal(0, sigma_driven)
-            
-            # Opdater position
-            x_new = x + driven_hat * np.cos(theta)
-            y_new = y + driven_hat * np.sin(theta)
-            
-            p.setX(x_new)
-            p.setY(y_new)
         
         if degree !=0:
 
@@ -65,13 +54,23 @@ def sample_motion_model(particles, movement):
             theta_new = np.mod(theta + degree_hat, 2.0 * np.pi)
 
             p.setTheta(theta_new)
+        
+        #Hvis vi har kørt, opdatere partikler efter hvor mange cm vi har kørt
+        
+        
+        if driven !=0:
+            # Tilfældig fejl på movement
+            driven_hat = driven + np.random.normal(0, sigma_driven)
+            
+            # Opdater position
+            x_new = x + driven_hat * np.cos(theta)
+            y_new = y + driven_hat * np.sin(theta)
+            
+            p.setX(x_new)
+            p.setY(y_new)
+        
+        
 
-# def initialize_particles(num_particles):
-#     particles = []
-#     for i in range(num_particles):
-#         # Random starting points. 
-#         p = particle.Particle(600.0*np.random.ranf() - 100.0, 600.0*np.random.ranf() - 250.0, np.mod(2.0*np.pi*np.random.ranf(), 2.0*np.pi), 1.0/num_particles)
-#         particles.append(p)
 
 #Vi generer partikler der ligger inden for banen
 def initialize_particles(num_particles):
