@@ -64,7 +64,6 @@ current_goal_index=0
 #current_state=selflocalize.initialize_mcl(num_particles=1500)
 
 #while True:  
-    
 drive_with_sonars(200, forward=True) #tager input i cm
     
     # valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
