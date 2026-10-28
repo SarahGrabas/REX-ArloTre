@@ -4,6 +4,7 @@ import numpy as np
 from loop_v1_rrt import Grid, RRT
 from time import perf_counter
 import random
+from time import sleep
 
 
 
@@ -25,8 +26,10 @@ def scan_for_landmark(arlo:Robot, id:int) -> Landmark:
             if total_angle <= 360 - angle:
                 total_angle += angle
                 arlo.motors.rotate(angle)
+                sleep(0.5)
             else:
                 arlo.motors.rotate(360 - angle)
+                sleep(0.5)
                 break
     lm = get_landmark(arlo.camera.detect_landmarks(True), id)
     if lm is not None:
