@@ -7,7 +7,7 @@ import time
 arlo = rally.Robot()
 arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
 
-safe_distance_to_lm = 0.35 #m
+safe_distance_to_lm = 0.3 #m
 safe_distance_to_obstacles = 0.3 #m
 
 valid_objects=[8,9,10,11]
@@ -139,10 +139,21 @@ while True:
         selflocalize.scan_function(current_state,arlo)
         
         scan_counter+=1
-    
+
      
-    GOAL_ID=phases[current_goal]
-    GOAL_COORDS=valid_coords[phases[current_goal]] 
+    GOAL_ID=phases[current_goal_index]
+    GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+    
+    
+    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
+    reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
+
+    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
+
+    if dist_to_goal <= reach_dist:
+        current_goal_index += 1
+        if current_goal_index == len(phases):
+            break  # rally færdigt
         
     obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
         
@@ -163,17 +174,6 @@ while True:
         #skal vi køre lidt i en retning væk fra obstacles og scanner igen
         sonars_choose_direction(current_state,arlo)
         
-    
-    goal_buffer = 0.30 #m
-    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
-    reach_dist = (lm_radius + rally.ARLO_RADIUS + goal_buffer) * 100 #fra meter til cm
-
-    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
-
-    if dist_to_goal <= reach_dist:
-        current_goal_index += 1
-        if current_goal_index == len(phases):
-            break  # rally færdigt
 
 
 #Vi skal have en funktion, der beslutter om vi er ved goal ved at bruge sensor og kamera
