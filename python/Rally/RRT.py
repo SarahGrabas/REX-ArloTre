@@ -214,7 +214,7 @@ class RRT:
 def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_center = [lm.center for lm in landmarks_seen]
-    detected_radius = [lm.radius/100 for lm in landmarks_seen]
+    detected_radius = [lm.radius*100 for lm in landmarks_seen]
 
     for i in range(len(detected_objectIDs)):
         if detected_objectIDs[i]!=GOAL_ID:
@@ -258,6 +258,13 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     Y_MAX = (120 + 22 + 300 + 28 + 120) 
     GRID_CELL_SIZE=2.0
     map = Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
+    print("OBSTACLES:")
+    for obstacle in obstacles:
+        print(obstacle)
+        print("  ID:", obstacle[0])
+        print("  CENTER:", obstacle[1])
+        print("  CENTER LENGTH:", len(obstacle[1]))
+        print("  RADIUS:", obstacle[2])
     map.obstacles(obstacles, robot_radius=arlo_radius)
     
     
