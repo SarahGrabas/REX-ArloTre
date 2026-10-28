@@ -42,71 +42,71 @@ while True:
     
     
     
-    if phases[current_goal] in all_obj_in_frame: #hvis vi kan se current goal, så laver vi RRT til den
-        GOAL_ID=phases[current_goal]
-        GOAL_COORDS=valid_coords[phases[current_goal]]
+#     if phases[current_goal] in all_obj_in_frame: #hvis vi kan se current goal, så laver vi RRT til den
+#         GOAL_ID=phases[current_goal]
+#         GOAL_COORDS=valid_coords[phases[current_goal]]
         
-        obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
+#         obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
         
-        print(f"RRT TO {GOAL_ID}")
-        path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
+#         print(f"RRT TO {GOAL_ID}")
+#         path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
         
         
-        if path: #ikke er none
+#         if path: #ikke er none
         
-            number_nodes=len(path) #antal noder fra path vi ønsker at kører til
-            RRT.execute_robot_path(arlo,path,number_nodes)
-            #Vi mangler at putte sensors på dette
-            #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
+#             number_nodes=len(path) #antal noder fra path vi ønsker at kører til
+#             RRT.execute_robot_path(arlo,path,number_nodes)
+#             #Vi mangler at putte sensors på dette
+#             #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
-        elif path is None:
-            print(f"Could not find path to {GOAL_ID}")
-            #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
+#         elif path is None:
+#             print(f"Could not find path to {GOAL_ID}")
+#             #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
             
-            #skal vi køre lidt i en retning væk fra obstacles og scanner igen
+#             #skal vi køre lidt i en retning væk fra obstacles og scanner igen
         
-    else: #roter så vi kan se current goal 
-        
-    
-    if #sensorer registrere noget inden for 40 cm, så stop kørsel, selflocalize og forfra
+#     else: #roter så vi kan se current goal 
         
     
-    if :#betingelse for at robot har været ved current goal
-        current_goal+=1
+#     if #sensorer registrere noget inden for 40 cm, så stop kørsel, selflocalize og forfra
+        
+    
+#     if :#betingelse for at robot har været ved current goal
+#         current_goal+=1
 
-#Vi skal have en funktion, der beslutter om vi er ved goal ved at bruge sensor og kamera
+# #Vi skal have en funktion, der beslutter om vi er ved goal ved at bruge sensor og kamera
 
-def sensor_choose_way():
-    left = arlo.read_left_ping_sensor() < safe_distance_to_obstacles
-    front = arlo.read_front_ping_sensor() < safe_distance_to_obstacles
-    right = arlo.read_right_ping_sensor() < safe_distance_to_obstacles
+# def sensor_choose_way():
+#     left = arlo.read_left_ping_sensor() < safe_distance_to_obstacles
+#     front = arlo.read_front_ping_sensor() < safe_distance_to_obstacles
+#     right = arlo.read_right_ping_sensor() < safe_distance_to_obstacles
     
-    vals = (left, front, right)
-    print(vals)
+#     vals = (left, front, right)
+#     print(vals)
     
-    if vals == (0,0,0):
-        arlo.move() #20 cm maybe, hvor der stadig intet er
+#     if vals == (0,0,0):
+#         arlo.move() #20 cm maybe, hvor der stadig intet er
         
-    elif vals==(0,0,1):
-        #E1.rotate_inplace(arlo,90,True)
+#     elif vals==(0,0,1):
+#         #E1.rotate_inplace(arlo,90,True)
         
-    elif vals==(0,1,0):
-        #E1.rotate_inplace(arlo,90,True)
+#     elif vals==(0,1,0):
+#         #E1.rotate_inplace(arlo,90,True)
         
-    elif vals==(0,1,1):
-        #E1.rotate_inplace(arlo,90,True)
+#     elif vals==(0,1,1):
+#         #E1.rotate_inplace(arlo,90,True)
         
-    elif vals==(1,0,0):
-        #E1.rotate_inplace(arlo,90,False)
+#     elif vals==(1,0,0):
+#         #E1.rotate_inplace(arlo,90,False)
         
-    elif vals==(1,0,1):
-        #E1.rotate_inplace(arlo,180,True)
+#     elif vals==(1,0,1):
+#         #E1.rotate_inplace(arlo,180,True)
         
-    elif vals==(1,1,0):
-        #E1.rotate_inplace(arlo,90,False)
+#     elif vals==(1,1,0):
+#         #E1.rotate_inplace(arlo,90,False)
         
-    elif vals==(1,1,1):
-        #E1.rotate_inplace(arlo,180,True)
+#     elif vals==(1,1,1):
+#         #E1.rotate_inplace(arlo,180,True)
     
-    else:
-        #arlo.stop()
+#     else:
+#         #arlo.stop()
