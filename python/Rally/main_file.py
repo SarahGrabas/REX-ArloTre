@@ -55,15 +55,15 @@ def sonars_choose_direction(current_state,arlo):
     # Drej mod den valgte retning
     if direction == "left":
         arlo.motors.rotate(90)
-        current_state["movement"][1]=90
+        current_state["movement"][1]+=90
 
     elif direction == "right":
         arlo.motors.rotate(-90)
-        current_state["movement"][1]=-90
+        current_state["movement"][1]+=-90
 
     elif direction == "back":
         arlo.motors.rotate(180)
-        current_state["movement"][1]=180
+        current_state["movement"][1]+=180
         
     
 
@@ -144,7 +144,7 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
 
         distance = np.sqrt(dx**2 + dy**2)
 
-        desired_angle = np.degrees(np.arctan2(dx, dy)) #-np.degrees(np.arctan2(dx, dy))
+        desired_angle = np.degrees(np.arctan2(dy, dx)) #-np.degrees(np.arctan2(dx, dy))
 
         relative_angle = desired_angle - current_angle
         
@@ -175,14 +175,14 @@ while True:
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
         if scan_counter%5==0: #Ved hver 5 scan bevæger vi os lidt, hvis vi ikke kan se 2 lms
             sonars_choose_direction(current_state,arlo) #når vi bevæger os, opdateres current state inde i funktionen
-        selflocalize.scan_function(current_state,arlo)
+        if scan_counter !=1:
+            selflocalize.scan_function(current_state,arlo)
         
         print("Selflocalizing")
         landmarks_seen = arlo.camera.detect_landmarks()
         
         all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
         selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
-
         
         scan_counter+=1
 

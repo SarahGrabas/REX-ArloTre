@@ -313,7 +313,7 @@ def scan_function(state, robot_controller):
     degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
     robot_controller.motors.rotate(degree)
     time.sleep(1.0)
-    state["movement"]=[0,degree] #Update movement state
+    state["movement"][1]+=degree #Update movement state
 
 
 
