@@ -250,9 +250,9 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
 
             radius = float(detected_radius[i])
 
-        obstacles.append(
-            (detected_objectIDs[i], center, radius)
-        )
+            obstacles.append(
+                (detected_objectIDs[i], center, radius)
+            )
 
     print("OBSTACLES:")
     for obstacle in obstacles:
