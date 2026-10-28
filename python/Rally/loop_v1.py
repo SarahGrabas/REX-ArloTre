@@ -85,7 +85,7 @@ def drive_with_sensors(arlo:Robot, meters:float):
     if min(arlo.sonars.left(), arlo.sonars.front(), arlo.sonars.right()) >= 0.2:
         time = arlo.motors.drive(meters, True, False, False)
         START_TIME = perf_counter()
-        while (perf_counter()-START_TIME)*1_000_000 < time:
+        while (perf_counter()-START_TIME) < time:
             if min(arlo.sonars.left(), arlo.sonars.front(), arlo.sonars.right()) < 0.2:
                 arlo.motors.stop()
                 raise AssertionError()
