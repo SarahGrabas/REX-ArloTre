@@ -32,8 +32,8 @@ def sample_motion_model(particles, movement):
     driven, degree =movement
 
     # Noise
-    sigma_driven = 5.0   # cm
-    sigma_degree = 2.0     # grader
+    sigma_driven = 8.0   # cm
+    sigma_degree = 5.0     # grader
 
     for p in particles:
 
