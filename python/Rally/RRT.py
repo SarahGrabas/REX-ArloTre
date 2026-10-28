@@ -220,7 +220,7 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
         if detected_objectIDs[i]!=GOAL_ID:
             x, y, theta = pose
 
-            local_coords = np.asarray(local_coords)
+            local_coords = np.asarray(detected_center[i])
 
             # theta = 0 means facing global +X.
             cos_theta = np.cos(theta)
