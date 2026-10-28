@@ -1,4 +1,4 @@
-VERBOSITY : int = 1 # 0 means no debug info, 1 means all, and higher values means less verbosity
+VERBOSITY : int = 0 # 0 means no debug info, 1 means all, and higher values means less verbosity
 
 # in case verbosity is false, we want debug calls to not throw an unknown expression error
 def debug(*args, **kwargs): pass
