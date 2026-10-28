@@ -249,7 +249,7 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
             float(global_xy[1])
         )
 
-        radius = float(detected_radius)
+        radius = float(detected_radius[i])
 
         obstacles.append(
             (detected_objectIDs, center, radius)
