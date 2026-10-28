@@ -3,6 +3,7 @@ from rally import Robot, Landmark, ARLO_RADIUS, Camera
 import numpy as np
 from loop_v1_rrt import Grid, RRT
 from time import perf_counter
+import random
 
 
 
@@ -74,14 +75,23 @@ def drive_with_sensors(arlo:Robot, meters:float):
     BUFFER = 0.1
 
     obstacles = arlo.camera.detect_landmarks()
-    a = (obs for obs in obstacles if obs.center[1] <= meters + obs.radius + ARLO_RADIUS)
+    a = tuple(obs for obs in obstacles if obs.center[1] <= meters + obs.radius + ARLO_RADIUS + BUFFER)
+    b = tuple(obs for obs in a if abs(obs.center[0]) <= ARLO_RADIUS + BUFFER)
 
-    time = arlo.motors.drive(meters, True, False, False)
-    START_TIME = perf_counter()
-    while (perf_counter()-START_TIME)*1_000_000 < time:
-        if min(arlo.sonars.left(), arlo.sonars.front(), arlo.sonars.right()) < 0.2:
-            arlo.motors.stop()
-    arlo.motors.stop()
+    if b:
+        m = min(obs.center[1] for obs in b)
+        meters = min(m, meters)
+
+    if min(arlo.sonars.left(), arlo.sonars.front(), arlo.sonars.right()) >= 0.2:
+        time = arlo.motors.drive(meters, True, False, False)
+        START_TIME = perf_counter()
+        while (perf_counter()-START_TIME)*1_000_000 < time:
+            if min(arlo.sonars.left(), arlo.sonars.front(), arlo.sonars.right()) < 0.2:
+                arlo.motors.stop()
+                raise AssertionError()
+        arlo.motors.stop()
+    else:
+        raise AssertionError()
 
 
 
@@ -92,17 +102,24 @@ with Robot() as arlo:
             target = look_at_landmark(arlo, target_id)
             avoid = {i for i in (1, 2, 3, 4, 1) if i != target_id}
             if target is None:
-                # GO RANDOM DIRECTION
-                # AVOID OBSTACLES
-                # AVOID OTHER TARGETS
-                pass
+                arlo.motors.rotate(random.randint(-180, 180))
+                drive_with_sensors(arlo, 1)
             else:
                 obstacles = arlo.camera.detect_landmarks(True)
                 goal = target.center[:2]
                 goal -= (target.radius + 0.4 + ARLO_RADIUS/2) * goal / np.linalg.norm(goal) # goal is the closest point on a circle around the L1
-                # USE RRT TO PLAN PATH TO GOAL
-                # DRIVE PATH
-                # AVOID OBSTACLES
-                # AVOID OTHER TARGETS
+                instructions = None
+                while instructions is None:
+                    instructions = RRT_instructions(goal, obstacles)
+                for action,param in instructions:
+                    try:
+                        if action == "rotate":
+                            arlo.motors.rotate(param)
+                        elif action == "drive":
+                            drive_with_sensors(arlo, param)
+                        else:
+                            raise TypeError()
+                    except AssertionError:
+                        break
                 break
 

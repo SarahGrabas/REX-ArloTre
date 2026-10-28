@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from numpy.typing import NDArray
     from typing import Sequence, Optional, Union
+    _Landmark_ = tuple[int, Union[Sequence[float], NDArray], float]
+    Position = Union[Sequence[float], NDArray]
 
 import numpy as np
 
-_Landmark_ = tuple[int, Union[Sequence[float], NDArray], float]
-Position = Union[Sequence[float], NDArray]
 
 
 class Grid:
@@ -261,7 +261,7 @@ class RRT:
         return simpler_path
     
     @staticmethod
-    def generate_instructions(path: "Sequence[Union[Sequence[float], np.ndarray]]") -> "list[Union[Sequence[float], np.ndarray]]":
+    def generate_instructions(path: "Sequence[Union[Sequence[float], np.ndarray]]") -> list[tuple[str,float]]:
         """Funktion til at køre den simpler path
         Gridsize er længde på x og y akse i meter"""
 
