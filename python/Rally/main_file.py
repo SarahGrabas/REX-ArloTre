@@ -117,7 +117,7 @@ def drive_with_sonars(current_state,arlo,cm, forward=True):
     return meter_driven * 100
 
 
-phases=[1,2,3,4,1]
+phases=[8,9,10,11,8]
 current_goal_index=0
 
 current_state=selflocalize.initialize_mcl(num_particles=1500)
@@ -151,6 +151,7 @@ while True:
     dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
 
     if dist_to_goal <= reach_dist:
+        print("Goal reached")
         current_goal_index += 1
         if current_goal_index == len(phases):
             break  # rally færdigt
@@ -161,7 +162,7 @@ while True:
     path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
         
     if path: #ikke er none
-        
+        print("Path found: ", path)
         number_nodes=len(path) #antal noder fra path vi ønsker at kører til
         RRT.execute_robot_path(current_state,arlo,path,number_nodes)
             #Vi mangler at putte sensors på dette
