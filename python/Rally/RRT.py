@@ -45,8 +45,8 @@ class RRT:
                  start: Position, #start coords
                  goal: Position,  #goal coords
                  map: Grid,
-                 moving_dist_limit: float = 0.5, #Hvad vi max bevæger os ved ny node
-                 grid_cell_size: float = 0.05,
+                 moving_dist_limit: float = 30, #cm #Hvad vi max bevæger os ved ny node
+                 grid_cell_size: float = 2.0, #2cm pr celle
                  goal_sample_rate: int = 5,    #Procentdel på hvor tit en random node skal være goal node
                  max_iter: int = 1000,          #Max forsøg på at finde path
                  ) -> None:
@@ -211,16 +211,32 @@ class RRT:
 
         return simpler_path
 
-def convert_lm_center_to_global():
-    return GOAL, obstacles #skal returnere mål og obstacles i global koordinater
+def convert_lm_center_to_global(landmarks_seen, GOAL_ID):
+    detected_objectIDs = [lm.id for lm in landmarks_seen]
+    detected_center = [lm.center for lm in landmarks_seen]
+    detected_radius = [lm.radius for lm in landmarks_seen]
+
+    for i in range(len(detected_objectIDs)):
+        if detected_objectIDs[i]!=GOAL_ID:
+            None
+            #konverter til globale koordinater
+            
+            
+            #center coord skal være i cm
+            
+    
+    #radius skal være i cm
+    obstacles =(detected_objectIDs,detected_radius) 
+    
+    return obstacles #skal returnere mål og obstacles i global koordinater
 
 def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float], arlo_radius):
     """Funktion til at lave kald til RRT"""
     X_MIN= 0.0
-    X_MAX = (120 + 22 + 400 + 28 + 120) /100
+    X_MAX = (120 + 22 + 400 + 28 + 120) 
     Y_MIN= 0.0
-    Y_MAX = (120 + 22 + 300 + 28 + 120) /100
-    GRID_CELL_SIZE=0.1
+    Y_MAX = (120 + 22 + 300 + 28 + 120) 
+    GRID_CELL_SIZE=2.0
     map = Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
     map.obstacles(obstacles, robot_radius=arlo_radius)
     
@@ -242,7 +258,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
 
 def execute_robot_path(arlo,path: "Sequence[Union[Sequence[float], np.ndarray]]",number_nodes:int) -> "list[Union[Sequence[float], np.ndarray]]":
     """Funktion til at køre den simpler path
-    Gridsize er længde på x og y akse i meter"""
+    Gridsize er længde på x og y akse i cm"""
 
     executed_path = [path[0]]
     
@@ -270,8 +286,8 @@ def execute_robot_path(arlo,path: "Sequence[Union[Sequence[float], np.ndarray]]"
         print("         desired_angle, relative_angle, distance",
               desired_angle, relative_angle, distance)
 
-        arlo.rotate(relative_angle, stop_when_done=False)
-        arlo.drive(distance, stop_when_done=False)
+        arlo.moters.rotate(relative_angle)
+        arlo.motors.drive(distance / 100.0) #drive tager input i meter
 
         current_angle = desired_angle
         

@@ -1,11 +1,10 @@
 import rally
 import RRT
-import RRT_grid
 import selflocalize
 import numpy as np
 
 arlo = rally.Robot()
-arlo_radius =rally.ARLO_RADIUS
+arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
 
 safe_distance_to_lm = 350 #mm
 safe_distance_to_obstacles = 300 #mm
@@ -28,6 +27,7 @@ while True:
     
     valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
+        print("Selflocalizing")
         landmarks_seen = arlo.camera.detect_landmarks()
         
         all_obj_in_frame=selflocalize.data_objects(landmarks_seen)  
@@ -39,10 +39,13 @@ while True:
     
     if phases[current_goal] in all_obj_in_frame: #hvis vi kan se current goal, så laver vi RRT til den
         GOAL_ID=phases[current_goal]
+        GOAL_COORDS=valid_coords[phases[current_goal]]
         
-        GOAL,obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
+        obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
         
-        path=RRT.RRT_call(GOAL, obstacles , current_state["est_pose"], arlo_radius)
+        print(f"RRT TO {GOAL_ID}")
+        path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
+        
         
         if path: #ikke er none
         
@@ -52,6 +55,7 @@ while True:
             #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
         elif path is None:
+            print(f"Could not find path to {GOAL_ID}")
             #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
             
             #skal vi køre lidt i en retning væk fra obstacles og scanner igen

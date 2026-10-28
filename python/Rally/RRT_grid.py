@@ -46,7 +46,7 @@ class Grid:
                 for id, centrum, radius in landmarks_list:
                     X, Y =centrum
                     center=np.array([X,Y])
-                    added_radius = radius + robot_radius + 0.1 #det er landmark radius og robotradius, så vi ikke måler fra centrum men fra siden af de to.
+                    added_radius = radius + robot_radius + 10.0 #det er landmark radius og robotradius, så vi ikke måler fra centrum men fra siden af de to.
                                                                 
                     
                     if np.linalg.norm(centroid - center) <= added_radius:
