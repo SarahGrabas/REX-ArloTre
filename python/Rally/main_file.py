@@ -172,14 +172,14 @@ while True:
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
         if scan_counter%5==0: #Ved hver 5 scan bevæger vi os lidt, hvis vi ikke kan se 2 lms
             sonars_choose_direction(current_state,arlo) #når vi bevæger os, opdateres current state inde i funktionen
-
+        selflocalize.scan_function(current_state,arlo)
+        
         print("Selflocalizing")
         landmarks_seen = arlo.camera.detect_landmarks()
         
         all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
         selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
 
-        selflocalize.scan_function(current_state,arlo)
         
         scan_counter+=1
 
