@@ -2,6 +2,7 @@ import rally
 import RRT
 import selflocalize
 import numpy as np
+import time
 
 arlo = rally.Robot()
 arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
@@ -23,61 +24,94 @@ valid_coords={
 # Y_MIN= 0.0
 # Y_MAX = 590
 
+def drive_with_sonars(cm, forward=True):
+    meters=cm/100
+    
+    start=time.time() 
+    current_time = start
+    
+    while current_time-start<drive_time:
+        left = arlo.sonars.left() < safe_distance_to_obstacles
+        front = arlo.sonars.front()< safe_distance_to_obstacles
+        right = arlo.sonars.right() < safe_distance_to_obstacles
+        #back = arlo.sonars.back() < safe_distance_to_obstacles
+        
+            
+        if left==1 or front==1 or right==1:
+            arlo.motors.stop()
+            break
+        
+        if forward: 
+            drive_time=arlo.motors.drive(meters, True, False, False)
+
+        current_time=time.time() 
+    
+    if current_time-start < drive_time:
+        total_driven_time= current_time-start
+        meter_driven= arlo.motors.meters_pr_sec *total_driven_time
+        
+        return meter_driven *100 #vi returnere cm
+    else:
+        return meters*100 #vi returnere cm
+    
+
 phases=[1,2,3,4,1]
 current_goal_index=0
 
-current_state=selflocalize.initialize_mcl(num_particles=1500)
+#current_state=selflocalize.initialize_mcl(num_particles=1500)
 
-while True:  
+#while True:  
     
-    valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
-    while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
-        print("Selflocalizing")
-        landmarks_seen = arlo.camera.detect_landmarks()
+drive_with_sonars(200, forward=True) #tager input i cm
+    
+    # valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
+    # while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
+    #     print("Selflocalizing")
+    #     landmarks_seen = arlo.camera.detect_landmarks()
         
-        all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
-        selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
+    #     all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
+    #     selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
 
-        selflocalize.scan_function(current_state,arlo)
+    #     selflocalize.scan_function(current_state,arlo)
         
-    arlo.motors.drive(1)
-    print("Driving 1 meter")
-    current_state["movement"]=(100.0,0)
+    # arlo.motors.drive(1)
+    # print("Driving 1 meter")
+    # current_state["movement"]=(100.0,0)
     
     
     
     
-#     if phases[current_goal] in all_obj_in_frame: #hvis vi kan se current goal, så laver vi RRT til den
-#         GOAL_ID=phases[current_goal]
-#         GOAL_COORDS=valid_coords[phases[current_goal]]
+    # if phases[current_goal] in all_obj_in_frame: #hvis vi kan se current goal, så laver vi RRT til den
+    #     GOAL_ID=phases[current_goal]
+    #     GOAL_COORDS=valid_coords[phases[current_goal]]
         
-#         obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
+    #     obstacles=RRT.convert_lm_center_to_global(landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
         
-#         print(f"RRT TO {GOAL_ID}")
-#         path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
+    #     print(f"RRT TO {GOAL_ID}")
+    #     path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
         
         
-#         if path: #ikke er none
+    #     if path: #ikke er none
         
-#             number_nodes=len(path) #antal noder fra path vi ønsker at kører til
-#             RRT.execute_robot_path(arlo,path,number_nodes)
-#             #Vi mangler at putte sensors på dette
-#             #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
+    #         number_nodes=len(path) #antal noder fra path vi ønsker at kører til
+    #         RRT.execute_robot_path(arlo,path,number_nodes)
+    #         #Vi mangler at putte sensors på dette
+    #         #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
-#         elif path is None:
-#             print(f"Could not find path to {GOAL_ID}")
-#             #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
+    #     elif path is None:
+    #         print(f"Could not find path to {GOAL_ID}")
+    #         #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
             
-#             #skal vi køre lidt i en retning væk fra obstacles og scanner igen
+    #         #skal vi køre lidt i en retning væk fra obstacles og scanner igen
         
-#     else: #roter så vi kan se current goal 
-        
-    
-#     if #sensorer registrere noget inden for 40 cm, så stop kørsel, selflocalize og forfra
+    # else: #roter så vi kan se current goal 
         
     
-#     if :#betingelse for at robot har været ved current goal
-#         current_goal+=1
+    # if #sensorer registrere noget inden for 40 cm, så stop kørsel, selflocalize og forfra
+        
+    
+    # if :#betingelse for at robot har været ved current goal
+    #     current_goal+=1
 
 # #Vi skal have en funktion, der beslutter om vi er ved goal ved at bruge sensor og kamera
 
@@ -85,6 +119,7 @@ while True:
 #     left = arlo.read_left_ping_sensor() < safe_distance_to_obstacles
 #     front = arlo.read_front_ping_sensor() < safe_distance_to_obstacles
 #     right = arlo.read_right_ping_sensor() < safe_distance_to_obstacles
+#     back = arlo.read_back_ping_sensor() < safe_distance_to_obstacles
     
 #     vals = (left, front, right)
 #     print(vals)
