@@ -49,9 +49,11 @@ def drive_with_sonars(cm, forward=True):
     if current_time-start < drive_time:
         total_driven_time= current_time-start
         meter_driven= arlo.motors.meters_pr_sec *total_driven_time
+        print("Meters driven:",meter_driven *100)
         
         return meter_driven *100 #vi returnere cm
     else:
+        print("Meters driven:",meters *100)
         return meters*100 #vi returnere cm
     
 
