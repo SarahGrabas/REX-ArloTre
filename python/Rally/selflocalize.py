@@ -46,15 +46,6 @@ def sample_motion_model(particles, movement):
             # Tilfældig fejl på movement
             driven_hat = driven + np.random.normal(0, sigma_driven)
             
-            print(
-                "Motion:",
-                "driven =", driven_hat,
-                "theta =", theta,
-                "theta_deg =", np.rad2deg(theta),
-                "dx =", driven_hat * np.cos(theta),
-                "dy =", driven_hat * np.sin(theta)
-            )
-            
             # Opdater position
             x_new = x + driven_hat * np.cos(theta)
             y_new = y + driven_hat * np.sin(theta)
@@ -304,7 +295,7 @@ def initialize_mcl(num_particles):
     state = {
         "particles": particles,
         "est_pose": est_pose, #Estimate for robot position
-        "movement": (0,0), #(cm for- or backward, degree turned (left positive))
+        "movement": [0,0], #(cm for- or backward, degree turned (left positive))
 
         #Kan udkommenteres hvis vi ikke vil gemme billed
         "world": np.zeros((500, 500, 3), dtype=np.uint8),
@@ -322,7 +313,7 @@ def scan_function(state, robot_controller):
     degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
     robot_controller.motors.rotate(degree)
     time.sleep(1.0)
-    state["movement"]=(0,degree) #Update movement state
+    state["movement"]=[0,degree] #Update movement state
 
 
 
@@ -343,7 +334,7 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     # cv2.imwrite("mcl_world.png", state["world"])
     
     # Bevægelsen er nu blevet brugt så vi nulstiller movement
-    state["movement"] = (0, 0)
+    state["movement"] = [0, 0]
 
 def data_objects(landmarks_seen, valid_lm_seen: list, valid_objects:list): 
     """Funktion til at trække de observations data vi skal bruge i selflocalization"""
