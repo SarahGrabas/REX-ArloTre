@@ -165,7 +165,7 @@ current_state=selflocalize.initialize_mcl(num_particles=1500)
 while True:  
     
     valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
-    scan_counter=0
+    scan_counter=1
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
         if scan_counter%5==0: #Ved hver 5 scan bevæger vi os lidt, hvis vi ikke kan se 2 lms
             sonars_choose_direction(current_state,arlo) #når vi bevæger os, opdateres current state inde i funktionen
@@ -201,12 +201,13 @@ while True:
     obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
         
     print(f"RRT TO {GOAL_ID}")
+    
     path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
         
     if path: #ikke er none
         print("Path found: ", path)
         number_nodes=len(path) #antal noder fra path vi ønsker at kører til
-        RRT.execute_robot_path(current_state,arlo,path,number_nodes)
+        execute_robot_path(current_state,arlo,path,number_nodes)
             #Vi mangler at putte sensors på dette
             #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
