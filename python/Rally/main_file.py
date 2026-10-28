@@ -164,8 +164,17 @@ while True:
         sonars_choose_direction(current_state,arlo)
         
     
-    if :#betingelse for at robot har været ved current goal
-        current_goal+=1
+    goal_buffer = 0.30 #m
+    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
+    reach_dist = (lm_radius + rally.ARLO_RADIUS + goal_buffer) * 100 #fra meter til cm
+
+    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
+
+    if dist_to_goal <= reach_dist:
+        current_goal_index += 1
+        if current_goal_index == len(phases):
+            break  # rally færdigt
+
 
 #Vi skal have en funktion, der beslutter om vi er ved goal ved at bruge sensor og kamera
 
