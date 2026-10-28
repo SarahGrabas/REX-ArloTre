@@ -118,6 +118,10 @@ def drive_with_sonars(current_state,arlo,cm, forward=True):
 def execute_robot_path(current_state,arlo,path,number_nodes:int):
     """Funktion til at køre den simpler path
     Gridsize er længde på x og y akse i cm"""
+    
+    #Robottens orientering
+    theta= current_state["est_pose"].getTheta()
+    current_angle = np.degrees(theta)
 
     executed_path = [path[0]]
     
@@ -126,7 +130,6 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
     if number_nodes > path_length: 
         number_nodes=path_length
 
-    current_angle = 0  # Robotten starter med at pege ligeud
     
     for i in range(number_nodes - 1): #Vi kører kun til antal noder angivet
 
