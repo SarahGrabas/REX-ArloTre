@@ -542,8 +542,8 @@ if __name__ == "__main__":
     with Robot() as arlo:
         arlo.calibrate_velocities()
         sleep(1)
-        arlo.motors.rotate(45)
-        sleep(1)
-        arlo.motors.rotate(45)
+        arlo.motors.rotate(90)
         sleep(1)
         arlo.motors.rotate(90)
+        sleep(1)
+        arlo.motors.rotate(180)
