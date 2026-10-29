@@ -172,16 +172,55 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
     return executed_path, full_route
 
 def goal_check(current_state,GOAL_ID, GOAL_COORDS):
-    #Check if we are at goal
-    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
-    reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
-
-    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
-
-    reached=False
-    if dist_to_goal <= reach_dist:
         reached=True
-    return reached
+    #Roter til goal 
+        current_x, current_y, current_theta=(current_state["est_pose"].getX(),current_state["est_pose"].getY(), current_state["est_pose"].getTheta())
+        goal_x,goal_y =GOAL_COORDS
+        
+        dx = goal_x - current_x
+        dy = goal_y - current_y
+        current_angle =np.degrees(current_theta)
+
+        # Vinkel fra robotten til målet
+        desired_angle = np.degrees(np.arctan2(dy, dx)) % 360
+
+        relative_angle = (desired_angle - current_theta + 180) % 360 - 180
+        
+        arlo.motors.rotate(relative_angle)
+        current_state["movement"][1]+=relative_angle
+        
+        landmarks_seen = arlo.camera.detect_landmarks(unique=True)
+        ids, distances, angles = landmarks_seen
+        
+        if GOAL_ID in ids:
+            i = ids.index(GOAL_ID)
+            angle_deg = np.degrees(angles[i])
+            print("Goal angle:", angle_deg)
+            if abs(angle_deg) < 20:
+                print("Goal is within 10 degrees")
+                front = arlo.sonars.front()
+                if front < 0.4: #m
+                    reached=True
+        return reached
+                
+        
+        
+        
+        #detect landmarks,
+        #if goal in detected landmark er vinkle til goal inden for en givet range
+            #Hvis ja, så brug front sensor til at vurderer om vi er tættere på en 40 cm.   
+
+# def goal_check(current_state,GOAL_ID, GOAL_COORDS):
+#     #Check if we are at goal
+#     lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
+#     reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
+
+#     dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
+
+#     reached=False
+#     if dist_to_goal <= reach_dist:
+#         reached=True
+#     return reached
 
 current_state=selflocalize.initialize_mcl(num_particles=1500)
 
