@@ -145,9 +145,10 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
 
         distance = np.sqrt(dx**2 + dy**2)
 
-        desired_angle =  -np.degrees(np.arctan2(dx, dy))#np.degrees(np.arctan2(dy, dx))
+        desired_angle = np.degrees(np.arctan2(dy, dx)) % 360 #-np.degrees(np.arctan2(dx, dy))#np.degrees(np.arctan2(dy, dx))
 
-        relative_angle = desired_angle - current_angle
+        relative_angle = (desired_angle - current_angle + 180) % 360 - 180 #korteste rotationsvej
+        #relative_angle = desired_angle - current_angle
         print("desired_angle: ", desired_angle)
         print("relative_angle: ", relative_angle)
         print("distance: ", distance)
