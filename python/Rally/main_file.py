@@ -192,14 +192,8 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         
         landmarks_seen = arlo.camera.detect_landmarks(unique=True)
         ids = [lm.id for lm in landmarks_seen]
-        angles = [lm.angle for lm in landmarks_seen]
         
         if GOAL_ID in ids:
-            i = ids.index(GOAL_ID)
-            angle_deg = angles[i]
-            print("Goal angle:", angle_deg)
-            if abs(angle_deg) < 20:
-                print("Goal is within 20 degrees")
                 front = arlo.sonars.front()
                 if front < 0.4: #m
                     reached=True
@@ -213,18 +207,6 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         #detect landmarks,
         #if goal in detected landmark er vinkle til goal inden for en givet range
             #Hvis ja, så brug front sensor til at vurderer om vi er tættere på en 40 cm.   
-
-# def goal_check(current_state,GOAL_ID, GOAL_COORDS):
-#     #Check if we are at goal
-#     lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
-#     reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
-
-#     dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
-
-#     reached=False
-#     if dist_to_goal <= reach_dist:
-#         reached=True
-#     return reached
 
 arlo.calibrate_velocities()
 
