@@ -184,7 +184,7 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         # Vinkel fra robotten til målet
         desired_angle = np.degrees(np.arctan2(dy, dx)) % 360
 
-        relative_angle = (desired_angle - current_theta + 180) % 360 - 180
+        relative_angle = (desired_angle - current_angle + 180) % 360 - 180
         
         arlo.motors.rotate(relative_angle)
         current_state["movement"][1]+=relative_angle
