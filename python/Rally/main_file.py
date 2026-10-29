@@ -244,7 +244,7 @@ while True:
     GOAL_ID=phases[current_goal_index]
     GOAL_COORDS=valid_coords[phases[current_goal_index]]
     
-    
+    print("checking for goal")
     goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
     if goal_checking:
         print("Goal reached")
