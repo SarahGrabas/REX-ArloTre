@@ -27,7 +27,7 @@ current_goal_index=0
 # Y_MIN= 0.0
 # Y_MAX = 590
 
-def sonars_choose_direction(current_state,arlo):
+def sonars_choose_direction(current_state,arlo, distance):
     left = arlo.sonars.left()
     front = arlo.sonars.front()
     right = arlo.sonars.right()
@@ -70,7 +70,7 @@ def sonars_choose_direction(current_state,arlo):
     # Hvis front er bedst, skal vi ikke dreje
 
     # Kør 30 cm
-    drive_with_sonars(current_state,arlo,50, True)
+    drive_with_sonars(current_state,arlo,distance, True)
 
     return direction
 
@@ -223,7 +223,7 @@ while True:
     scan_counter=1
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
         if scan_counter%5==0: #Ved hver 5 scan bevæger vi os lidt, hvis vi ikke kan se 2 lms
-            sonars_choose_direction(current_state,arlo) #når vi bevæger os, opdateres current state inde i funktionen
+            sonars_choose_direction(current_state,arlo,50) #når vi bevæger os, opdateres current state inde i funktionen
             goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
             if goal_checking:
                 print("Goal reached")
@@ -281,7 +281,7 @@ while True:
             break  # rally færdigt
         
         elif full_route==False:
-            sonars_choose_direction(current_state,arlo)
+            sonars_choose_direction(current_state,arlo,35)
             goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
             if goal_checking:
                 print("Goal reached")
@@ -301,7 +301,7 @@ while True:
             #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
             
         #skal vi køre lidt i en retning væk fra obstacles og scanner igen
-        sonars_choose_direction(current_state,arlo)
+        sonars_choose_direction(current_state,arlo,50)
         goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
         if goal_checking:
                 print("Goal reached")
