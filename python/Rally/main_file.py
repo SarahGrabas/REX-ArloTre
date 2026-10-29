@@ -251,6 +251,7 @@ while True:
         current_goal_index += 1
         GOAL_ID=phases[current_goal_index]
         GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        goal_checking=False
         
         if current_goal_index == len(phases):
             break  # rally færdigt
