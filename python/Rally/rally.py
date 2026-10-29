@@ -525,11 +525,13 @@ class Robot:
             for _id in intersection
         ]
         avg_degs_diff = np.mean(angle_diffs)
+        debug(f"Average landmark angle difference: {avg_degs_diff}")
         # calculating velocities : velocity = distance / time
         actual_angle_sum = angle_sum - avg_degs_diff if assume_under_rotation else angle_sum
         degrees_pr_sec = actual_angle_sum / (
             angle_sum / self.motors.degrees_pr_second
         )
+        debug(f"Calibrated degrees per second: {degrees_pr_sec}")
         rads_pr_sec = degrees_pr_sec * PI/180
         # update velocities
         self.motors.degrees_pr_second = degrees_pr_sec
