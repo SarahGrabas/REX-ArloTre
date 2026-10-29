@@ -7,7 +7,7 @@ import time
 arlo = rally.Robot()
 arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
 
-safe_distance_to_lm = 0.3 #m
+safe_distance_to_lm = 0.4 #m
 safe_distance_to_obstacles = 0.3 #m
 
 valid_objects=[8,9,10,11]
