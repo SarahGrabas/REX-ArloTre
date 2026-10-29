@@ -202,6 +202,8 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
                 front = arlo.sonars.front()
                 if front < 0.4: #m
                     reached=True
+        else: print("goal not seen")
+        
         return reached
                 
         
