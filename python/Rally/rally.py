@@ -530,7 +530,7 @@ class Robot:
         rads_pr_sec = degrees_pr_sec * PI/180
         # update velocities
         self.motors.degrees_pr_second = degrees_pr_sec
-        self.motors.meters_pr_sec = Robot._meters_pr_sec(rads_pr_sec)
+        # self.motors.meters_pr_sec = Robot._meters_pr_sec(rads_pr_sec)
 
 
 
