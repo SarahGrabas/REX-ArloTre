@@ -223,6 +223,9 @@ while True:
         print("Path found: ", path)
         number_nodes=len(path) #antal noder fra path vi ønsker at kører til
         execute_robot_path(current_state,arlo,path,number_nodes)
+        #Vi opdatere particler uden objekter, da vi har kørt, så der bliver tjekket om denne position er inden for mål
+        selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+        
             #Vi mangler at putte sensors på dette
             #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
