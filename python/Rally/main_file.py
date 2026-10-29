@@ -18,7 +18,7 @@ valid_coords={
     11: (531 , 431)
 }
 
-phases=[8,9,10,11,8,8]
+phases=[8,9,10,11,8]
 current_goal_index=0
 
 #MAP
@@ -188,7 +188,7 @@ while True:
         GOAL_ID=phases[current_goal_index]
         GOAL_COORDS=valid_coords[phases[current_goal_index]] 
         
-        if current_goal_index == len(phases)-1:
+        if current_goal_index == len(phases):
             break  # rally færdigt
     
     
@@ -202,7 +202,7 @@ while True:
             selflocalize.scan_function(current_state,arlo)
         
         print("Selflocalizing")
-        landmarks_seen = arlo.camera.detect_landmarks()
+        landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
         
         all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
         selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)

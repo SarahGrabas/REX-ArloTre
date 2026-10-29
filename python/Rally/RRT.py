@@ -277,7 +277,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     X_MAX = (120 + 22 + 400 + 28 + 120) 
     Y_MIN= 0.0
     Y_MAX = (120 + 22 + 300 + 28 + 120) 
-    GRID_CELL_SIZE=2.0
+    GRID_CELL_SIZE=5.0 #cm
     map = Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
     map.obstacles(obstacles, robot_radius=arlo_radius)
     
