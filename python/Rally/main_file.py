@@ -232,69 +232,11 @@ current_state=selflocalize.initialize_mcl(num_particles=1500)
 
 
 while True:  
-    scan_counter=1
-    valid_lm_seen =[]
-    
-    
-    while scan_counter<6:
-            selflocalize.scan_function(current_state,arlo)
-        
-            print("Selflocalizing")
-            landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
-        
-            all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
-            selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
-            scan_counter+=1
-            
-    GOAL_ID=phases[current_goal_index]
-    GOAL_COORDS=valid_coords[phases[current_goal_index]]
-    
-    print("checking for goal")
-    goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
-    if goal_checking:
-        print("Goal reached")
-        current_goal_index += 1
-        GOAL_ID=phases[current_goal_index]
-        GOAL_COORDS=valid_coords[phases[current_goal_index]] 
-        goal_checking=False
-        
-        if current_goal_index == len(phases):
-            break  # rally færdigt
-    
-    
-    # #Selflocalization
-    # valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
     # scan_counter=1
-    # while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
-    #     if scan_counter%5==0: #Ved hver 5 scan bevæger vi os lidt, hvis vi ikke kan se 2 lms
-    #         sonars_choose_direction(current_state,arlo) #når vi bevæger os, opdateres current state inde i funktionen
-    #     if scan_counter !=1:
-    #         selflocalize.scan_function(current_state,arlo)
-        
-    #     print("Selflocalizing")
-    #     landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
-        
-    #     all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
-    #     selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
-        
-    #     scan_counter+=1
-
-    # #Current estimated robot pose 
-    # (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-        
-    # obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
-        
-    # print(f"RRT TO ID: {GOAL_ID}")
+    # valid_lm_seen =[]
     
-    # path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
-        
-    # if path: #ikke er none
-    #     print("Path found: ", path)
-    #     number_nodes=len(path) #antal noder fra path vi ønsker at kører til
-    #     _, full_route=execute_robot_path(current_state,arlo,path,number_nodes)
-    #     #Vi opdatere particler uden objekter, da vi har kørt, så der bliver tjekket om denne position er inden for mål
-    #     selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
-    #     while scan_counter<6:
+    
+    # while scan_counter<6:
     #         selflocalize.scan_function(current_state,arlo)
         
     #         print("Selflocalizing")
@@ -303,29 +245,87 @@ while True:
     #         all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
     #         selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
     #         scan_counter+=1
-        
-    #     goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
-    #     if goal_checking:
-    #         print("Goal reached")
-    #         current_goal_index += 1
-    #         GOAL_ID=phases[current_goal_index]
-    #         GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+            
+    GOAL_ID=phases[current_goal_index]
+    GOAL_COORDS=valid_coords[phases[current_goal_index]]
+    
+    # print("checking for goal")
+    # goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+    # if goal_checking:
+    #     print("Goal reached")
+    #     current_goal_index += 1
+    #     GOAL_ID=phases[current_goal_index]
+    #     GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+    #     goal_checking=False
         
     #     if current_goal_index == len(phases):
     #         break  # rally færdigt
+    
+    
+    #Selflocalization
+    valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
+    scan_counter=1
+    while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
+        if scan_counter%5==0: #Ved hver 5 scan bevæger vi os lidt, hvis vi ikke kan se 2 lms
+            sonars_choose_direction(current_state,arlo) #når vi bevæger os, opdateres current state inde i funktionen
+        if scan_counter !=1:
+            selflocalize.scan_function(current_state,arlo)
         
-    #     elif full_route==False:
-    #         sonars_choose_direction(current_state,arlo)
+        print("Selflocalizing")
+        landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
+        
+        all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
+        selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
+        
+        scan_counter+=1
+
+    #Current estimated robot pose 
+    (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
+        
+    obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
+        
+    print(f"RRT TO ID: {GOAL_ID}")
+    
+    path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
+        
+    if path: #ikke er none
+        print("Path found: ", path)
+        number_nodes=len(path) #antal noder fra path vi ønsker at kører til
+        _, full_route=execute_robot_path(current_state,arlo,path,number_nodes)
+        #Vi opdatere particler uden objekter, da vi har kørt, så der bliver tjekket om denne position er inden for mål
+        selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+        while scan_counter<6:
+            selflocalize.scan_function(current_state,arlo)
+        
+            print("Selflocalizing")
+            landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
+        
+            all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
+            selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
+            scan_counter+=1
+        
+        goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+        if goal_checking:
+            print("Goal reached")
+            current_goal_index += 1
+            GOAL_ID=phases[current_goal_index]
+            GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        
+        if current_goal_index == len(phases):
+            break  # rally færdigt
+        
+        elif full_route==False:
+            sonars_choose_direction(current_state,arlo)
             
         
-    #         #Vi mangler at putte sensors på dette
-    #         #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
+            #Vi mangler at putte sensors på dette
+            #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
         
-    # elif path is None:
-    #     print(f"Could not find path to {GOAL_ID}")
-    #         #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
+    elif path is None:
+        print(f"Could not find path to {GOAL_ID}")
+            #Vi skal lave en funktion, der bruger sensorerne til at køre lidt væk fra obstacles, så vi kan scanne igen.
             
-    #     #skal vi køre lidt i en retning væk fra obstacles og scanner igen
-    #     sonars_choose_direction(current_state,arlo)
+        #skal vi køre lidt i en retning væk fra obstacles og scanner igen
+        sonars_choose_direction(current_state,arlo)
         
 
