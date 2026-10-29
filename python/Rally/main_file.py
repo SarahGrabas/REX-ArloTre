@@ -227,6 +227,9 @@ current_state=selflocalize.initialize_mcl(num_particles=1500)
 
 
 while True:  
+    scan_counter=1
+    
+    
     while scan_counter<6:
             selflocalize.scan_function(current_state,arlo)
         
