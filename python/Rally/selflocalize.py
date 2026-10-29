@@ -232,20 +232,21 @@ def mcl_step(state: dict,z_t: tuple,landmarks: dict[int, tuple:float]):
     Vi opdaterer partikel vægt og resampler hvis vi har landmark i frame.
     Dvs at vi kun gætter på robottens position når vi faktisk har et landmark i framen. 
      """
-    objectIDs, dists, angles = z_t #Observations we use to update weights
     particles = state["particles"]
     driven, degree =state["movement"]
 
     #Hvis vi enten har kørt eller drejet flytte partikler med
     if driven != 0.0 or degree != 0.0:
         sample_motion_model(particles, state["movement"])
- 
-    if objectIDs: 
-        
-        update_particle_weights(particles, objectIDs, dists, angles, landmarks)
-
     
-        particles = resample_particles(particles)
+    if z_t is not None:
+        objectIDs, dists, angles = z_t #Observations we use to update weights
+        if objectIDs: 
+            
+            update_particle_weights(particles, objectIDs, dists, angles, landmarks)
+
+        
+            particles = resample_particles(particles)
 
 
     return particles
@@ -319,8 +320,10 @@ def scan_function(state, robot_controller):
 #Udfører én mcl update ud fra de objecter der detectes i frame og de objecter der ønskes localisering ud fra.
 def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict):
     #MCL step
-    z_t = object_filtering(detected_obj,VALID_IDS)
-    print("OBJECTs for selflocalizing:", z_t)
+    if detected_obj is not None:
+        z_t = object_filtering(detected_obj,VALID_IDS)
+        print("OBJECTs for selflocalizing:", z_t)
+    else: z_t=None
     
     state["particles"] = mcl_step(state, z_t, landmarks)
     #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
