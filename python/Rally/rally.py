@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 ##### LIBARIES #####
 
-from time import sleep
+from time import sleep, perf_counter
 import numpy as np
 from math import sqrt
 from debug import debug
@@ -501,8 +501,10 @@ class Robot:
         landmark_set = {lm.id for lm in landmarks}
         landmark_dict = dict((lm.id, lm) for lm in landmarks)
         # applying movement to be calibrated
-        angle_sum = 3*360
-        self.motors.rotate(angle_sum)
+        angle_sum = 2*8*45
+        for _ in range(2*8*45):
+            self.motors.rotate(45)
+            sleep(0.5)
         # detecting previously seen landmarks
         _landmarks = self.camera.detect_landmarks()
         degs = Camera.FOV * 2/3
