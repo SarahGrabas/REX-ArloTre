@@ -172,7 +172,7 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
     return executed_path, full_route
 
 def goal_check(current_state,GOAL_ID, GOAL_COORDS):
-        reached=True
+        reached=False
     #Roter til goal 
         current_x, current_y, current_theta=(current_state["est_pose"].getX(),current_state["est_pose"].getY(), current_state["est_pose"].getTheta())
         goal_x,goal_y =GOAL_COORDS
