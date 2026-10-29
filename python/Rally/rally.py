@@ -540,6 +540,10 @@ class Robot:
 
 if __name__ == "__main__":
     with Robot() as arlo:
-        arlo.camera.detect_landmarks()
-        arlo.sonars.front()
+        arlo.calibrate_velocities()
+        sleep(1)
+        arlo.motors.rotate(45)
+        sleep(1)
+        arlo.motors.rotate(45)
+        sleep(1)
         arlo.motors.rotate(90)
