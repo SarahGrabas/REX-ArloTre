@@ -228,6 +228,7 @@ current_state=selflocalize.initialize_mcl(num_particles=1500)
 
 while True:  
     scan_counter=1
+    valid_lm_seen =[]
     
     
     while scan_counter<6:
