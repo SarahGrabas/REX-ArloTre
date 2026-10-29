@@ -190,7 +190,8 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         current_state["movement"][1]+=relative_angle
         
         landmarks_seen = arlo.camera.detect_landmarks(unique=True)
-        ids, distances, angles = landmarks_seen
+        ids = [lm.id for lm in landmarks_seen]
+        angles = [lm.angle for lm in landmarks_seen]
         
         if GOAL_ID in ids:
             i = ids.index(GOAL_ID)
@@ -231,15 +232,15 @@ while True:
     GOAL_COORDS=valid_coords[phases[current_goal_index]]
     
     
-    goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
-    if goal_checking:
-        print("Goal reached")
-        current_goal_index += 1
-        GOAL_ID=phases[current_goal_index]
-        GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+    # goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+    # if goal_checking:
+    #     print("Goal reached")
+    #     current_goal_index += 1
+    #     GOAL_ID=phases[current_goal_index]
+    #     GOAL_COORDS=valid_coords[phases[current_goal_index]] 
         
-        if current_goal_index == len(phases):
-            break  # rally færdigt
+    #     if current_goal_index == len(phases):
+    #         break  # rally færdigt
     
     
     #Selflocalization
