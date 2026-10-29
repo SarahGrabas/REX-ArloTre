@@ -171,10 +171,17 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
     arlo.motors.stop()
     return executed_path, full_route
 
+def goal_check(current_state,GOAL_ID, GOAL_COORDS):
+    #Check if we are at goal
+    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
+    reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
 
+    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
 
-
-
+    reached=False
+    if dist_to_goal <= reach_dist:
+        reached=True
+    return reached
 
 current_state=selflocalize.initialize_mcl(num_particles=1500)
 
@@ -184,13 +191,9 @@ while True:
     GOAL_ID=phases[current_goal_index]
     GOAL_COORDS=valid_coords[phases[current_goal_index]]
     
-    #Check if we are at goal
-    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
-    reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
-
-    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
-
-    if dist_to_goal <= reach_dist:
+    
+    goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+    if goal_checking:
         print("Goal reached")
         current_goal_index += 1
         GOAL_ID=phases[current_goal_index]
@@ -232,7 +235,17 @@ while True:
         _, full_route=execute_robot_path(current_state,arlo,path,number_nodes)
         #Vi opdatere particler uden objekter, da vi har kørt, så der bliver tjekket om denne position er inden for mål
         selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
-        if full_route==False:
+        goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+        if goal_checking:
+            print("Goal reached")
+            current_goal_index += 1
+            GOAL_ID=phases[current_goal_index]
+            GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        
+        if current_goal_index == len(phases):
+            break  # rally færdigt
+        
+        elif full_route==False:
             sonars_choose_direction(current_state,arlo)
             
         
