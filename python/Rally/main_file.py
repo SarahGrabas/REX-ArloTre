@@ -188,6 +188,7 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         
         arlo.motors.rotate(relative_angle)
         current_state["movement"][1]+=relative_angle
+        time.sleep(0.5)
         
         landmarks_seen = arlo.camera.detect_landmarks(unique=True)
         ids = [lm.id for lm in landmarks_seen]
