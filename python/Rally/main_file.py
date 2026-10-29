@@ -235,6 +235,16 @@ while True:
         _, full_route=execute_robot_path(current_state,arlo,path,number_nodes)
         #Vi opdatere particler uden objekter, da vi har kørt, så der bliver tjekket om denne position er inden for mål
         selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+        while scan_counter<6:
+            selflocalize.scan_function(current_state,arlo)
+        
+            print("Selflocalizing")
+            landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
+        
+            all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
+            selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
+            scan_counter+=1
+        
         goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
         if goal_checking:
             print("Goal reached")
