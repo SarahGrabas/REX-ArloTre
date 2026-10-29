@@ -490,9 +490,13 @@ class Robot:
     def _meters_pr_sec(rads_pr_sec:float):
         return rads_pr_sec * WHEEL_2_WHEEL_DIST/2
 
-    def calibrate_velocities(self):
+
+    def calibrate_velocities(self, assume_under_rotation=True):
         """
         Requires at least one detectable landmark to work.
+
+        If assume_under_rotation is True, account for the robot rotating less
+        than the commanded angle during calibration.
         """
         landmarks = self.camera.detect_landmarks()
         assert len(landmarks) > 0, "Error: Expected at least one detectable landmark, but detected 0!"
@@ -522,16 +526,14 @@ class Robot:
         ]
         avg_degs_diff = np.mean(angle_diffs)
         # calculating velocities : velocity = distance / time
-        degrees_pr_sec = (
-            angle_sum - avg_degs_diff
-        ) / (
+        actual_angle_sum = angle_sum - avg_degs_diff if assume_under_rotation else angle_sum
+        degrees_pr_sec = actual_angle_sum / (
             angle_sum / self.motors.degrees_pr_second
         )
         rads_pr_sec = degrees_pr_sec * PI/180
         # update velocities
         self.motors.degrees_pr_second = degrees_pr_sec
         # self.motors.meters_pr_sec = Robot._meters_pr_sec(rads_pr_sec)
-
 
 
 
