@@ -195,7 +195,7 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         
         if GOAL_ID in ids:
             i = ids.index(GOAL_ID)
-            angle_deg = np.degrees(angles[i])
+            angle_deg = angles[i]
             print("Goal angle:", angle_deg)
             if abs(angle_deg) < 20:
                 print("Goal is within 20 degrees")
