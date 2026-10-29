@@ -214,35 +214,9 @@ current_state=selflocalize.initialize_mcl(num_particles=1500)
 
 
 while True:  
-    # scan_counter=1
-    # valid_lm_seen =[]
-    
-    
-    # while scan_counter<6:
-    #         selflocalize.scan_function(current_state,arlo)
-        
-    #         print("Selflocalizing")
-    #         landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
-        
-    #         all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
-    #         selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
-    #         scan_counter+=1
-            
+
     GOAL_ID=phases[current_goal_index]
     GOAL_COORDS=valid_coords[phases[current_goal_index]]
-    
-    # print("checking for goal")
-    # goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
-    # if goal_checking:
-    #     print("Goal reached")
-    #     current_goal_index += 1
-    #     GOAL_ID=phases[current_goal_index]
-    #     GOAL_COORDS=valid_coords[phases[current_goal_index]] 
-    #     goal_checking=False
-        
-    #     if current_goal_index == len(phases):
-    #         break  # rally færdigt
-    
     
     #Selflocalization
     valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
@@ -250,6 +224,16 @@ while True:
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
         if scan_counter%5==0: #Ved hver 5 scan bevæger vi os lidt, hvis vi ikke kan se 2 lms
             sonars_choose_direction(current_state,arlo) #når vi bevæger os, opdateres current state inde i funktionen
+            goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+            if goal_checking:
+                print("Goal reached")
+                current_goal_index += 1
+                GOAL_ID=phases[current_goal_index]
+                GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        
+            if current_goal_index == len(phases):
+                break  # rally færdigt
+            
         if scan_counter !=1:
             selflocalize.scan_function(current_state,arlo)
         
@@ -298,6 +282,15 @@ while True:
         
         elif full_route==False:
             sonars_choose_direction(current_state,arlo)
+            goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+            if goal_checking:
+                print("Goal reached")
+                current_goal_index += 1
+                GOAL_ID=phases[current_goal_index]
+                GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        
+            if current_goal_index == len(phases):
+                break  # rally færdigt
             
         
             #Vi mangler at putte sensors på dette
@@ -309,5 +302,14 @@ while True:
             
         #skal vi køre lidt i en retning væk fra obstacles og scanner igen
         sonars_choose_direction(current_state,arlo)
+        goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+        if goal_checking:
+                print("Goal reached")
+                current_goal_index += 1
+                GOAL_ID=phases[current_goal_index]
+                GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+            
+        if current_goal_index == len(phases):
+                break  # rally færdigt
         
 
