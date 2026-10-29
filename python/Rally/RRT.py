@@ -45,7 +45,7 @@ class RRT:
                  start: Position, #start coords
                  goal: Position,  #goal coords
                  map: Grid,
-                 moving_dist_limit: float = 50, #cm #Hvad vi max bevæger os ved ny node
+                 moving_dist_limit: float = 100, #cm #Hvad vi max bevæger os ved ny node
                  grid_cell_size: float = 10.0, #2cm pr celle
                  goal_sample_rate: int = 5,    #Procentdel på hvor tit en random node skal være goal node
                  max_iter: int = 1000,          #Max forsøg på at finde path
@@ -277,7 +277,7 @@ def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],fl
     X_MAX = (120 + 22 + 400 + 28 + 120) 
     Y_MIN= 0.0
     Y_MAX = (120 + 22 + 300 + 28 + 120) 
-    GRID_CELL_SIZE=5.0 #cm
+    GRID_CELL_SIZE=10.0 #cm
     map = Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
     map.obstacles(obstacles, robot_radius=arlo_radius)
     
