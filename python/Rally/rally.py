@@ -502,7 +502,7 @@ class Robot:
         landmark_dict = dict((lm.id, lm) for lm in landmarks)
         # applying movement to be calibrated
         angle_sum = 2*8*45
-        for _ in range(2*8*45):
+        for _ in range(2*8):
             self.motors.rotate(45)
             sleep(0.5)
         # detecting previously seen landmarks
