@@ -525,32 +525,34 @@ class Robot:
             for _id in intersection
         ]
         avg_degs_diff = np.mean(angle_diffs)
+        # calculating velocities : velocity = distance / time
+        actual_angle_sum = angle_sum - avg_degs_diff if assume_under_rotation else angle_sum
+        degrees_pr_sec = actual_angle_sum / (
+            angle_sum / self.motors.degrees_pr_second
+        )
+        rads_pr_sec = degrees_pr_sec * PI/180
+        # update velocities
+        self.motors.degrees_pr_second = degrees_pr_sec
+        # self.motors.meters_pr_sec = Robot._meters_pr_sec(rads_pr_sec)
+
+        avg_degs_diff = np.mean(angle_diffs)
         debug(f"Average landmark angle difference: {avg_degs_diff}")
 
-        # Estimate the actual rotation, accounting for angle wrapping.
-        actual_angle_sum = -avg_degs_diff
-
-        actual_angle_sum += 360 * round(
-            (angle_sum - actual_angle_sum) / 360
+        actual_angle_sum = (
+            angle_sum - avg_degs_diff
+            if assume_under_rotation
+            else angle_sum
         )
 
-        if not assume_under_rotation:
-            actual_angle_sum = angle_sum
-
-        # Calculate calibrated angular velocity.
-        degrees_pr_sec = (
-            actual_angle_sum
-        ) / (
-            angle_sum / self.motors.degrees_pr_second
+        degrees_pr_sec = self.motors.degrees_pr_second * (
+            actual_angle_sum / angle_sum
         )
         debug(f"Calibrated degrees per second: {degrees_pr_sec}")
 
         rads_pr_sec = degrees_pr_sec * PI/180
 
-        # Update velocities.
         self.motors.degrees_pr_second = degrees_pr_sec
         # self.motors.meters_pr_sec = Robot._meters_pr_sec(rads_pr_sec)
-
 
 
 
