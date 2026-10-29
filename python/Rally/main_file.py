@@ -227,7 +227,16 @@ current_state=selflocalize.initialize_mcl(num_particles=1500)
 
 
 while True:  
-    
+    while scan_counter<6:
+            selflocalize.scan_function(current_state,arlo)
+        
+            print("Selflocalizing")
+            landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
+        
+            all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
+            selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
+            scan_counter+=1
+            
     GOAL_ID=phases[current_goal_index]
     GOAL_COORDS=valid_coords[phases[current_goal_index]]
     
@@ -241,7 +250,7 @@ while True:
         
         if current_goal_index == len(phases):
             break  # rally færdigt
-    
+    break
     
     #Selflocalization
     valid_lm_seen =[] #Vi nulstiller efter selflocalization loop
