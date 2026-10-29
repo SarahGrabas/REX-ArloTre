@@ -80,6 +80,7 @@ def drive_with_sonars(current_state,arlo,cm, forward=True):
 
     start = time.time()
 
+    full_route=True #Er robot blevet afbrudt undervejs
     # Beregn hvor lang tid det burde tage
     drive_time = meters / arlo.motors.meters_pr_sec
 
@@ -101,6 +102,7 @@ def drive_with_sonars(current_state,arlo,cm, forward=True):
         # Stop hvis der er en forhindring
         if left or front or right:
             arlo.motors.stop()
+            full_route=False
             break
 
         # Stop når den ønskede tid er gået
@@ -116,7 +118,7 @@ def drive_with_sonars(current_state,arlo,cm, forward=True):
     print("Centimeters driven:", meter_driven * 100)
     current_state["movement"][0]+=meter_driven * 100
 
-    return meter_driven * 100
+    return meter_driven * 100, full_route
 
 def execute_robot_path(current_state,arlo,path,number_nodes:int):
     """Funktion til at køre den simpler path
@@ -155,14 +157,19 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
 
         arlo.motors.rotate(relative_angle)
         current_state["movement"][1]+=relative_angle
-        drive_with_sonars(current_state,arlo,distance) #input i cm
-
+        _, full_route=drive_with_sonars(current_state,arlo,distance) #input i cm
+        
         current_angle = desired_angle
         
         executed_path.append([x2, y2])
+        
+        if full_route==False:
+            break
+
+        
 
     arlo.motors.stop()
-    return executed_path
+    return executed_path, full_route
 
 
 
@@ -222,9 +229,12 @@ while True:
     if path: #ikke er none
         print("Path found: ", path)
         number_nodes=len(path) #antal noder fra path vi ønsker at kører til
-        execute_robot_path(current_state,arlo,path,number_nodes)
+        _, full_route=execute_robot_path(current_state,arlo,path,number_nodes)
         #Vi opdatere particler uden objekter, da vi har kørt, så der bliver tjekket om denne position er inden for mål
         selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+        if full_route==False:
+            sonars_choose_direction(current_state,arlo)
+            
         
             #Vi mangler at putte sensors på dette
             #Her kaldes en funktion der kører til første punkt i path med sensorer tændt mens den køre
