@@ -32,13 +32,13 @@ if VERBOSITY:
         else:
             assert verbosity >= 1, f"Error: Expected verbosity to be positive, but recieved {verbosity}"
 
-from rally import Robot
-from time import sleep
-with Robot() as arlo:
-    arlo.calibrate_velocities()
-    sleep(1)
-    arlo.motors.rotate(-90)
-    sleep(1)
-    arlo.motors.drive(2)
-    sleep(1)
-    arlo.motors.rotate(180)
+# from rally import Robot
+# from time import sleep
+# with Robot() as arlo:
+#     arlo.calibrate_velocities()
+#     sleep(1)
+#     arlo.motors.rotate(-90)
+#     sleep(1)
+#     arlo.motors.drive(2)
+#     sleep(1)
+#     arlo.motors.rotate(180)
