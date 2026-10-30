@@ -171,8 +171,7 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
     arlo.motors.stop()
     return executed_path, full_route
 
-def goal_check(current_state,GOAL_ID, GOAL_COORDS):
-        reached=False
+def rotate_to_goal(current_state, GOAL_COORDS):
     #Roter til goal 
         current_x, current_y, current_theta=(current_state["est_pose"].getX(),current_state["est_pose"].getY(), current_state["est_pose"].getTheta())
         goal_x,goal_y =GOAL_COORDS
@@ -189,7 +188,13 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         arlo.motors.rotate(relative_angle)
         current_state["movement"][1]+=relative_angle
         time.sleep(0.5)
-        
+    
+    
+
+def goal_check(current_state,GOAL_ID, GOAL_COORDS):
+        reached=False
+        #Roter til goal 
+        rotate_to_goal(current_state, GOAL_COORDS)
         landmarks_seen = arlo.camera.detect_landmarks(unique=True)
         ids = [lm.id for lm in landmarks_seen]
         
@@ -245,13 +250,17 @@ while True:
         
         scan_counter+=1
 
-    #Current estimated robot pose 
+    #Current estimated robot pose to use when converting objects from local to global map
     (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-        
     obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
-        
-    print(f"RRT TO ID: {GOAL_ID}")
     
+    #Vi kunne overveje at den skal dreje orienteringen mod goal ID, så den faktisk kan se de relevanteobjekter
+    rotate_to_goal(current_state, GOAL_COORDS)
+    print("Rotating to Goal")
+    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+    
+    print(f"RRT TO ID: {GOAL_ID}")
+   
     path=RRT.RRT_call(GOAL_COORDS, obstacles , current_state["est_pose"], arlo_radius)
         
     if path: #ikke er none
