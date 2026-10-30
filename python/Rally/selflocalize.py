@@ -51,9 +51,9 @@ def sample_motion_model(particles, movement):
             degree_hat = np.deg2rad(degree_hat)
 
             # Opdater orientering
-            theta_new = np.mod(theta + degree_hat, 2.0 * np.pi)
+            theta = np.mod(theta + degree_hat, 2.0 * np.pi) #theta_new
 
-            p.setTheta(theta_new)
+            p.setTheta(theta) #theta_new
         
         #Hvis vi har kørt, opdatere partikler efter hvor mange cm vi har kørt
         

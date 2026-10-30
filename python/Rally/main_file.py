@@ -205,8 +205,13 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         else: print("goal not seen")
         
         return reached
-                
-        
+
+# def add_landmarks(total_ids, total_centers, total_radius,landmarks_seen):
+#     for lm in landmarks_seen:
+#         if lm.id not in total_ids:
+#             total_ids.append(lm.id)
+#             total_centers.append(lm.center)
+#             total_radius.append(lm.radius)
         
         
         #detect landmarks,
@@ -260,44 +265,45 @@ while True:
     print("Rotating to Goal")
     selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
     
-    total_ids = []
-    total_centers = []
-    total_radius = []
+    total_obstacles = {}
 
-    # Første scanning
-    ids, centers, radius = arlo.camera.detect_landmarks(unique=True)
-    for i in range(len(ids)):
-        if ids[i] not in total_ids:
-            total_ids.append(ids[i])
-            total_centers.append(centers[i])
-            total_radius.append(radius[i])
+    # Første scan
+    landmarks_seen = arlo.camera.detect_landmarks(unique=True)
+    pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
+    obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
+
+    for obstacle in obstacles:
+        total_obstacles[obstacle[0]] = obstacle
     
     #Vi drejer lidt til hver side for at scanne obstacles
     arlo.motors.rotate(50)
     current_state["movement"][1]+=50
-    # Anden scanning
-    ids, centers, radius = arlo.camera.detect_landmarks(unique=True)
-
-    for i in range(len(ids)):
-        if ids[i] not in total_ids:
-            total_ids.append(ids[i])
-            total_centers.append(centers[i])
-            total_radius.append(radius[i])
+    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
     
+    #Anden scan
+    landmarks_seen = arlo.camera.detect_landmarks(unique=True)
+    pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
+    obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
+    
+    for obstacle in obstacles:
+        if obstacle[0] not in total_obstacles:
+            total_obstacles[obstacle[0]] = obstacle
+            
     arlo.motors.rotate(-100)
     current_state["movement"][1]+=-100
+    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
     
-    # Anden scanning
-    ids, centers, radius = arlo.camera.detect_landmarks(unique=True)
-
-    for i in range(len(ids)):
-        if ids[i] not in total_ids:
-            total_ids.append(ids[i])
-            total_centers.append(centers[i])
-            total_radius.append(radius[i])
+    #Tredje scanning
+    landmarks_seen = arlo.camera.detect_landmarks(unique=True)
+    pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
+    obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
     
-    landmarks_seen=(total_ids,total_centers,total_radius)
-    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords) #Vi opdaterer kun bevægelse
+    for obstacle in obstacles:
+        if obstacle[0] not in total_obstacles:
+            total_obstacles[obstacle[0]] = obstacle
+            
+    obstacles = tuple(total_obstacles.values())
+    
     rotate_to_goal(current_state, GOAL_COORDS)
     selflocalize.mcl_update(current_state,None,valid_objects,valid_coords) #Vi opdaterer kun bevægelse
     
