@@ -250,14 +250,64 @@ while True:
         
         scan_counter+=1
 
-    #Current estimated robot pose to use when converting objects from local to global map
-    (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-    obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
+
+    #############################################################################
+    #############################################################################
+    #############################################################################
     
     #Vi kunne overveje at den skal dreje orienteringen mod goal ID, så den faktisk kan se de relevanteobjekter
     rotate_to_goal(current_state, GOAL_COORDS)
     print("Rotating to Goal")
     selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+    
+    total_ids = []
+    total_centers = []
+    total_radius = []
+
+    # Første scanning
+    ids, centers, radius = arlo.camera.detect_landmarks(unique=True)
+    for i in range(len(ids)):
+        if ids[i] not in total_ids:
+            total_ids.append(ids[i])
+            total_centers.append(centers[i])
+            total_radius.append(radius[i])
+    
+    #Vi drejer lidt til hver side for at scanne obstacles
+    arlo.motors.rotate(50)
+    current_state["movement"][1]+=50
+    # Anden scanning
+    ids, centers, radius = arlo.camera.detect_landmarks(unique=True)
+
+    for i in range(len(ids)):
+        if ids[i] not in total_ids:
+            total_ids.append(ids[i])
+            total_centers.append(centers[i])
+            total_radius.append(radius[i])
+    
+    arlo.motors.rotate(-100)
+    current_state["movement"][1]+=-100
+    
+    # Anden scanning
+    ids, centers, radius = arlo.camera.detect_landmarks(unique=True)
+
+    for i in range(len(ids)):
+        if ids[i] not in total_ids:
+            total_ids.append(ids[i])
+            total_centers.append(centers[i])
+            total_radius.append(radius[i])
+    
+    landmarks_seen=(total_ids,total_centers,total_radius)
+    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords) #Vi opdaterer kun bevægelse
+    rotate_to_goal(current_state, GOAL_COORDS)
+    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords) #Vi opdaterer kun bevægelse
+    
+    #############################################################################
+    #############################################################################
+    #############################################################################
+    
+    #Current estimated robot pose to use when converting objects from local to global map
+    (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
+    obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
     
     print(f"RRT TO ID: {GOAL_ID}")
    
