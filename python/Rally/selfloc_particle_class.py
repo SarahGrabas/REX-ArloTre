@@ -9,6 +9,7 @@ class Particle(object):
         self.y = y
         self.theta = np.mod(theta, 2.0*np.pi)
         self.weight = weight
+        self.injected = False #True for tilfældige partikler tilføjet ved resampling
 
     def getX(self):
         return self.x

@@ -436,9 +436,9 @@ class Camera:
                 )
                 landmark.distance = np.mean(tuple(lm.distance for lm in bin_))
                 landmark.angle = np.mean(tuple(lm.angle for lm in bin_))
-                landmarks_dict[id_] = [lm]
+                landmarks_dict[id_] = [landmark]
 
-                return tuple(lms[0] for _, lms in landmarks_dict.items())
+            return tuple(lms[0] for _, lms in landmarks_dict.items())
 
         return landmarks_all
 
@@ -530,27 +530,9 @@ class Robot:
         degrees_pr_sec = actual_angle_sum / (
             angle_sum / self.motors.degrees_pr_second
         )
-        rads_pr_sec = degrees_pr_sec * PI/180
-        # update velocities
-        self.motors.degrees_pr_second = degrees_pr_sec
-        # self.motors.meters_pr_sec = Robot._meters_pr_sec(rads_pr_sec)
-
-        avg_degs_diff = np.mean(angle_diffs)
         debug(f"Average landmark angle difference: {avg_degs_diff}")
-
-        actual_angle_sum = (
-            angle_sum - avg_degs_diff
-            if assume_under_rotation
-            else angle_sum
-        )
-
-        degrees_pr_sec = self.motors.degrees_pr_second * (
-            actual_angle_sum / angle_sum
-        )
         debug(f"Calibrated degrees per second: {degrees_pr_sec}")
-
-        rads_pr_sec = degrees_pr_sec * PI/180
-
+        # update velocities (korrektionen må kun anvendes én gang)
         self.motors.degrees_pr_second = degrees_pr_sec
         # self.motors.meters_pr_sec = Robot._meters_pr_sec(rads_pr_sec)
 

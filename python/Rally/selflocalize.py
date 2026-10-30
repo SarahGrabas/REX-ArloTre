@@ -32,9 +32,10 @@ def sample_motion_model(particles, movement):
        Det er vigtigt at hvis movement både indeholder driven og degree, at robotten så er drejet først og så kørt"""
     driven, degree =movement
 
-    # Noise
-    sigma_driven = 8.0   # cm
-    sigma_degree = 5.0     # grader
+    # Noise: proportional med bevægelsens størrelse (+ en lille konstant),
+    # da en lang kørsel/stor rotation akkumulerer mere fejl end en kort
+    sigma_driven = 2.0 + 0.05 * abs(driven)   # cm
+    sigma_degree = 2.0 + 0.05 * abs(degree)   # grader
 
     for p in particles:
 
@@ -215,7 +216,10 @@ def resample_particles(particles):
         new_particles.append(new_particle)
 
     # De sidste 10 % bliver helt nye random partikler
+    # De markeres, så de ikke trækker pose-estimatet mod banens midte
     random_particles = initialize_particles(num_random)
+    for p in random_particles:
+        p.injected = True
     new_particles.extend(random_particles)
 
     for p in new_particles:
@@ -327,8 +331,8 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     
     state["particles"] = mcl_step(state, z_t, landmarks)
     #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
-    
-    state["est_pose"] = particle.estimate_pose(state["particles"])
+
+    state["est_pose"] = particle.estimate_pose(core_particles(state["particles"]))
     print("Estimate Robot Pose:", state["est_pose"].getX(), state["est_pose"].getY(),state["est_pose"].getTheta() )
     
     #Tegner og gemmer billed af world
@@ -338,7 +342,47 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
     # Bevægelsen er nu blevet brugt så vi nulstiller movement
     state["movement"] = [0, 0]
 
-def data_objects(landmarks_seen, valid_lm_seen: list, valid_objects:list): 
+def motion_update(state: dict, VALID_IDS: list, landmarks: dict):
+    """Opdaterer partiklerne med den bevægelse der står i state["movement"] (uden observationer).
+    Skal kaldes efter HVER primitive bevægelse (én rotation eller én kørsel),
+    da motion modellen antager 'først drej, så kør' for den samlede movement."""
+    if state["movement"][0] != 0 or state["movement"][1] != 0:
+        mcl_update(state, None, VALID_IDS, landmarks)
+
+
+def core_particles(particles):
+    """Partiklerne uden de tilfældigt injicerede. Bruges til pose-estimat og spredning."""
+    core = [p for p in particles if not p.injected]
+    return core if core else particles
+
+
+def particle_spread(particles):
+    """Returnerer (positions-spredning i cm, vinkel-spredning i rad).
+    Positions-spredning er sqrt(var(x) + var(y)).
+    Vinkel-spredning er den cirkulære standardafvigelse sqrt(-2 ln R),
+    hvor R er længden af middelvektoren af (cos theta, sin theta)."""
+    core = core_particles(particles)
+    xs = np.array([p.getX() for p in core])
+    ys = np.array([p.getY() for p in core])
+    thetas = np.array([p.getTheta() for p in core])
+
+    pos_spread = np.sqrt(np.var(xs) + np.var(ys))
+
+    R = np.hypot(np.mean(np.cos(thetas)), np.mean(np.sin(thetas)))
+    R = np.clip(R, 1e-9, 1.0)
+    theta_spread = np.sqrt(-2.0 * np.log(R))
+
+    return pos_spread, theta_spread
+
+
+def is_converged(state: dict, max_pos_spread=25.0, max_theta_spread=0.2):
+    """Vi stoler på pose-estimatet, når partiklerne er samlet (lav spredning)."""
+    pos_spread, theta_spread = particle_spread(state["particles"])
+    print(f"Particle spread: pos {pos_spread:.1f} cm, theta {np.degrees(theta_spread):.1f} deg")
+    return pos_spread <= max_pos_spread and theta_spread <= max_theta_spread
+
+
+def data_objects(landmarks_seen, valid_lm_seen: list, valid_objects:list):
     """Funktion til at trække de observations data vi skal bruge i selflocalization"""
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]

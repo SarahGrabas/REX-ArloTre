@@ -271,18 +271,27 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
     
     # return obstacles #skal returnere mål og obstacles i global koordinater
 
-def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float], arlo_radius):
-    """Funktion til at lave kald til RRT"""
+def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float], arlo_radius, buffer: float = 10.0):
+    """Funktion til at lave kald til RRT.
+    buffer er den ekstra afstand (cm) mellem robotkant og landmark-radius, som stien skal holde."""
     X_MIN= 0.0
     X_MAX = (120 + 22 + 400 + 28 + 120) 
     Y_MIN= 0.0
     Y_MAX = (120 + 22 + 300 + 28 + 120) 
     GRID_CELL_SIZE=10.0 #cm
     map = Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
-    map.obstacles(obstacles, robot_radius=arlo_radius)
+    map.obstacles(obstacles, robot_radius=arlo_radius, buffer=buffer)
     
     
     START_POINT=[estimate_robot_pose.getX(),estimate_robot_pose.getY()]
+    
+    #Hvis start eller mål ligger i en (oppustet) forhindring, kan RRT aldrig finde en path
+    if map.is_occupied(*START_POINT):
+        print("Start is inside an obstacle")
+        return None
+    if map.is_occupied(*GOAL):
+        print("Goal is inside an obstacle")
+        return None
     rrt = RRT(start=START_POINT,goal=GOAL,map=map,grid_cell_size=GRID_CELL_SIZE,)
     path = rrt.path_planning()
     

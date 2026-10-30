@@ -21,7 +21,7 @@ class Grid:
         
         self.grid_matrix = np.zeros((self.number_of_celles[0], self.number_of_celles[1]), dtype=bool) #lav matrix der svarer til grid størrelse med korrekt cellestørrlese, men kun med 0.
     
-    def obstacles(self, landmarks_list: Sequence[Landmark], robot_radius: float) -> None:
+    def obstacles(self, landmarks_list: Sequence[Landmark], robot_radius: float, buffer: float = 10.0) -> None:
         """
         obstacles are equal to ``1`` or ``True`` in the grid, otherwise ``0`` or ``False``.
         
@@ -46,8 +46,14 @@ class Grid:
                 for id, centrum, radius in landmarks_list:
                     X, Y =centrum
                     center=np.array([X,Y])
-                    added_radius = radius + robot_radius + 10.0 #det er landmark radius og robotradius, så vi ikke måler fra centrum men fra siden af de to.
+                    added_radius = radius + robot_radius + buffer #det er landmark radius og robotradius, så vi ikke måler fra centrum men fra siden af de to.
                                                                 
                     
                     if np.linalg.norm(centroid - center) <= added_radius:
                         self.grid_matrix[i, j] = 1
+
+    def is_occupied(self, x: float, y: float) -> bool:
+        """Tjekker om punktet (x, y) ligger i en optaget celle."""
+        x_cell = max(0, min(int((x-self.x_limits[0]) // self.grid_cell_size), self.grid_matrix.shape[0]-1))
+        y_cell = max(0, min(int((y-self.y_limits[0]) // self.grid_cell_size), self.grid_matrix.shape[1]-1))
+        return bool(self.grid_matrix[x_cell, y_cell])
