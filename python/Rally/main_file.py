@@ -206,17 +206,8 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
         
         return reached
 
-# def add_landmarks(total_ids, total_centers, total_radius,landmarks_seen):
-#     for lm in landmarks_seen:
-#         if lm.id not in total_ids:
-#             total_ids.append(lm.id)
-#             total_centers.append(lm.center)
-#             total_radius.append(lm.radius)
-        
-        
-        #detect landmarks,
-        #if goal in detected landmark er vinkle til goal inden for en givet range
-            #Hvis ja, så brug front sensor til at vurderer om vi er tættere på en 40 cm.   
+
+#--------------------MAIN LOOP------------------------------------  
 
 arlo.calibrate_velocities()
 

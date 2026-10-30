@@ -1,105 +1,64 @@
-#import cv2
 import selfloc_particle_class as particle
 import numpy as np
-#from timeit import default_timer as timer
-#import sys
-#from math import pi as PI
 import time
-#import robot
-#import robot as robot_module
-#import random
-#import random_numbers as rn
-#import rally
 
-#WHEEL_2_WHEEL_DIST= 0.381
-
-#meters_pr_sec = 2 * PI * WHEEL_2_WHEEL_DIST / 8 * (3.14/3)
-#degrees_pr_second = 360 / 4
-
-#V_CALIB = 40.0   # Den kører 40 cm pr. sekund ca. Fremadrettet hastighed ved go_diff_calibrated(1, 1)
-#W_CALIB = 1.9234  # I radianer/pr. sekund. Rotationshastighed (~110,2 degree/s) ved go_diff_calibrated(-1, 1)
-
-#V_CALIB = meters_pr_sec * 100
-#W_CALIB = np.deg2rad(degrees_pr_second)
-
-
-
-#Motion model, opdatere partikler ud fra motion kun
+#Motion model, opdatere partikler ud fra motion siden sidste mcl kald + noise
 def sample_motion_model(particles, movement):
     """Motion model
-       Hvis der har været movement (forward eller bagud) flyttes partiklerne med denne movement (+ noise).
-       Hvis vi har roteret, opdateres partiklernes orientering med denne rotation (+ noise)
-       Det er vigtigt at hvis movement både indeholder driven og degree, at robotten så er drejet først og så kørt"""
+       Hvis der har været movement (forward eller bagud) på robotten flyttes/drejes partiklerne med robotten (+ noise).
+       Hvis vi har roteret, opdateres partiklernes orientering med vinklen for denne rotation (+ noise).
+       Note:
+       Det er vigtigt at hvis movement både indeholder driven og degree, at robotten er drejet først og så kørt."""
     driven, degree =movement
 
-    # Noise
+    #Noise
     sigma_driven = 8.0   # cm
-    sigma_degree = 5.0     # grader
+    sigma_degree = 5.0     #grader
 
     for p in particles:
-
         x = p.getX()
         y = p.getY()
         theta = p.getTheta()
         
         if degree !=0:
+            degree_hat = degree + np.random.normal(0, sigma_degree) #lægger noise til mellem -5 og 5 grader
 
-            # Tilfældig fejl på rotation
-            degree_hat = degree + np.random.normal(0, sigma_degree)
+            degree_hat = np.deg2rad(degree_hat) #grader til radianer
 
-            #grader til radianer
-            degree_hat = np.deg2rad(degree_hat)
-
-            # Opdater orientering
-            theta = np.mod(theta + degree_hat, 2.0 * np.pi) #theta_new
-
+            theta = np.mod(theta + degree_hat, 2.0 * np.pi) #theta_new , opdaterer orientering
             p.setTheta(theta) #theta_new
         
-        #Hvis vi har kørt, opdatere partikler efter hvor mange cm vi har kørt
-        
-        
         if driven !=0:
-            # Tilfældig fejl på movement
-            driven_hat = driven + np.random.normal(0, sigma_driven)
+            driven_hat = driven + np.random.normal(0, sigma_driven) #lægger noise til, svarer til robot har kørt max 8 cm for kort eller for langt
             
-            # Opdater position
-            x_new = x + driven_hat * np.cos(theta)
+            x_new = x + driven_hat * np.cos(theta)  #opdater position i retning af ny orientering
             y_new = y + driven_hat * np.sin(theta)
-            
             p.setX(x_new)
             p.setY(y_new)
         
-        
-
-
-#Vi generer partikler der ligger inden for banen
+#Vi generer partikler der ligger inden for banens koordinater
 def initialize_particles(num_particles):
-    particles = []
-
     X_MIN = 0.0
     X_MAX = 690.0
     Y_MIN = 0.0
     Y_MAX = 590.0
 
+    particles = []
     for i in range(num_particles):
-        x = np.random.uniform(X_MIN, X_MAX)
+        x = np.random.uniform(X_MIN, X_MAX) 
         y = np.random.uniform(Y_MIN, Y_MAX)
         theta = np.random.uniform(0, 2*np.pi)
 
-        p = particle.Particle(
-            x, y, theta, 1.0 / num_particles
-        )
+        p = particle.Particle(x, y, theta, 1.0 / num_particles)
         particles.append(p)
 
     return particles
 
-    return particles
-
-#This is our observation model
+#Observation model, 
 def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
     """VIGTIGT: 'dists' er kameraets målte distance til landmark konverteret til afstanden fra robottens centrum og landmarks centrum.
-    Beregner og tildeler en sandsynlighedsvægt til hver partikel ud fra
-    robotkameraets målinger af landmarks.
+    Veregner og tildeler en sandsynlighedsvægt til hver partikel ud fra
+    robotkameraets målinger af distance og vinkel til landmarks.
 
     For hver partikel sammenlignes den forventede observation af hvert
     observeret landmark med kameraets faktiske måling. Der beregnes både
@@ -115,20 +74,19 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
     Vinklen mellem partiklens orientering og kameraets retningen mod landmarket
     beregnes og bruges derefter til at beregne en Gaussisk
     sandsynlighed for kameraets målte vinkel."""
-    
-    particle_weights =[]
-    
+    #Noise
     sigma_dist = 15.0 #cm
     sigma_angle=0.20    #rad
     
+    particle_weights =[]
     for p in particles:
         x = p.getX()
         y = p.getY()
         theta = p.getTheta()
         weight = 1.0 
-
+        
         for i in range(len(objectIDs)):
-            x_obj, y_obj = landmarks[objectIDs[i]]  #Landmarkets coordinater for centrum
+            x_obj, y_obj = landmarks[objectIDs[i]]  #Landmarkets coordinater for centrum 
             
             diff_x = x_obj - x
             diff_y = y_obj - y
@@ -136,27 +94,25 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
             
             measured_dist = dists[i]    #Målte distance fra kamera -> afstand fra robot centrum til landmark centrum
 
-        #Gaussian probability: (particle_dist - measured_dist) er forskellen mellem opringelig afstand og målte afstand hvis robotten er på denne partikle position.
+            #Gaussian probability: (particle_dist - measured_dist) er forskellen mellem opringelig afstand og målte afstand hvis robotten er på denne partikle position.
             land_dist = (1 / (np.sqrt(2 * np.pi) * sigma_dist)) * np.exp(-0.5 * ((particle_dist - measured_dist) / sigma_dist)**2)
             
-        #Vinkel beregninger
+            #Vinkel beregninger for oprindelig vinkel fra partikel til landmark
             enheds_theta=np.array([np.cos(theta), np.sin(theta)])
             enheds_particle=np.array([diff_x, diff_y])/np.linalg.norm(np.array([diff_x, diff_y]))
-            
-            dot_product = np.dot(enheds_theta, enheds_particle)
-            dot_product = np.clip(dot_product, -1.0, 1.0) #Sikrer at vi ikke får tal som 1.00000002
-
-            theta_particle = np.arccos(dot_product)     
+            dot_product = np.dot(enheds_theta, enheds_particle) #prikprodukt
+            dot_product = np.clip(dot_product, -1.0, 1.0) #sikrer at vi ikke får tal som 1.00000002
+            theta_particle = np.arccos(dot_product)    #oprindelig vinkel uden fortegn
             
             #Vi skal finde ud af om theta_p er negativ eller positiv, dvs om den ligger på højre eller venstre side af enheds theta
             #enheds_theta_hat=np.array(np.sin(theta),-np.cos(theta)) #Denne vektor ville vi skulle bruge hvis kamrea har positiv vinkel til højre
             enheds_theta_hat=np.array([-np.sin(theta),np.cos(theta)])   #Denne vektor bruger vi da kamrea har positiv vinkel til venstre
-            
-            final_theta_particle=np.sign(np.dot(enheds_particle, enheds_theta_hat))*theta_particle
+            final_theta_particle=np.sign(np.dot(enheds_particle, enheds_theta_hat))*theta_particle #oprindelig vinkel med fortegn
             
             #Gaussian probability: (final_theta_particle - angles) er forskellen mellem opringelig vinkel og målte vinkel hvis robotten har denne partikel vinkel.
             land_angle = (1 / (np.sqrt(2 * np.pi) * sigma_angle)) * np.exp(-0.5 * ((final_theta_particle - angles[i]) / sigma_angle)**2)
             
+            #For hvert landmark vi observerer ganger vi probability for distance og vinkelmåling
             land_weight=land_dist*land_angle
             
             #Hvis der er flere landmarks, ganges deres sandsynligheder sammen
@@ -165,10 +121,9 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
         particle_weights.append(weight)    
         
     particle_weights = np.array(particle_weights,dtype=float)
-
     total_weight = np.sum(particle_weights)
 
-    #Vi normaliserer vægtene
+    #Normalisering af vægtene
     if total_weight > 0:
             particle_weights = particle_weights / total_weight
     else:
@@ -178,16 +133,13 @@ def update_particle_weights(particles, objectIDs, dists, angles,landmarks):
             p.setWeight(p_weight)
             
 def resample_particles(particles):
+    """Funktion til at resample partikler.
+        Vi bruger også Random sample injection, hvor vi erstatter 10 % af partiklerne med nye random samples."""
+    num_particles = len(particles) 
+    num_random = int(0.10 * num_particles) #10 % of particles will be new random samples
+    num_resampled = num_particles - num_random #90 % resamples med vægte
 
-    num_particles = len(particles)
-    num_random = int(0.10 * num_particles)
-    num_resampled = num_particles - num_random
-
-    weights = np.asarray(
-        [p.getWeight() for p in particles],
-        dtype=float
-    )
-
+    weights = np.asarray([p.getWeight() for p in particles],dtype=float)
     total = np.sum(weights)
 
     if total <= 0 or not np.isfinite(total):
@@ -195,29 +147,19 @@ def resample_particles(particles):
     else:
         weights = weights / total
 
-    # Vælg 90 % af partiklerne ud fra deres vægt
-    selected = np.random.choice(
-        num_particles,
-        size=num_resampled,
-        replace=True,
-        p=weights
-    )
+    #Resampling af 90% af partiklerne med vægte (med replacement)
+    selected = np.random.choice(num_particles,size=num_resampled,replace=True,p=weights)
 
     new_particles = []
-
-    # De 90 % resamples fra de eksisterende partikler
     for index in selected:
-        new_particle = particle.Particle(
-            particles[index].getX(),
-            particles[index].getY(),
-            particles[index].getTheta(),
-        )
+        new_particle = particle.Particle(particles[index].getX(),particles[index].getY(),particles[index].getTheta(),)
         new_particles.append(new_particle)
 
-    # De sidste 10 % bliver helt nye random partikler
+    #Sampler 10% som nye random samples
     random_particles = initialize_particles(num_random)
     new_particles.extend(random_particles)
 
+    #Nulstiller vægte
     for p in new_particles:
         p.setWeight(1.0 / num_particles)
         
@@ -225,121 +167,93 @@ def resample_particles(particles):
 
     return new_particles
 
-def mcl_step(state: dict,z_t: tuple,landmarks: dict[int, tuple:float]):
+def mcl_step(state: dict, z_t: tuple,landmarks: dict[int, tuple:float]):
     """
     Funktion der udfører MCL-skridt: Prediction, Correction og Resampling.
-    Vi beregner particles movement ud fra velocity og angular verlocity som burde afspejle robottens bevægelse.
+    Vi opdaterer partikler ud fra robot movement.
     Vi opdaterer partikel vægt og resampler hvis vi har landmark i frame.
-    Dvs at vi kun gætter på robottens position når vi faktisk har et landmark i framen. 
      """
     particles = state["particles"]
     driven, degree =state["movement"]
 
-    #Hvis vi enten har kørt eller drejet flytte partikler med
+    #Hvis vi enten har kørt eller drejet flytter partikler med
     if driven != 0.0 or degree != 0.0:
         sample_motion_model(particles, state["movement"])
     
     if z_t is not None:
         objectIDs, dists, angles = z_t #Observations we use to update weights
         if objectIDs: 
-            
             update_particle_weights(particles, objectIDs, dists, angles, landmarks)
-
-        
             particles = resample_particles(particles)
-
 
     return particles
 
-def object_filtering(objects_from_frame: tuple, VALID_IDS): #Valid IDs er de ID vi ønsker at selflocalize ud fra
-    
+def object_filtering(objects_from_frame: tuple, VALID_IDS):
+    """Funktion til at at sortere de observationer fra, som vi ikke ønsker at selflocalize ud fra"""
     detected_objectIDs, detected_dists, detected_angles=objects_from_frame
 
     objectIDs = []
     dists = []
     angles = []
-
-    #Observationer 
     if detected_objectIDs is not None:
-
         observations = {}
-
-        for ID, dist, angle in zip(
-            detected_objectIDs,
-            detected_dists,
-            detected_angles
-        ):
+        for ID, dist, angle in zip(detected_objectIDs, detected_dists,detected_angles):
             if ID not in VALID_IDS:
                 continue
-
-            # Hvis samme ID ses flere gange,
-            # behold den korteste distance
+            # Hvis samme ID ses flere gange, beholder den korteste distance
             if ID not in observations or dist < observations[ID][0]:
                 observations[ID] = (dist, angle)
 
         for ID, (measured_dist, measured_angle) in observations.items():
-
             objectIDs.append(ID)
             dists.append(measured_dist)
             angles.append(measured_angle)
             
-
     return objectIDs, dists, angles
             
-#Funktion til at initialisere inden vi har kørt, her resetter man altså partiklerne og estimatet
+#Funktion til at initialisere, her resetter man altså partiklerne og estimatet
 def initialize_mcl(num_particles):
+    """Funktion til at initalizere partikler og robot position og movement"""
     particles = initialize_particles(num_particles)
-
     est_pose = particle.estimate_pose(particles)
 
     state = {
-        "particles": particles,
+        "particles": particles, 
         "est_pose": est_pose, #Estimate for robot position
         "movement": [0,0], #(cm for- or backward, degree turned (left positive))
-
-        #Kan udkommenteres hvis vi ikke vil gemme billed
-        "world": np.zeros((500, 500, 3), dtype=np.uint8),
     }
     
 
     return state
 
-
 def scan_function(state, robot_controller):
-    """Funktion der rotere.
+    """Funktion der rotere robotten 50 grader mod venstre.
        Bruges under scanning efter landmarks i selflocalization.
-       Grader beregnes ud fra FOV, så vi ikke springer noget over når vi roterer. (Laver for store rotationer).
+       Grader beregnes ud fra FOV, så vi ikke springer noget over når vi roterer.
        Vi opdaterer movement i vores state dictionary, så det passer med faktisk rotation."""
-    degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64 grader
+    degree=50 #Vi drejer mindre end FOV, så vi får alt med, FOV er ca 64
     robot_controller.motors.rotate(degree)
     time.sleep(1.0)
-    state["movement"][1]+=degree #Update movement state
+    state["movement"][1]+=degree #update movement state
 
-
-
-#Udfører én mcl update ud fra de objecter der detectes i frame og de objecter der ønskes localisering ud fra.
 def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict):
-    #MCL step
+    """Funktionen filtrerer objecter, laver mcl og estimerer robot position.
+       Robot movement nulstilles også."""
     if detected_obj is not None:
         z_t = object_filtering(detected_obj,VALID_IDS)
         print("OBJECTs for selflocalizing:", z_t)
     else: z_t=None
     
     state["particles"] = mcl_step(state, z_t, landmarks)
-    #state["particles"] = mcl_step(state["particles"],u_t,z_t,delta_t,landmarks)
-    
     state["est_pose"] = particle.estimate_pose(state["particles"])
     print("Estimate Robot Pose:", state["est_pose"].getX(), state["est_pose"].getY(),state["est_pose"].getTheta() )
     
-    #Tegner og gemmer billed af world
-    # draw_world(state["est_pose"], state["particles"], state["world"])
-    # cv2.imwrite("mcl_world.png", state["world"])
-    
-    # Bevægelsen er nu blevet brugt så vi nulstiller movement
+    #Bevægelsen er nu blevet brugt så vi nulstiller movement
     state["movement"] = [0, 0]
 
 def data_objects(landmarks_seen, valid_lm_seen: list, valid_objects:list): 
-    """Funktion til at trække de observations data vi skal bruge i selflocalization"""
+    """Funktion til at trække de observations data (id, distance, vinkel) vi skal bruge i selflocalization.
+       Denne funktion opdaterer også de landmark corners vi har set indtil videre, så vi kan holde øje med hvornår vi har set 2."""
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_dists = [lm.distance * 100.0 for lm in landmarks_seen]
 
@@ -353,3 +267,4 @@ def data_objects(landmarks_seen, valid_lm_seen: list, valid_objects:list):
             valid_lm_seen.append(detected_objectIDs[i])
     
     return detected_obj, valid_lm_seen
+
