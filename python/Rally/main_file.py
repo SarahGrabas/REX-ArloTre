@@ -320,7 +320,7 @@ while True:
     
     #Current estimated robot pose to use when converting objects from local to global map
     (x,y,theta) = (current_state["est_pose"].getX(),current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-    obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
+    #obstacles=RRT.convert_lm_center_to_global((x,y,theta),landmarks_seen, GOAL_ID) #denne funktion håndterer landmark koordinater i robot koords, og assumer at dubletter er fjernet 
     
     print(f"RRT TO ID: {GOAL_ID}")
    
@@ -332,6 +332,7 @@ while True:
         _, full_route=execute_robot_path(current_state,arlo,path,number_nodes)
         #Vi opdatere particler uden objekter, da vi har kørt, så der bliver tjekket om denne position er inden for mål
         selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+        print("Check Goal")
         goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
         if goal_checking:
             print("Goal reached")
@@ -362,9 +363,10 @@ while True:
         # if current_goal_index == len(phases):
         #     break  # rally færdigt
         
-        elif full_route==False:
+        if full_route==False:
             sonars_choose_direction(current_state,arlo,35)
             selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+            print("Check Goal")
             goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
             if goal_checking:
                 print("Goal reached")
@@ -386,6 +388,7 @@ while True:
         #skal vi køre lidt i en retning væk fra obstacles og scanner igen
         sonars_choose_direction(current_state,arlo,50)
         selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+        print("Check Goal")
         goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
         if goal_checking:
                 print("Goal reached")
