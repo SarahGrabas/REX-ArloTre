@@ -241,7 +241,6 @@ def mcl_update(state:dict, detected_obj:tuple, VALID_IDS: list , landmarks: dict
        Robot movement nulstilles også."""
     if detected_obj is not None:
         z_t = object_filtering(detected_obj,VALID_IDS)
-        print("OBJECTs for selflocalizing:", z_t)
     else: z_t=None
     
     state["particles"] = mcl_step(state, z_t, landmarks)
@@ -260,7 +259,6 @@ def data_objects(landmarks_seen, valid_lm_seen: list, valid_objects:list):
     detected_angles = [np.deg2rad(lm.angle) for lm in landmarks_seen]
 
     detected_obj =(detected_objectIDs, detected_dists, detected_angles) #alle objecter i frame
-    print(detected_obj)
     
     for i in range(len(detected_objectIDs)):
         if detected_objectIDs[i] in valid_objects and detected_objectIDs[i] not in valid_lm_seen:

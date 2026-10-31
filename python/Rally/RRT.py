@@ -38,7 +38,7 @@ class RRT:
                  map: Grid,
                  moving_dist_limit: float = 60, #cm #Hvad vi max bevæger os ved ny node
                  grid_cell_size: float = 10.0, #10cm pr celle
-                 goal_sample_rate: int = 5,    #Procentdel på hvor tit en random node skal være goal node
+                 goal_sample_rate: int = 25,    #Procentdel på hvor tit en random node skal være goal node
                  max_iter: int = 1000,          #Max forsøg på at finde path
                  ) -> None:
 
@@ -248,7 +248,6 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
 
 def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float], arlo_radius):
     """Funktion til at lave kald til RRT"""
-    print("Obstacles for RRT: id, center, radius", obstacles)
     
     X_MIN= 0.0
     X_MAX = (120 + 22 + 400 + 28 + 120) 
