@@ -158,6 +158,7 @@ def execute_robot_path(current_state,arlo,path,number_nodes:int):
         arlo.motors.rotate(relative_angle)
         current_state["movement"][1]+=relative_angle
         _, full_route=drive_with_sonars(current_state,arlo,distance) #input i cm
+        selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
         
         current_angle = desired_angle
         
@@ -225,6 +226,7 @@ while True:
     while len(valid_lm_seen)<2: #Vi skal have set 2 valid landmark for selflocalization, før vi stoler på estimated robot pose
         if scan_counter%5==0: #Ved hver 5 scan bevæger vi os lidt, hvis vi ikke kan se 2 lms
             sonars_choose_direction(current_state,arlo,50) #når vi bevæger os, opdateres current state inde i funktionen
+            selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
             goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
             if goal_checking:
                 print("Goal reached")
@@ -356,6 +358,7 @@ while True:
         
         elif full_route==False:
             sonars_choose_direction(current_state,arlo,35)
+            selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
             goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
             if goal_checking:
                 print("Goal reached")
@@ -376,6 +379,7 @@ while True:
             
         #skal vi køre lidt i en retning væk fra obstacles og scanner igen
         sonars_choose_direction(current_state,arlo,50)
+        selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
         goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
         if goal_checking:
                 print("Goal reached")
