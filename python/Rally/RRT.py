@@ -1,11 +1,7 @@
 from __future__ import annotations
-
 from typing import Sequence, Optional, Union
-
 import numpy as np
 from RRT_grid import Grid
-
-
 
 Position = Union[Sequence[float], np.ndarray]
 
@@ -21,17 +17,12 @@ class Node:
         self.node_path=[]
         self.parent=None
         
-          
-
-    #euclidean distance from node to target node
+    #Euclidean distance from node to target node
     def eucl_dist(self, target_node: Node) -> np.float64:
         return np.linalg.norm(np.array(target_node.position[:2]) - np.array(self.position[:2]))        
-            
-                        
+                       
 class RRT:
-    """Jo højere max_iter vi har, jo lavere moving distance limit, kan vi have hvor den stadig finder path.
-    Dette gør måske path mere præcis??"""
-    
+    """Jo højere max_iter vi har, jo lavere moving distance limit, kan vi have hvor den stadig finder path."""
     start: Node
     end: Node
     map: Grid
@@ -45,8 +36,8 @@ class RRT:
                  start: Position, #start coords
                  goal: Position,  #goal coords
                  map: Grid,
-                 moving_dist_limit: float = 100, #cm #Hvad vi max bevæger os ved ny node
-                 grid_cell_size: float = 10.0, #2cm pr celle
+                 moving_dist_limit: float = 60, #cm #Hvad vi max bevæger os ved ny node
+                 grid_cell_size: float = 10.0, #10cm pr celle
                  goal_sample_rate: int = 5,    #Procentdel på hvor tit en random node skal være goal node
                  max_iter: int = 1000,          #Max forsøg på at finde path
                  ) -> None:
@@ -58,7 +49,7 @@ class RRT:
         self.moving_dist_limit = moving_dist_limit
         self.grid_cell_size=grid_cell_size
         self.goal_sample_rate = goal_sample_rate
-        self.max_iter = max_iter #Vi bruger max_iter ligesom dem, for at sætte grænse på hvor længe algoritmen må forsøge at finde path
+        self.max_iter = max_iter #Vi bruger max_iter for at sætte grænse på hvor længe algoritmen må forsøge at finde path
 
         self.node_list = []
     
@@ -67,17 +58,16 @@ class RRT:
         self.node_list = [self.start] #til start har vi kun startnode
 
         for i in range(self.max_iter):
-            print(f"iteration{i}")
-            random_node = self.random_node()
-            nearest_node = self.nearest_node(self.node_list, random_node)
-
+            #print(f"iteration{i}")
+            random_node = self.random_node() #Create random node in grid
+            nearest_node = self.nearest_node(self.node_list, random_node) #Find nearest node in tree to new node
             new_node = self.steering(nearest_node, random_node, self.moving_dist_limit)
             
             #Hvis der ikke er obstacles på vejen til noden, tilføjer vi til node_list
             if self.check_collision(nearest_node,new_node):
                 self.node_list.append(new_node)
 
-            #Denne blok kode har vi taget vi fra dem
+            #Denne blok kode har vi ikke ændret
             #try to steer towards the goal if we are already close enough
             if self.node_list[-1].eucl_dist(self.end) <= self.moving_dist_limit:
                 final_node = self.steering(self.node_list[-1], self.end,
@@ -90,24 +80,26 @@ class RRT:
 
     
     def random_node(self) -> Node:
-        rnd = Node(np.random.uniform((self.map.x_limits[0],self.map.y_limits[0]), 
-                                     (self.map.x_limits[1],self.map.y_limits[1])))
+        #Create random node in grid
+        rnd = Node(np.random.uniform((self.map.x_limits[0],self.map.y_limits[0]), (self.map.x_limits[1],self.map.y_limits[1])))
         
         return rnd
-    
     
     def nearest_node(self, node_list: Sequence[Node], random_node: Node) -> Node:
         distance_list=[]
         for node in node_list:
-            node_dist=node.eucl_dist(random_node) #For hver node i listen, beregner vi afstand til random node
+            node_dist=node.eucl_dist(random_node) #For hver node i treet, beregner vi afstand til random node
             distance_list.append(node_dist)
             
-        min_index = np.argmin(distance_list)
+        min_index = np.argmin(distance_list) #Vi vælger nearest node (mindste afstand)
 
         return node_list[min_index]
     
-    
     def steering(self, old_node: Node, new_node: Node, moving_dist_limit: float) -> Node: #moving_dist_limit er hvad vi maksimal bevæger os når vi finder ny node
+        """Funktion der beregener distance fra nearest node in tree til ny node.
+            Hvis distance er større en moving_dist_limit, bruger vi moving_dist_limit til at beregne hvor ny node skal være.
+            Ellers bruger vi distancen til at beregne position for ny node.
+            Ny node tilføjes til treet og vi sætter parent til nearest node."""
         print("steering")
         x1, y1 =old_node.position
         x2, y2 =new_node.position
@@ -115,26 +107,23 @@ class RRT:
         diff_x= x2-x1
         diff_y=y2-y1
         
-        distance= old_node.eucl_dist(new_node)
-        
+        distance= old_node.eucl_dist(new_node) #distance from nearest node to new node
         
         path_distance=min(distance, moving_dist_limit) #hvis distancen er mindre end vores limit, vælger vi distancen til noden.
         
-        new_x = old_node.position[0] + path_distance * diff_x / distance
+        new_x = old_node.position[0] + path_distance * diff_x / distance #koordinater for ny node
         new_y = old_node.position[1] + path_distance * diff_y / distance
-
 
         new_node.position = np.array([new_x,new_y])
         new_node.distance =path_distance
 
-        new_node.node_path.append([new_x, new_y]) #tilføjer ny node til path
+        new_node.node_path.append([new_x, new_y]) #tilføjer ny node til treet
         print("Node" , new_x, new_y)
         new_node.parent =old_node
         
         return new_node
-        
-        
-#tjekker om der er obstacles på vejen fra old_node til new_node
+           
+#tjekker om der er obstacles på vejen fra nearest node til new_node
     def check_collision(self, old_node: Node, new_node: Node) -> bool:
         """Funktion til at checke collision.
         Vi opretter punkter i hvert gridcell på distance mellem to noder.
@@ -163,7 +152,7 @@ class RRT:
             
         return True
             
-    #Denne kode har vi pt. også taget fra dem
+    #Denne kode har vi ikke ændret
     def generate_final_course(self, goal_ind: int) -> list[Position]:
         path = [self.end.position]
         node = self.node_list[goal_ind]
@@ -181,7 +170,7 @@ class RRT:
         På den måde undgår vi unødvendige rotationer."""
 
         simpler_path = [path[0]] #path skal starte ved start
-        num_nodes =len(path)-1
+        num_nodes =len(path)-1 
         current_node_index = 0
 
         while current_node_index < num_nodes:
@@ -213,18 +202,16 @@ class RRT:
         return simpler_path
 
 def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
+    """Funktion til at konvertere observed obstacles til globale koordinater"""
     detected_objectIDs = [lm.id for lm in landmarks_seen]
     detected_center = [lm.center for lm in landmarks_seen]
     detected_radius = [lm.radius*100 for lm in landmarks_seen]
     
     obstacles = []
-
     for i in range(len(detected_objectIDs)):
         if detected_objectIDs[i]!=GOAL_ID:
             x, y, theta = pose
-
             local_coords = np.asarray(detected_center[i])
-
 
             # theta = 0 means facing global +X.
             cos_theta = np.cos(theta)
@@ -244,22 +231,10 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
             global_xy = local_xy @ rotation_matrix.T
             global_xy += np.array([x, y])
             
-            center = (
-            float(global_xy[0]),
-            float(global_xy[1])
-        )
-
+            center = (float(global_xy[0]),float(global_xy[1]))
             radius = float(detected_radius[i])
 
-            obstacles.append(
-                (detected_objectIDs[i], center, radius)
-            )
-
-    print("OBSTACLES:")
-    for obstacle in obstacles:
-        print(obstacle)
-        print("  CENTER:", obstacle[1])
-        print("  CENTER LENGTH:", len(obstacle[1]))
+            obstacles.append((detected_objectIDs[i], center, radius))
 
     return tuple(obstacles)
 
@@ -273,14 +248,15 @@ def convert_lm_center_to_global(pose, landmarks_seen, GOAL_ID):
 
 def RRT_call(GOAL:tuple[float, float],obstacles: tuple[int,tuple[float,float],float], estimate_robot_pose:tuple[float,float,float], arlo_radius):
     """Funktion til at lave kald til RRT"""
+    print("Obstacles for RRT: id, center, radius", obstacles)
+    
     X_MIN= 0.0
     X_MAX = (120 + 22 + 400 + 28 + 120) 
     Y_MIN= 0.0
     Y_MAX = (120 + 22 + 300 + 28 + 120) 
     GRID_CELL_SIZE=10.0 #cm
-    map = Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE)
+    map = Grid(X_MIN,X_MAX,Y_MIN,Y_MAX, GRID_CELL_SIZE) #opret grid
     map.obstacles(obstacles, robot_radius=arlo_radius)
-    
     
     START_POINT=[estimate_robot_pose.getX(),estimate_robot_pose.getY()]
     rrt = RRT(start=START_POINT,goal=GOAL,map=map,grid_cell_size=GRID_CELL_SIZE,)

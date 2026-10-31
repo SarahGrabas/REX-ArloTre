@@ -1,7 +1,6 @@
 import numpy as np
 import random_numbers as rn
 
-
 class Particle(object):
     """Data structure for storing particle information (state and weight)"""
     def __init__(self, x=0.0, y=0.0, theta=0.0, weight=0.0):
@@ -34,7 +33,6 @@ class Particle(object):
     def setWeight(self, val):
         self.weight = val
 
-
 def estimate_pose(particles_list):
     """Estimate the pose from particles by computing the average position and orientation over all particles. 
     This is not done using the particle weights, but just the sample distribution."""
@@ -61,11 +59,9 @@ def estimate_pose(particles_list):
         
     return Particle(x, y, theta)
      
-     
 def move_particle(particle, delta_x, delta_y, delta_theta):
     """Move the particle by (delta_x, delta_y, delta_theta)"""
     print("particle.py: move_particle not implemented. You should do this.") 
-
 
 def add_uncertainty(particles_list, sigma, sigma_theta):
     """Add some noise to each particle in the list. Sigma and sigma_theta is the noise
@@ -74,7 +70,6 @@ def add_uncertainty(particles_list, sigma, sigma_theta):
         particle.x += rn.randn(0.0, sigma)
         particle.y += rn.randn(0.0, sigma)
         particle.theta = np.mod(particle.theta + rn.randn(0.0, sigma_theta), 2.0 * np.pi) 
-
 
 def add_uncertainty_von_mises(particles_list, sigma, theta_kappa):
     """Add some noise to each particle in the list. Sigma and theta_kappa is the noise
