@@ -560,6 +560,19 @@ class Robot:
 
 if __name__ == "__main__":
     with Robot() as arlo:
+        arlo.motors._move(0, 50, 1, 1)
+        sleep(0.5)
+        arlo.motors.stop()
+        sleep(1)
+        arlo.motors._move(0, 75, 1, 1)
+        sleep(0.5)
+        arlo.motors.stop()
+        sleep(1)
         arlo.motors._move(0, 100, 1, 1)
         sleep(0.5)
         arlo.motors.stop()
+        sleep(1)
+        arlo.motors._move(0, 100, 1, 1)
+        sleep(0.5)
+        arlo.motors.stop()
+        sleep(1)
