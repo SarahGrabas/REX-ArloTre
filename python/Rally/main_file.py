@@ -7,7 +7,7 @@ import time
 arlo = rally.Robot()
 arlo_radius =rally.ARLO_RADIUS *100 #fra meter til cm
 
-safe_distance_to_lm = 0.4 #m
+safe_distance_to_lm = 0.65 #m
 safe_distance_to_obstacles = 0.4 #m
 
 valid_objects=[8,9,10,11]
@@ -192,20 +192,33 @@ def rotate_to_goal(current_state, GOAL_COORDS):
     
     
 
+# def goal_check(current_state,GOAL_ID, GOAL_COORDS):
+#         reached=False
+#         #Roter til goal 
+#         rotate_to_goal(current_state, GOAL_COORDS)
+#         landmarks_seen = arlo.camera.detect_landmarks(unique=True)
+#         ids = [lm.id for lm in landmarks_seen]
+        
+#         if GOAL_ID in ids:
+#                 front = arlo.sonars.front()
+#                 if front < 0.4: #m
+#                     reached=True
+#         else: print("goal not seen")
+        
+#         return reached
+
 def goal_check(current_state,GOAL_ID, GOAL_COORDS):
-        reached=False
-        #Roter til goal 
-        rotate_to_goal(current_state, GOAL_COORDS)
-        landmarks_seen = arlo.camera.detect_landmarks(unique=True)
-        ids = [lm.id for lm in landmarks_seen]
-        
-        if GOAL_ID in ids:
-                front = arlo.sonars.front()
-                if front < 0.4: #m
-                    reached=True
-        else: print("goal not seen")
-        
-        return reached
+    reached=False
+    #Check if we are at goal
+    lm_radius = np.sqrt(rally.Landmark.MAX_BOX_SIZES[GOAL_ID]**2 / 2) #m
+    reach_dist = (lm_radius + rally.ARLO_RADIUS + safe_distance_to_lm ) * 100 #fra meter til cm
+
+    dist_to_goal = np.hypot(current_state["est_pose"].getX() - GOAL_COORDS[0], current_state["est_pose"].getY() - GOAL_COORDS[1])
+
+    if dist_to_goal <= reach_dist:
+        reached=True
+    
+    return reached
 
 
 #--------------------MAIN LOOP------------------------------------  
@@ -329,25 +342,25 @@ while True:
         if current_goal_index == len(phases):
             break  # rally færdigt
         
-        while scan_counter<6:
-            selflocalize.scan_function(current_state,arlo)
+        # while scan_counter<6:
+        #     selflocalize.scan_function(current_state,arlo)
         
-            print("Selflocalizing")
-            landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
+        #     print("Selflocalizing")
+        #     landmarks_seen = arlo.camera.detect_landmarks(unique=True) #Hvis vi ser flere med samme ID, tager vi gennemsnit
         
-            all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
-            selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
-            scan_counter+=1
+        #     all_obj_in_frame, valid_lm_seen=selflocalize.data_objects(landmarks_seen, valid_lm_seen, valid_objects)  
+        #     selflocalize.mcl_update(current_state,all_obj_in_frame,valid_objects,valid_coords)
+        #     scan_counter+=1
         
-        goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
-        if goal_checking:
-            print("Goal reached")
-            current_goal_index += 1
-            GOAL_ID=phases[current_goal_index]
-            GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        # goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+        # if goal_checking:
+        #     print("Goal reached")
+        #     current_goal_index += 1
+        #     GOAL_ID=phases[current_goal_index]
+        #     GOAL_COORDS=valid_coords[phases[current_goal_index]] 
         
-        if current_goal_index == len(phases):
-            break  # rally færdigt
+        # if current_goal_index == len(phases):
+        #     break  # rally færdigt
         
         elif full_route==False:
             sonars_choose_direction(current_state,arlo,35)
