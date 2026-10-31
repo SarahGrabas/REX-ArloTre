@@ -122,8 +122,8 @@ class Motor:
         speedLeft = (0, 51, 51)[dirLeft]
         speedRight = (0, 57, 53)[dirRight]
 
-        self._move(60, 100, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
-        sleep(0.1)
+        self._move(0, 120, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
+        sleep(0.05)
         self._move(speedLeft, speedRight, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
 
     def drive(self, meters:float, forward=True, _sleep=True, stop_when_done=True):
@@ -560,19 +560,4 @@ class Robot:
 
 if __name__ == "__main__":
     with Robot() as arlo:
-        dirLeft = 1
-        dirRight = 1
-        
-        arlo.motors._move(70, 100, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
-        sleep(0.1)
-        arlo.motors._move(51, 57, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
-        sleep(2)
-
-        arlo.motors.rotate(180)
-        sleep(0.5)
-
-        arlo.motors._move(0, 50, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
-        sleep(0.05)
-        arlo.motors._move(51, 57, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
-        sleep(2)
-        arlo.motors.stop()
+        arlo.motors.drive(2)
