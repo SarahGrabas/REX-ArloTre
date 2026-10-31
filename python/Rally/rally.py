@@ -510,14 +510,14 @@ class Robot:
         angle_sum = 2*8*45
         for _ in range(2*8):
             self.motors.rotate(45)
-            sleep(0.5)
+            sleep(1)
         # detecting previously seen landmarks
         _landmarks = self.camera.detect_landmarks()
         degs = Camera.FOV * 2/3
         while not landmark_set.intersection({lm.id for lm in _landmarks}):
             angle_sum += degs
             self.motors.rotate(degs)
-            sleep(0.5)
+            sleep(1)
             _landmarks = self.camera.detect_landmarks()
         # detecting visible reference points
         intersection = landmark_set.intersection({lm.id for lm in _landmarks})
@@ -561,18 +561,18 @@ class Robot:
 if __name__ == "__main__":
     with Robot() as arlo:
         arlo.motors._move(0, 50, 1, 1)
-        sleep(0.5)
+        sleep(1)
         arlo.motors.stop()
         sleep(1)
         arlo.motors._move(0, 75, 1, 1)
-        sleep(0.5)
+        sleep(1)
         arlo.motors.stop()
         sleep(1)
         arlo.motors._move(0, 100, 1, 1)
-        sleep(0.5)
+        sleep(1)
         arlo.motors.stop()
         sleep(1)
         arlo.motors._move(0, 100, 1, 1)
-        sleep(0.5)
+        sleep(1)
         arlo.motors.stop()
         sleep(1)
