@@ -122,7 +122,7 @@ class Motor:
         speedLeft = (0, 51, 51)[dirLeft]
         speedRight = (0, 57, 53)[dirRight]
 
-        self._move(80, 100, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
+        self._move(70, 100, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
         sleep(0.1)
         self._move(speedLeft, speedRight, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
 
@@ -560,4 +560,4 @@ class Robot:
 
 if __name__ == "__main__":
     with Robot() as arlo:
-        arlo.motors.drive(1.5)
+        arlo.motors.drive(2)
