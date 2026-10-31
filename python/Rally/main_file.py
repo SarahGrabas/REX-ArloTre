@@ -220,13 +220,11 @@ def goal_check(current_state,GOAL_ID, GOAL_COORDS):
     
     return reached
 
-
 #--------------------MAIN LOOP------------------------------------  
 
 #arlo.calibrate_velocities()
 
 current_state=selflocalize.initialize_mcl(num_particles=1500)
-
 
 while True:  
 
