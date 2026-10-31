@@ -263,7 +263,7 @@ while True:
     # Første scan
     landmarks_seen = arlo.camera.detect_landmarks(unique=True)
     pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-    obstacles1 = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
+    obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
 
     for obstacle in obstacles:
         total_obstacles[obstacle[0]] = obstacle
@@ -276,7 +276,7 @@ while True:
     #Anden scan
     landmarks_seen = arlo.camera.detect_landmarks(unique=True)
     pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-    obstacles2 = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
+    obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
     
     for obstacle in obstacles:
         if obstacle[0] not in total_obstacles:
@@ -289,19 +289,12 @@ while True:
     #Tredje scanning
     landmarks_seen = arlo.camera.detect_landmarks(unique=True)
     pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-    obstacles3 = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
+    obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
     
-    for obstacle in obstacles1:
+    for obstacle in obstacles:
         if obstacle[0] not in total_obstacles:
             total_obstacles[obstacle[0]] = obstacle
             
-    for obstacle in obstacles2:
-        if obstacle[0] not in total_obstacles:
-            total_obstacles[obstacle[0]] = obstacle
-            
-    for obstacle in obstacles3:
-        if obstacle[0] not in total_obstacles:
-            total_obstacles[obstacle[0]] = obstacle
             
     obstacles = tuple(total_obstacles.values())
     
