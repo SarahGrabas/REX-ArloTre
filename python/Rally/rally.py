@@ -122,7 +122,7 @@ class Motor:
         speedLeft = (0, 51, 51)[dirLeft]
         speedRight = (0, 57, 53)[dirRight]
 
-        self._move(60, 120, 0 if dirLeft==1 else 1, 1 if dirRight==1 else 0)
+        self._move(0, 120, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
         sleep(0.075)
         self._move(speedLeft, speedRight, 1 if dirLeft==1 else 0, 1 if dirRight==1 else 0)
 
