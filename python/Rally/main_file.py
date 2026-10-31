@@ -268,38 +268,38 @@ while True:
     for obstacle in obstacles:
         total_obstacles[obstacle[0]] = obstacle
     
-    #Vi drejer lidt til hver side for at scanne obstacles
-    arlo.motors.rotate(50)
-    current_state["movement"][1]+=50
-    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+    # #Vi drejer lidt til hver side for at scanne obstacles
+    # arlo.motors.rotate(50)
+    # current_state["movement"][1]+=50
+    # selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
     
-    #Anden scan
-    landmarks_seen = arlo.camera.detect_landmarks(unique=True)
-    pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-    obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
+    # #Anden scan
+    # landmarks_seen = arlo.camera.detect_landmarks(unique=True)
+    # pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
+    # obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
     
-    for obstacle in obstacles:
-        if obstacle[0] not in total_obstacles:
-            total_obstacles[obstacle[0]] = obstacle
+    # for obstacle in obstacles:
+    #     if obstacle[0] not in total_obstacles:
+    #         total_obstacles[obstacle[0]] = obstacle
             
-    arlo.motors.rotate(-100)
-    current_state["movement"][1]+=-100
-    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+    # arlo.motors.rotate(-100)
+    # current_state["movement"][1]+=-100
+    # selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
     
-    #Tredje scanning
-    landmarks_seen = arlo.camera.detect_landmarks(unique=True)
-    pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
-    obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
+    # #Tredje scanning
+    # landmarks_seen = arlo.camera.detect_landmarks(unique=True)
+    # pose = (current_state["est_pose"].getX(), current_state["est_pose"].getY(),current_state["est_pose"].getTheta())
+    # obstacles = RRT.convert_lm_center_to_global(pose,landmarks_seen,GOAL_ID)
     
-    for obstacle in obstacles:
-        if obstacle[0] not in total_obstacles:
-            total_obstacles[obstacle[0]] = obstacle
+    # for obstacle in obstacles:
+    #     if obstacle[0] not in total_obstacles:
+    #         total_obstacles[obstacle[0]] = obstacle
             
             
     obstacles = tuple(total_obstacles.values())
     
-    rotate_to_goal(current_state, GOAL_COORDS)
-    selflocalize.mcl_update(current_state,None,valid_objects,valid_coords) #Vi opdaterer kun bevægelse
+    # rotate_to_goal(current_state, GOAL_COORDS)
+    # selflocalize.mcl_update(current_state,None,valid_objects,valid_coords) #Vi opdaterer kun bevægelse
     
     #############################################################################
     #############################################################################
