@@ -560,4 +560,4 @@ class Robot:
 
 if __name__ == "__main__":
     with Robot() as arlo:
-        arlo.motors.move(1,1)
+        arlo.motors.drive(1.5)
