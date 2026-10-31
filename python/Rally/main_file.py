@@ -316,6 +316,16 @@ while True:
         _, full_route=execute_robot_path(current_state,arlo,path,number_nodes)
         #Vi opdatere particler uden objekter, da vi har kørt, så der bliver tjekket om denne position er inden for mål
         selflocalize.mcl_update(current_state,None,valid_objects,valid_coords)
+        goal_checking = goal_check(current_state, GOAL_ID, GOAL_COORDS)
+        if goal_checking:
+            print("Goal reached")
+            current_goal_index += 1
+            GOAL_ID=phases[current_goal_index]
+            GOAL_COORDS=valid_coords[phases[current_goal_index]] 
+        
+        if current_goal_index == len(phases):
+            break  # rally færdigt
+        
         while scan_counter<6:
             selflocalize.scan_function(current_state,arlo)
         
