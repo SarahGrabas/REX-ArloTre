@@ -100,7 +100,6 @@ class RRT:
             Hvis distance er større en moving_dist_limit, bruger vi moving_dist_limit til at beregne hvor ny node skal være.
             Ellers bruger vi distancen til at beregne position for ny node.
             Ny node tilføjes til treet og vi sætter parent til nearest node."""
-        print("steering")
         x1, y1 =old_node.position
         x2, y2 =new_node.position
         
@@ -118,7 +117,6 @@ class RRT:
         new_node.distance =path_distance
 
         new_node.node_path.append([new_x, new_y]) #tilføjer ny node til treet
-        print("Node" , new_x, new_y)
         new_node.parent =old_node
         
         return new_node
@@ -128,7 +126,6 @@ class RRT:
         """Funktion til at checke collision.
         Vi opretter punkter i hvert gridcell på distance mellem to noder.
         Vi tjekker obstacles på hvert af disse punkter"""
-        print("collision")
         x1, y1=old_node.position
         x2, y2=new_node.position
         distance=new_node.distance
